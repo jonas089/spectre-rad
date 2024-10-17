@@ -10,7 +10,6 @@ pub type PublicKeyHashes = Vec<Vec<u8>>;
 pub type CommitteeBranch = Vec<Vec<u8>>;
 pub type Leaf = Vec<u8>;
 pub type Root = Vec<u8>;
-pub type Bytes = Vec<u8>;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CommitteeUpdateArgs {

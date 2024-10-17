@@ -3,7 +3,7 @@ use sha2::{Digest, Sha256};
 use std::fs;
 
 use crate::{
-    types::{Bytes, CommitteeBranch, Leaf, PublicKeyHashes, PublicKeys, Root, ZERO_HASHES},
+    types::{CommitteeBranch, Leaf, PublicKeyHashes, PublicKeys, Root, ZERO_HASHES},
     CommitteeUpdateArgs,
 };
 
@@ -47,7 +47,7 @@ pub fn merkleize_keys(mut keys: PublicKeyHashes) -> Root {
 }
 
 pub fn add_left_right(left: Leaf, right: &Leaf) -> Vec<u8> {
-    let mut value: Bytes = left;
+    let mut value: Vec<u8> = left;
     value.extend_from_slice(&right);
     value.to_vec()
 }
