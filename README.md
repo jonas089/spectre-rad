@@ -24,7 +24,7 @@ Prerequisites:
 
 - Rust installation
 - Risc0 toolchain
-- Risc0 client `1.1.2`
+- Risc0 client `1.0.1`
 
 ```bash
 cargo test test_risc0 -- --nocapture
@@ -49,3 +49,22 @@ Example output:
 Verified Committee Root: [25, 122, 75, 125, 192, 12, 117, 238, 92, 109, 3, 192, 224, 63, 84, 28, 196, 131, 90, 32, 180, 39, 160, 7, 188, 177, 162, 100, 181, 205, 38, 142]
 ```
 
+## Generate a Risc0 proof for the Committee circuit and verify it on AlignedLayer
+
+Prerequisite:
+- Holesky funded account & keystore (see [AlignedLayer docs](https://docs.alignedlayer.com/))
+- Keystore should be placed in `./aligned/`
+
+Generate and submit the proof:
+
+```bash
+cargo test test_committee_submit_aligned
+```
+-> Enter password for keystore
+
+
+Example output:
+
+```rust
+
+```

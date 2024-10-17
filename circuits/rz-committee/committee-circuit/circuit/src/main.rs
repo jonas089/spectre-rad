@@ -1,6 +1,6 @@
 use committee_iso::{
     types::{CommitteeUpdateArgs, PublicKeyHashes, Root},
-    utils::{hash_keys, load_test_args, merkleize_keys, verify_merkle_proof},
+    utils::{hash_keys, merkleize_keys, verify_merkle_proof},
 };
 use risc0_zkvm::guest::env;
 fn main() {

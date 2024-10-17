@@ -1,5 +1,7 @@
+mod aligned;
+
 fn main() {
-    todo!("Client");
+    panic!("This is not (yet) a client!");
 }
 
 #[cfg(test)]
@@ -10,6 +12,8 @@ mod test_risc0 {
         utils::load_test_args,
     };
     use risc0_zkvm::{default_prover, ExecutorEnv};
+
+    use crate::aligned;
     #[test]
     fn test_committee_circuit_risc0() {
         use std::time::Instant;
@@ -34,5 +38,23 @@ mod test_risc0 {
         println!("Verified Committee Root: {:?}", &output);
         let duration = start_time.elapsed();
         println!("Elapsed time: {:?}", duration);
+    }
+
+    #[tokio::test]
+    async fn test_committee_submit_aligned() {
+        let committee_update: CommitteeUpdateArgs = load_test_args();
+        tracing_subscriber::fmt()
+            .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+            .init();
+        let env = ExecutorEnv::builder()
+            .write(&committee_update)
+            .unwrap()
+            .build()
+            .unwrap();
+
+        let prover = default_prover();
+        let prove_info = prover.prove(env, RZ_COMMITTEE_ELF).unwrap();
+        let receipt = prove_info.receipt;
+        aligned::submit_committee_proof(receipt).await;
     }
 }
