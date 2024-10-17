@@ -1,15 +1,6 @@
 pub mod types;
 pub mod utils;
-
-use ethereum_consensus_types::BeaconBlockHeader;
-use serde::{Deserialize, Serialize};
-use types::{CommitteeBranch, PublicKeys};
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CommitteeUpdateArgs {
-    pub pubkeys_compressed: PublicKeys,
-    pub finalized_header: BeaconBlockHeader,
-    pub sync_committee_branch: CommitteeBranch,
-}
+use types::CommitteeUpdateArgs;
 
 #[cfg(test)]
 mod test {

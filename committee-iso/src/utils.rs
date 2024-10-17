@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use sha2::{Digest, Sha256};
-use std::fs;
+use std::{env, fs};
 
 use crate::{
     types::{CommitteeBranch, Leaf, PublicKeyHashes, PublicKeys, Root, ZERO_HASHES},
@@ -8,7 +8,9 @@ use crate::{
 };
 
 pub fn load_test_args() -> CommitteeUpdateArgs {
-    serde_json::from_slice(&fs::read("../data/rotation_512.json").unwrap()).unwrap()
+    let path =
+        env::var("COMMITTEE_UPDATE_TEST_PATH").unwrap_or("../data/rotation_512.json".to_string());
+    serde_json::from_slice(&fs::read(&path).unwrap()).unwrap()
 }
 
 pub fn verify_merkle_proof(branch: CommitteeBranch, leaf: Leaf, root: &Root, mut gindex: usize) {

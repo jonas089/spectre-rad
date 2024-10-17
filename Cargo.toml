@@ -1,2 +1,2 @@
 [workspace]
-members = ["committee-iso"]
+members = ["committee-iso", "prover"]
