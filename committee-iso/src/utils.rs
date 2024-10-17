@@ -2,13 +2,16 @@ use itertools::Itertools;
 use sha2::{Digest, Sha256};
 use std::fs;
 
-use crate::{types::ZERO_HASHES, CommitteeUpdateArgs};
+use crate::{
+    types::{Bytes, CommitteeBranch, Leaf, PublicKeyHashes, PublicKeys, Root, ZERO_HASHES},
+    CommitteeUpdateArgs,
+};
 
 pub fn load_test_args() -> CommitteeUpdateArgs {
     serde_json::from_slice(&fs::read("../data/rotation_512.json").unwrap()).unwrap()
 }
 
-pub fn verify_merkle_proof(branch: Vec<Vec<u8>>, leaf: Vec<u8>, root: &[u8], mut gindex: usize) {
+pub fn verify_merkle_proof(branch: CommitteeBranch, leaf: Leaf, root: &Root, mut gindex: usize) {
     let mut computed_hash = leaf;
     for node in branch {
         if gindex % 2 == 0 {
@@ -21,7 +24,7 @@ pub fn verify_merkle_proof(branch: Vec<Vec<u8>>, leaf: Vec<u8>, root: &[u8], mut
     assert_eq!(&computed_hash, root);
 }
 
-pub fn merkleize_keys(mut keys: Vec<Vec<u8>>) -> Vec<u8> {
+pub fn merkleize_keys(mut keys: PublicKeyHashes) -> Root {
     let height = if keys.len() == 1 {
         1
     } else {
@@ -43,14 +46,14 @@ pub fn merkleize_keys(mut keys: Vec<Vec<u8>>) -> Vec<u8> {
     keys.pop().unwrap()
 }
 
-pub fn add_left_right(left: Vec<u8>, right: &[u8]) -> Vec<u8> {
-    let mut value: Vec<u8> = left;
+pub fn add_left_right(left: Leaf, right: &Leaf) -> Vec<u8> {
+    let mut value: Bytes = left;
     value.extend_from_slice(&right);
     value.to_vec()
 }
 
-pub fn hash_keys(keys: Vec<Vec<u8>>) -> Vec<Vec<u8>> {
-    let mut key_hashes: Vec<Vec<u8>> = vec![];
+pub fn hash_keys(keys: PublicKeys) -> PublicKeyHashes {
+    let mut key_hashes: PublicKeyHashes = vec![];
     for key in keys {
         let mut padded_key = key.clone();
         padded_key.resize(64, 0);
