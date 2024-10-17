@@ -66,5 +66,14 @@ cargo test test_committee_submit_aligned
 Example output:
 
 ```rust
+successes:
 
+---- test_risc0::test_committee_submit_aligned stdout ----
+Proof submitted and verified successfully on batch ebe6ea81087c1f4063f0a1d3b632e64be6925d8903fd1acacfede0241427e459
+
+
+successes:
+    test_risc0::test_committee_submit_aligned
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 687.50s
 ```
