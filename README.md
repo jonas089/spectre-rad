@@ -30,6 +30,15 @@ Prerequisites:
 cargo test test_risc0 -- --nocapture
 ```
 
+Make sure to specify the path to `rotation_512.json` as an environment variable when running the circuit.
+
+Example:
+
+```bash
+// in .bashrc
+export COMMITTEE_UPDATE_TEST_PATH="/Users/USERNAME/Desktop/spectre-rad/data/rotation_512.json"
+```
+
 
 Example output:
 

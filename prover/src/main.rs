@@ -12,6 +12,8 @@ mod test_risc0 {
     use risc0_zkvm::{default_prover, ExecutorEnv};
     #[test]
     fn test_committee_circuit_risc0() {
+        use std::time::Instant;
+        let start_time = Instant::now();
         let committee_update: CommitteeUpdateArgs = load_test_args();
         tracing_subscriber::fmt()
             .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
@@ -30,5 +32,7 @@ mod test_risc0 {
         let output: Root = receipt.journal.decode().unwrap();
         receipt.verify(RZ_COMMITTEE_ID).unwrap();
         println!("Verified Committee Root: {:?}", &output);
+        let duration = start_time.elapsed();
+        println!("Elapsed time: {:?}", duration);
     }
 }
