@@ -1,10 +1,14 @@
 // This file contains a proof of concept interaction between the prover and AlignedLayer
 mod constants;
+use std::str::FromStr;
+
 use aligned_sdk::core::types::{Network, PriceEstimate, ProvingSystemId, VerificationData};
-use aligned_sdk::sdk::{estimate_fee, get_next_nonce, submit_and_wait_verification};
-use committee_circuit::{RZ_COMMITTEE_ELF, RZ_COMMITTEE_ID};
+use aligned_sdk::sdk::{
+    compute_max_fee, estimate_fee, get_next_nonce, submit_and_wait_verification,
+};
+use committee_circuit::RZ_COMMITTEE_ID;
 use constants::{BATCHER_URL, ETH_RPC_URL};
-use ethers::types::Address;
+use ethers::types::{Address, U256};
 use ethers::{signers::LocalWallet, signers::Signer};
 use risc0_zkvm::Receipt;
 
@@ -28,9 +32,7 @@ pub(crate) async fn submit_committee_proof(proof: Receipt) {
         pub_input: Some(proof.journal.bytes),
     };
 
-    let max_fee = estimate_fee(ETH_RPC_URL, PriceEstimate::Min)
-        .await
-        .expect("failed to fetch gas price from the blockchain");
+    let max_fee = U256::from_str("3000000000000").unwrap();
 
     match submit_and_wait_verification(
         BATCHER_URL,
@@ -67,12 +69,4 @@ pub fn convert(data: &[u32; 8]) -> [u8; 32] {
         res[4 * i..4 * (i + 1)].copy_from_slice(&data[i].to_le_bytes());
     }
     res
-}
-
-#[tokio::test]
-async fn test_get_max_fee() {
-    let max_fee = estimate_fee(ETH_RPC_URL, PriceEstimate::Min)
-        .await
-        .expect("failed to fetch gas price from the blockchain");
-    println!("Max Fee: {:?}", &max_fee);
 }
