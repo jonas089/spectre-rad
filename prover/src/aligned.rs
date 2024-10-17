@@ -2,7 +2,7 @@
 mod constants;
 use aligned_sdk::core::types::{Network, PriceEstimate, ProvingSystemId, VerificationData};
 use aligned_sdk::sdk::{estimate_fee, get_next_nonce, submit_and_wait_verification};
-use committee_circuit::RZ_COMMITTEE_ELF;
+use committee_circuit::{RZ_COMMITTEE_ELF, RZ_COMMITTEE_ID};
 use constants::{BATCHER_URL, ETH_RPC_URL};
 use ethers::types::Address;
 use ethers::{signers::LocalWallet, signers::Signer};
@@ -21,14 +21,14 @@ pub(crate) async fn submit_committee_proof(proof: Receipt) {
 
     let verification_data = VerificationData {
         proving_system: ProvingSystemId::Risc0,
-        proof: bincode::serialize(&proof).unwrap(),
+        proof: bincode::serialize(&proof.inner).unwrap(),
         proof_generator_addr: wallet.address(),
-        vm_program_code: Some(RZ_COMMITTEE_ELF.to_vec()),
+        vm_program_code: Some(convert(&RZ_COMMITTEE_ID).to_vec()),
         verification_key: None,
-        pub_input: None,
+        pub_input: Some(proof.journal.bytes),
     };
 
-    let max_fee = estimate_fee(ETH_RPC_URL, PriceEstimate::Instant)
+    let max_fee = estimate_fee(ETH_RPC_URL, PriceEstimate::Min)
         .await
         .expect("failed to fetch gas price from the blockchain");
 
@@ -59,4 +59,20 @@ pub(crate) async fn submit_committee_proof(proof: Receipt) {
             println!("Proof verification failed: {:?}", e);
         }
     }
+}
+
+pub fn convert(data: &[u32; 8]) -> [u8; 32] {
+    let mut res = [0; 32];
+    for i in 0..8 {
+        res[4 * i..4 * (i + 1)].copy_from_slice(&data[i].to_le_bytes());
+    }
+    res
+}
+
+#[tokio::test]
+async fn test_get_max_fee() {
+    let max_fee = estimate_fee(ETH_RPC_URL, PriceEstimate::Min)
+        .await
+        .expect("failed to fetch gas price from the blockchain");
+    println!("Max Fee: {:?}", &max_fee);
 }

@@ -18,6 +18,13 @@ pub struct CommitteeUpdateArgs {
     pub sync_committee_branch: CommitteeBranch,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommitteeCircuitInput {
+    pub pubkeys: Vec<Vec<u8>>,
+    pub branch: Vec<Vec<u8>>,
+    pub state_root: Vec<u8>,
+}
+
 lazy_static! {
     pub static ref ZERO_HASHES: [[u8; 32]; 2] = {
         std::iter::successors(Some([0; 32]), |&prev| {

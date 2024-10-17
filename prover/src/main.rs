@@ -8,7 +8,7 @@ fn main() {
 mod test_risc0 {
     use committee_circuit::{RZ_COMMITTEE_ELF, RZ_COMMITTEE_ID};
     use committee_iso::{
-        types::{CommitteeUpdateArgs, Root},
+        types::{CommitteeCircuitInput, CommitteeUpdateArgs, Root},
         utils::load_test_args,
     };
     use risc0_zkvm::{default_prover, ExecutorEnv};
@@ -17,13 +17,18 @@ mod test_risc0 {
     #[test]
     fn test_committee_circuit_risc0() {
         use std::time::Instant;
-        let start_time = Instant::now();
-        let committee_update: CommitteeUpdateArgs = load_test_args();
         tracing_subscriber::fmt()
             .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
             .init();
+        let start_time = Instant::now();
+        let committee_update: CommitteeUpdateArgs = load_test_args();
+        let committee_update_inputs: CommitteeCircuitInput = CommitteeCircuitInput {
+            pubkeys: committee_update.pubkeys_compressed,
+            branch: committee_update.sync_committee_branch,
+            state_root: committee_update.finalized_header.state_root.to_vec(),
+        };
         let env = ExecutorEnv::builder()
-            .write(&committee_update)
+            .write(&committee_update_inputs)
             .unwrap()
             .build()
             .unwrap();
@@ -42,12 +47,17 @@ mod test_risc0 {
 
     #[tokio::test]
     async fn test_committee_submit_aligned() {
-        let committee_update: CommitteeUpdateArgs = load_test_args();
         tracing_subscriber::fmt()
             .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
             .init();
+        let committee_update: CommitteeUpdateArgs = load_test_args();
+        let committee_update_inputs: CommitteeCircuitInput = CommitteeCircuitInput {
+            pubkeys: committee_update.pubkeys_compressed,
+            branch: committee_update.sync_committee_branch,
+            state_root: committee_update.finalized_header.state_root.to_vec(),
+        };
         let env = ExecutorEnv::builder()
-            .write(&committee_update)
+            .write(&committee_update_inputs)
             .unwrap()
             .build()
             .unwrap();
