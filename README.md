@@ -80,12 +80,12 @@ Commands:
 Full Example command:
 
 ```
-cargo run prove --path data/rotation_512.json --rpc https://ethereum-holesky-rpc.publicnode.com --chain-id 17000 --network Holesky --keystore aligned/keystore0 --password 1234 --gas 3000000000000
+cargo run prove --path data/rotation_512.json --rpc https://ethereum-holesky-rpc.publicnode.com --chain-id 17000 --network Holesky --address ec3f9f8FF528862aa99Bf4648Fa4844C3d9a50a3 --keystore aligned/keystore0 --password 1234 --gas 3000000000000
 ```
 
 ## Proof Generation and Submission E2E Video
 
-
+<img src="https://github.com/jonas089/spectre-rad/blob/master/resources/demo.gif" alt="demo" height="540" width="960"/>
 
 ## Integration test to submit a Risc0 proof to AlignedLayer for verification
 

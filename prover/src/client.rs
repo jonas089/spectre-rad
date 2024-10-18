@@ -26,6 +26,8 @@ pub enum Command {
         #[arg(short, long)]
         network: String,
         #[arg(short, long)]
+        address: String,
+        #[arg(short, long)]
         keystore: String,
         #[arg(long)]
         password: String,
@@ -41,6 +43,7 @@ pub async fn run(cli: Cli) {
             rpc,
             chain_id,
             network,
+            address,
             keystore,
             password,
             gas,
@@ -55,6 +58,7 @@ pub async fn run(cli: Cli) {
                 &rpc,
                 chain_id,
                 network_typed,
+                &address,
                 &keystore,
                 &password,
                 gas,
@@ -71,6 +75,7 @@ async fn generate_and_submit_committee_proof_aligned(
     rpc: &str,
     chain_id: u64,
     network: Network,
+    address: &str,
     keystore: &str,
     password: &str,
     gas: u64,
@@ -90,5 +95,8 @@ async fn generate_and_submit_committee_proof_aligned(
     let prover = default_prover();
     let prove_info = prover.prove(env, RZ_COMMITTEE_ELF).unwrap();
     let receipt = prove_info.receipt;
-    aligned::submit_committee_proof(receipt, rpc, chain_id, network, keystore, password, gas).await;
+    aligned::submit_committee_proof(
+        receipt, rpc, chain_id, network, address, keystore, password, gas,
+    )
+    .await;
 }

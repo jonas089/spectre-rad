@@ -76,6 +76,7 @@ mod test_risc0 {
             ETH_RPC_URL,
             17000,
             aligned_sdk::core::types::Network::Holesky,
+            "ec3f9f8FF528862aa99Bf4648Fa4844C3d9a50a3",
             "../aligned/keystore0",
             "KEYSTORE_PASSWORD",
             3000000000000,

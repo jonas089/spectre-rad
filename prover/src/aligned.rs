@@ -1,5 +1,6 @@
 // This file contains a proof of concept interaction between the prover and AlignedLayer
 pub mod constants;
+pub mod storage;
 use aligned_sdk::core::types::{Network, ProvingSystemId, VerificationData};
 use aligned_sdk::sdk::{get_next_nonce, submit_and_wait_verification};
 use committee_circuit::RZ_COMMITTEE_ID;
@@ -7,12 +8,14 @@ use constants::BATCHER_URL;
 use ethers::types::{Address, U256};
 use ethers::{signers::LocalWallet, signers::Signer};
 use risc0_zkvm::Receipt;
+use storage::ProofDB;
 
 pub async fn submit_committee_proof(
     proof: Receipt,
     rpc: &str,
     chain_id: u64,
     network: Network,
+    address: &str,
     keystore: &str,
     password: &str,
     gas: u64,
@@ -29,7 +32,6 @@ pub async fn submit_committee_proof(
         verification_key: None,
         pub_input: Some(proof.journal.bytes),
     };
-    // good default: "3000000000000"
     let max_fee = U256::from(gas);
 
     match submit_and_wait_verification(
@@ -41,7 +43,7 @@ pub async fn submit_committee_proof(
         wallet.clone(),
         get_next_nonce(
             &rpc,
-            Address::from_slice(&hex::decode("ec3f9f8FF528862aa99Bf4648Fa4844C3d9a50a3").unwrap()),
+            Address::from_slice(&hex::decode(address).unwrap()),
             network,
         )
         .await
@@ -51,9 +53,30 @@ pub async fn submit_committee_proof(
     {
         Ok(aligned_verification_data) => {
             println!(
-                "Proof submitted and verified successfully on batch {}",
+                "[Success] Proof was successfully verified and included in batch {}",
                 hex::encode(aligned_verification_data.batch_merkle_root)
             );
+
+            let mut db = ProofDB {
+                path: "proofs.db".to_string(),
+            };
+            db.setup();
+
+            let root = aligned_verification_data.batch_merkle_root;
+            let height = aligned_verification_data.index_in_batch;
+
+            db.insert(&root, height);
+            println!("[Success] Proof was stored in {}", &db.path);
+
+            let verified_proofs = db.get_all();
+            println!("[Info] Content of {}", &db.path);
+
+            for proof in verified_proofs {
+                println!(
+                    "[Proof] \n [Batch Root]: {:?} \n [Batch Height]: {:?}",
+                    proof.0, proof.1
+                );
+            }
         }
         Err(e) => {
             println!("Proof verification failed: {:?}", e);
