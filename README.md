@@ -3,10 +3,9 @@
 > [!NOTE]
 > This repository is a hackathon submission for AlignedLayer that is a proof of concept for integrating their infrastructure into Chainsafe's lightclient operations
 
-Work in progress:
+> [!WARNING]
+> Todo: Utilize precompiles to accelerate hashing
 
-- Host function for sha2 in Risc0 / generic hashing
-- AlignedLayer integration of the CommitteeUpdateCircuit for Risc0
 
 ## Naming convention
 
