@@ -1,7 +1,13 @@
-mod aligned;
+use clap::Parser;
+use client::{run, Cli};
 
-fn main() {
-    panic!("This is not (yet) a client!");
+pub mod aligned;
+mod client;
+
+#[tokio::main]
+async fn main() {
+    let cli: Cli = Cli::parse();
+    run(cli).await;
 }
 
 #[cfg(test)]
@@ -9,11 +15,11 @@ mod test_risc0 {
     use committee_circuit::{RZ_COMMITTEE_ELF, RZ_COMMITTEE_ID};
     use committee_iso::{
         types::{CommitteeCircuitInput, CommitteeUpdateArgs, Root},
-        utils::load_test_args,
+        utils::load_circuit_args_env,
     };
     use risc0_zkvm::{default_prover, ExecutorEnv};
 
-    use crate::aligned;
+    use crate::aligned::{self, constants::ETH_RPC_URL};
     #[test]
     fn test_committee_circuit_risc0() {
         use std::time::Instant;
@@ -21,7 +27,7 @@ mod test_risc0 {
             .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
             .init();
         let start_time = Instant::now();
-        let committee_update: CommitteeUpdateArgs = load_test_args();
+        let committee_update: CommitteeUpdateArgs = load_circuit_args_env();
         let committee_update_inputs: CommitteeCircuitInput = CommitteeCircuitInput {
             pubkeys: committee_update.pubkeys_compressed,
             branch: committee_update.sync_committee_branch,
@@ -50,7 +56,7 @@ mod test_risc0 {
         tracing_subscriber::fmt()
             .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
             .init();
-        let committee_update: CommitteeUpdateArgs = load_test_args();
+        let committee_update: CommitteeUpdateArgs = load_circuit_args_env();
         let committee_update_inputs: CommitteeCircuitInput = CommitteeCircuitInput {
             pubkeys: committee_update.pubkeys_compressed,
             branch: committee_update.sync_committee_branch,
@@ -65,6 +71,15 @@ mod test_risc0 {
         let prover = default_prover();
         let prove_info = prover.prove(env, RZ_COMMITTEE_ELF).unwrap();
         let receipt = prove_info.receipt;
-        aligned::submit_committee_proof(receipt).await;
+        aligned::submit_committee_proof(
+            receipt,
+            ETH_RPC_URL,
+            17000,
+            aligned_sdk::core::types::Network::Holesky,
+            "../aligned/keystore0",
+            "KEYSTORE_PASSWORD",
+            3000000000000,
+        )
+        .await;
     }
 }

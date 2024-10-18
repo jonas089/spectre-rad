@@ -1,5 +1,8 @@
 # Non-Halo2 implementation of Spectre for use with LLVM-compatible ZKVMs (Risc0, SP1)
 
+> [!NOTE]
+> This repository is a hackathon submission for AlignedLayer that is a proof of concept for integrating their infrastructure into Chainsafe's lightclient operations
+
 Work in progress:
 
 - Host function for sha2 in Risc0 / generic hashing
@@ -35,7 +38,6 @@ Make sure to specify the path to `rotation_512.json` as an environment variable 
 Example:
 
 ```bash
-// in .bashrc
 export COMMITTEE_UPDATE_TEST_PATH="/Users/USERNAME/Desktop/spectre-rad/data/rotation_512.json"
 ```
 
@@ -49,7 +51,43 @@ Example output:
 Verified Committee Root: [25, 122, 75, 125, 192, 12, 117, 238, 92, 109, 3, 192, 224, 63, 84, 28, 196, 131, 90, 32, 180, 39, 160, 7, 188, 177, 162, 100, 181, 205, 38, 142]
 ```
 
-## Generate a Risc0 proof for the Committee circuit and verify it on AlignedLayer
+## Test Data
+
+Test data for the circuit can be found in `data/rotation_512.json`. 
+It contains a committee update for Beacon with `512` public keys, a merkle branch and the resulting root.
+
+## Command line Client interactions
+`cargo run` output:
+
+```js
+Commands:
+  prove  
+  help   Print this message or the help of the given subcommand(s)
+```
+
+`prove` command arguments:
+
+```js
+  --path <PATH>
+  --rpc <RPC>
+  --chain-id <CHAIN_ID>
+  --network <NETWORK>
+  --keystore <KEYSTORE>
+  --password <PASSWORD>
+  --gas <GAS>
+```
+
+Full Example command:
+
+```
+cargo run prove --path data/rotation_512.json --rpc https://ethereum-holesky-rpc.publicnode.com --chain-id 17000 --network Holesky --keystore aligned/keystore0 --password 1234 --gas 3000000000000
+```
+
+## Proof Generation and Submission E2E Video
+
+
+
+## Integration test to submit a Risc0 proof to AlignedLayer for verification
 
 Prerequisite:
 - Holesky funded account & keystore (see [AlignedLayer docs](https://docs.alignedlayer.com/))
@@ -60,8 +98,6 @@ Generate and submit the proof:
 ```bash
 cargo test test_committee_submit_aligned
 ```
--> Enter password for keystore
-
 
 Example output:
 

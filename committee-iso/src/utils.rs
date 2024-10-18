@@ -7,7 +7,11 @@ use crate::{
     CommitteeUpdateArgs,
 };
 
-pub fn load_test_args() -> CommitteeUpdateArgs {
+pub fn load_circuit_args(path: &str) -> CommitteeUpdateArgs {
+    serde_json::from_slice(&fs::read(&path).unwrap()).unwrap()
+}
+
+pub fn load_circuit_args_env() -> CommitteeUpdateArgs {
     let path =
         env::var("COMMITTEE_UPDATE_TEST_PATH").unwrap_or("../data/rotation_512.json".to_string());
     serde_json::from_slice(&fs::read(&path).unwrap()).unwrap()

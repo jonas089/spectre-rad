@@ -1,27 +1,25 @@
 // This file contains a proof of concept interaction between the prover and AlignedLayer
-mod constants;
-use std::str::FromStr;
-
-use aligned_sdk::core::types::{Network, PriceEstimate, ProvingSystemId, VerificationData};
-use aligned_sdk::sdk::{
-    compute_max_fee, estimate_fee, get_next_nonce, submit_and_wait_verification,
-};
+pub mod constants;
+use aligned_sdk::core::types::{Network, ProvingSystemId, VerificationData};
+use aligned_sdk::sdk::{get_next_nonce, submit_and_wait_verification};
 use committee_circuit::RZ_COMMITTEE_ID;
-use constants::{BATCHER_URL, ETH_RPC_URL};
+use constants::BATCHER_URL;
 use ethers::types::{Address, U256};
 use ethers::{signers::LocalWallet, signers::Signer};
 use risc0_zkvm::Receipt;
 
-pub(crate) async fn submit_committee_proof(proof: Receipt) {
-    const NETWORK: Network = Network::Holesky;
-    const KEYSTORE: &str = "../aligned/keystore0";
-
-    let keystore_password = rpassword::prompt_password("Enter keystore password: ")
-        .expect("Failed to read keystore password");
-
-    let wallet = LocalWallet::decrypt_keystore(KEYSTORE, &keystore_password)
+pub async fn submit_committee_proof(
+    proof: Receipt,
+    rpc: &str,
+    chain_id: u64,
+    network: Network,
+    keystore: &str,
+    password: &str,
+    gas: u64,
+) {
+    let wallet = LocalWallet::decrypt_keystore(keystore, &password)
         .expect("Failed to decrypt keystore")
-        .with_chain_id(17000u64);
+        .with_chain_id(chain_id);
 
     let verification_data = VerificationData {
         proving_system: ProvingSystemId::Risc0,
@@ -31,20 +29,20 @@ pub(crate) async fn submit_committee_proof(proof: Receipt) {
         verification_key: None,
         pub_input: Some(proof.journal.bytes),
     };
-
-    let max_fee = U256::from_str("3000000000000").unwrap();
+    // good default: "3000000000000"
+    let max_fee = U256::from(gas);
 
     match submit_and_wait_verification(
         BATCHER_URL,
-        ETH_RPC_URL,
-        NETWORK,
+        &rpc,
+        network,
         &verification_data,
         max_fee,
         wallet.clone(),
         get_next_nonce(
-            ETH_RPC_URL,
+            &rpc,
             Address::from_slice(&hex::decode("ec3f9f8FF528862aa99Bf4648Fa4844C3d9a50a3").unwrap()),
-            NETWORK,
+            network,
         )
         .await
         .unwrap(),
@@ -63,7 +61,7 @@ pub(crate) async fn submit_committee_proof(proof: Receipt) {
     }
 }
 
-pub fn convert(data: &[u32; 8]) -> [u8; 32] {
+fn convert(data: &[u32; 8]) -> [u8; 32] {
     let mut res = [0; 32];
     for i in 0..8 {
         res[4 * i..4 * (i + 1)].copy_from_slice(&data[i].to_le_bytes());
