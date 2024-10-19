@@ -6,10 +6,59 @@
 > [!WARNING]
 > Todo: Utilize precompiles to accelerate hashing
 
+# Context for Judges
+Spectre, a ZK lightclient developed and operated by Chainsafe Systems,
+mainly consists of two ZK circuits:
 
-## Naming convention
+- CommitteeUpdateCircuit
+- StepCircuit
 
-### Naming convention for crates
+see [here](https://github.com/ChainSafe/Spectre/tree/main/lightclient-circuits%2Fsrc) the original implementation in [Halo2](https://zcash.github.io/halo2/).
+
+For the hackathon I developed a proof of concept on how to re-implement the Spectre lightclient in Risc0 with end to end tests for proof verification on AlignedLayer.
+
+My implementation focuses on:
+
+- integration of AlignedLayer infrastructure
+- modular design that is easily extendable
+- a Risc0 implementation of Spectre's CommitteeUpdateCircuit
+- real world test data
+
+For the scope of this hackathon I chose to demonstrate how an integration with Aligned is possible for Spectre 
+by implementing one of the two circuits that are necessary to run the full light client. 
+
+Due to my modular design choices it is possible to extend this implementation to support all of Spectre's functionality and 
+the StepCircuit. This is however not what I am submitting for the hackathon and it is important to clarify that this proof of concept
+only has some of Spectre's functionality. The functionality that it has however is fully integrated with AlignedLayer / proofs for the CommitteeUpdateCircuit
+are verifiable on Aligend.
+
+How the circuit works:
+
+1. The 512 public keys and expected root of the merkle tree are loaded from the test data
+2. The merkle tree with the 512 keys as leafs is hashed using `sha256`
+3. It is asserted / constrained that the computed merkle root matches the expected merkle root
+
+The merkle root will be committed to the journal upon successful verification.
+
+# Overview of components
+This submission consists of:
+
+- a Risc0 implementation of the CommitteeUpdateCircuit (Chainsafe Spectre)
+- a Client that makes it easy to specify paths to real world committee data, keys & more
+- a Database implementation that will premanently store information of all proofs that have been verified on Aligned.
+- end to end integration tests that can be run in isolation
+
+The circuit logic is located in `committee-iso/src/`
+
+The risc0 guest is located in `circuits/committee-circuit/`
+
+The AlignedLayer integration is located in `prover/src/aligned.rs`
+
+The Client logic is loated in `prover/src/client.rs`
+
+The Database logic is located in `prover/src/aligned/storage.rs`
+
+## Naming convention for crates
 
 `*-iso`: Raw Rust implementation of a Spectre component in Isolation. Example: `committee-iso` for the `CommitteeUpdateCircuit` logic.
 
@@ -40,7 +89,6 @@ Example:
 ```bash
 export COMMITTEE_UPDATE_TEST_PATH="/Users/USERNAME/Desktop/spectre-rad/data/rotation_512.json"
 ```
-
 
 Example output:
 
