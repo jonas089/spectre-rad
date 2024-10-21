@@ -86,6 +86,10 @@ Prerequisites:
 - Risc0 toolchain
 - Risc0 client `1.0.1`
 
+[Install Risc0](https://dev.risczero.com/api/zkvm/install)
+
+`rzup install cargo-risczero <version>`
+
 ```bash
 cargo test test_risc0 -- --nocapture
 ```
