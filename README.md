@@ -146,7 +146,7 @@ cargo run prove --path data/rotation_512.json --rpc https://ethereum-holesky-rpc
 
 ## Proof Generation and Submission E2E Video
 
-<img src="https://github.com/jonas089/spectre-rad/blob/master/resources/demo.gif" alt="demo" height="540" width="960"/>
+[click here](https://youtu.be/fHt3cDbzV0U)
 
 The video was significantly sped up to illustrate the insertion of multiple `proofs` in the sqlite database that is created
 on the client side. Each proof that was successfully verified using the client will be inserted into the database so that the 
