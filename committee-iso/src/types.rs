@@ -7,7 +7,7 @@ use crate::utils::digest;
 
 pub type PublicKeys = Vec<Vec<u8>>;
 pub type PublicKeyHashes = Vec<Vec<u8>>;
-pub type CommitteeBranch = Vec<Vec<u8>>;
+pub type Branch = Vec<Vec<u8>>;
 pub type Leaf = Vec<u8>;
 pub type Root = Vec<u8>;
 
@@ -15,7 +15,7 @@ pub type Root = Vec<u8>;
 pub struct CommitteeUpdateArgs {
     pub pubkeys_compressed: PublicKeys,
     pub finalized_header: BeaconBlockHeader,
-    pub sync_committee_branch: CommitteeBranch,
+    pub sync_committee_branch: Branch,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

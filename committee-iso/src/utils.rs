@@ -3,7 +3,7 @@ use sha2::{Digest, Sha256};
 use std::{env, fs};
 
 use crate::{
-    types::{CommitteeBranch, Leaf, PublicKeyHashes, PublicKeys, Root, ZERO_HASHES},
+    types::{Branch, Leaf, PublicKeyHashes, PublicKeys, Root, ZERO_HASHES},
     CommitteeUpdateArgs,
 };
 
@@ -17,7 +17,7 @@ pub fn load_circuit_args_env() -> CommitteeUpdateArgs {
     serde_json::from_slice(&fs::read(&path).unwrap()).unwrap()
 }
 
-pub fn verify_merkle_proof(branch: CommitteeBranch, leaf: Leaf, root: &Root, mut gindex: usize) {
+pub fn verify_merkle_proof(branch: Branch, leaf: Leaf, root: &Root, mut gindex: usize) {
     let mut computed_hash = leaf;
     for node in branch {
         if gindex % 2 == 0 {
