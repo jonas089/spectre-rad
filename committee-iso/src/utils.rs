@@ -112,7 +112,18 @@ pub fn digest(input: &[u8]) -> Vec<u8> {
     hasher.finalize().to_vec()
 }
 
+pub fn precompile_sha2_commitment(keys: Vec<BigUint>, signs: Vec<u8>) -> [u8; 32] {
+    let mut input: Vec<u8> = vec![];
+    for key in keys {
+        input.extend_from_slice(&key.to_bytes_be());
+    }
+    input.extend_from_slice(&signs);
+    digest(&input).try_into().unwrap()
+}
+
 pub fn poseidon_commit_pubkeys_compressed(keys: Vec<BigUint>, signs: Vec<u8>) -> [u8; 32] {
+    // maximum chunks with circom config: 13
+    // todo: hash more chunks per round
     let mut poseidon = Poseidon::<Fr>::new_circom(2).unwrap();
     let mut input: Vec<Vec<u8>> = vec![
         (keys.get(0).unwrap() % BigUint::from_str(&DEFAULT_FIELD_MODULUS).unwrap()).to_bytes_be(),
@@ -158,6 +169,14 @@ mod tests {
         println!("Commitment: {:?}", &commitment);
     }
 
+    #[test]
+    fn test_precompile_commit() {
+        let args: CommitteeUpdateArgs = load_circuit_args_env();
+        let compressed: (Vec<num_bigint::BigUint>, Vec<u8>) =
+            decode_pubkeys_x(args.pubkeys_compressed.clone());
+        let commitment = poseidon_commit_pubkeys_compressed(compressed.0, compressed.1);
+        println!("Commitment: {:?}", &commitment);
+    }
     #[test]
     fn poseidon_setup() {
         // BigUint is 32 Bytes
