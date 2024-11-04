@@ -5,7 +5,9 @@ use types::CommitteeUpdateArgs;
 mod test {
     use crate::{
         types::{PublicKeyHashes, Root},
-        utils::{hash_keys, load_circuit_args_env, merkleize_keys, verify_merkle_proof},
+        utils::{
+            decode_pubkeys_x, hash_keys, load_circuit_args_env, merkleize_keys, verify_merkle_proof,
+        },
         CommitteeUpdateArgs,
     };
     #[test]
@@ -21,5 +23,8 @@ mod test {
             &finalized_state_root,
             110,
         );
+
+        let decoded_pukeys = decode_pubkeys_x(args.pubkeys_compressed);
+        
     }
 }

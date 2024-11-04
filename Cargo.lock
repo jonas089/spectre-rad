@@ -923,6 +923,7 @@ name = "committee-iso"
 version = "0.1.0"
 dependencies = [
  "ark-bn254",
+ "ark-ff 0.4.2",
  "ethereum-consensus-types",
  "hex",
  "itertools 0.13.0",

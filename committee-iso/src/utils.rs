@@ -1,6 +1,11 @@
+use ark_bn254::Fr;
 use itertools::Itertools;
+use light_poseidon::Poseidon;
+use light_poseidon::PoseidonBytesHasher;
+use light_poseidon::PoseidonParameters;
 use num_bigint::BigUint;
 use sha2::{Digest, Sha256};
+use std::str::FromStr;
 use std::{env, fs};
 
 use crate::{
@@ -78,11 +83,12 @@ pub fn decode_pubkeys_x(
         .into_iter()
         .map(|mut bytes| {
             assert_eq!(bytes.len(), 48);
-            let masked_byte = bytes[47];
+            let (x_coordinate_bytes, remaining) = bytes.split_at_mut(32);
+            let masked_byte = remaining[15];
             let cleared_byte = masked_byte & 0x1F;
             let y_sign = (masked_byte >> 5) & 1;
-            bytes[47] = cleared_byte;
-            let x_coordinate = BigUint::from_bytes_be(&bytes);
+            remaining[15] = cleared_byte;
+            let x_coordinate = BigUint::from_bytes_be(x_coordinate_bytes);
             (x_coordinate, y_sign)
         })
         .unzip();
@@ -95,7 +101,7 @@ pub fn decode_pubkeys_x(
                 .enumerate()
                 .fold(0, |acc, (i, &bit)| acc | (bit << i))
         })
-        .collect_vec();
+        .collect();
 
     (x_coordinates, y_signs_packed)
 }
@@ -106,25 +112,64 @@ pub fn digest(input: &[u8]) -> Vec<u8> {
     hasher.finalize().to_vec()
 }
 
+pub fn poseidon_commit_pubkeys_compressed(keys: Vec<BigUint>, signs: Vec<u8>) -> [u8; 32] {
+    let mut input: Vec<Vec<u8>> = vec![];
+    for key in keys {
+        let reduced_x = key
+            % BigUint::from_str(
+                "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+            )
+            .unwrap();
+        input.push(reduced_x.to_bytes_be());
+    }
+
+    let signs_first_half = BigUint::from_bytes_be(&signs[0..32])
+        % BigUint::from_str(
+            "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+        )
+        .unwrap();
+    let signs_second_half = BigUint::from_bytes_be(&signs[32..])
+        % BigUint::from_str(
+            "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+        )
+        .unwrap();
+
+    input.push(signs_first_half.to_bytes_be());
+    input.push(signs_second_half.to_bytes_be());
+
+    let parameters = PoseidonParameters {
+        // Warning! These params need to be addressed
+        ark: vec![],
+        mds: vec![],
+        full_rounds: 8,
+        partial_rounds: 57,
+        width: 514,
+        alpha: 5,
+    };
+
+    // 2 sign, 512x X => 514 total
+    let mut poseidon = Poseidon::<Fr>::new(parameters);
+    let input_finalized = &input.iter().map(|array| &array[..]).collect::<Vec<&[u8]>>()[..];
+    poseidon.hash_bytes_be(input_finalized).unwrap()
+}
+
 #[cfg(test)]
 mod tests {
-    use ark_bn254::Fr;
-
+    use super::{decode_pubkeys_x, load_circuit_args_env, poseidon_commit_pubkeys_compressed};
     use crate::types::CommitteeUpdateArgs;
-
-    use super::{decode_pubkeys_x, load_circuit_args_env};
+    use ark_bn254::Fr;
+    use light_poseidon::{Poseidon, PoseidonBytesHasher};
 
     #[test]
-    fn test() {
+    fn test_poseidon_commit() {
         let args: CommitteeUpdateArgs = load_circuit_args_env();
-        let _decoded_keys: (Vec<num_bigint::BigUint>, Vec<u8>) =
+        let compressed: (Vec<num_bigint::BigUint>, Vec<u8>) =
             decode_pubkeys_x(args.pubkeys_compressed.clone());
+        poseidon_commit_pubkeys_compressed(compressed.0, compressed.1);
     }
 
     #[test]
     fn poseidon_setup() {
-        use light_poseidon::Poseidon;
-        use light_poseidon::PoseidonBytesHasher;
         // BigUint is 32 Bytes
         let mut poseidon = Poseidon::<Fr>::new_circom(2).unwrap();
         let hash = poseidon.hash_bytes_be(&[&[1u8; 32], &[2u8; 32]]).unwrap();
