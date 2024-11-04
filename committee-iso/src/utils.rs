@@ -8,6 +8,7 @@ use sha2::{Digest, Sha256};
 use std::str::FromStr;
 use std::{env, fs};
 
+use crate::constants::DEFAULT_FIELD_MODULUS;
 use crate::{
     types::{Branch, Leaf, PublicKeyHashes, PublicKeys, Root, ZERO_HASHES},
     CommitteeUpdateArgs,
@@ -115,24 +116,14 @@ pub fn digest(input: &[u8]) -> Vec<u8> {
 pub fn poseidon_commit_pubkeys_compressed(keys: Vec<BigUint>, signs: Vec<u8>) -> [u8; 32] {
     let mut input: Vec<Vec<u8>> = vec![];
     for key in keys {
-        let reduced_x = key
-            % BigUint::from_str(
-                "21888242871839275222246405745257275088548364400416034343698204186575808495617",
-            )
-            .unwrap();
+        let reduced_x = key % BigUint::from_str(&DEFAULT_FIELD_MODULUS).unwrap();
         input.push(reduced_x.to_bytes_be());
     }
 
-    let signs_first_half = BigUint::from_bytes_be(&signs[0..32])
-        % BigUint::from_str(
-            "21888242871839275222246405745257275088548364400416034343698204186575808495617",
-        )
-        .unwrap();
-    let signs_second_half = BigUint::from_bytes_be(&signs[32..])
-        % BigUint::from_str(
-            "21888242871839275222246405745257275088548364400416034343698204186575808495617",
-        )
-        .unwrap();
+    let signs_first_half =
+        BigUint::from_bytes_be(&signs[0..32]) % BigUint::from_str(&DEFAULT_FIELD_MODULUS).unwrap();
+    let signs_second_half =
+        BigUint::from_bytes_be(&signs[32..]) % BigUint::from_str(&DEFAULT_FIELD_MODULUS).unwrap();
 
     input.push(signs_first_half.to_bytes_be());
     input.push(signs_second_half.to_bytes_be());
