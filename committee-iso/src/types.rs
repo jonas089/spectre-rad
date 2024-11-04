@@ -1,9 +1,8 @@
+use crate::utils::digest;
 use ethereum_consensus_types::BeaconBlockHeader;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-
-use crate::utils::digest;
 
 pub type PublicKeys = Vec<Vec<u8>>;
 pub type PublicKeyHashes = Vec<Vec<u8>>;

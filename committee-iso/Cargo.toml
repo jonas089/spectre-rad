@@ -9,8 +9,8 @@ serde = { version = "1", features = ["derive"] }
 ethereum-consensus-types = { git = "https://github.com/ChainSafe/ethereum-consensus-types", branch = "capella", features = [
     "serde",
 ] }
-
 sha2 = { git = "https://github.com/jonas089/risc0-precompiles" }
 lazy_static = "1.5.0"
 itertools = "0.13.0"
+num-bigint = "0.4.6"
 hex = "0.4.3"

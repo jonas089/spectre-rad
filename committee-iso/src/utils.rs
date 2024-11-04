@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use num_bigint::BigUint;
 use sha2::{Digest, Sha256};
 use std::{env, fs};
 
@@ -30,6 +31,8 @@ pub fn verify_merkle_proof(branch: Branch, leaf: Leaf, root: &Root, mut gindex: 
     assert_eq!(&computed_hash, root);
 }
 
+// for the step circuit the PublicKeyHashes are generic Hashes.
+// todo: make this more intuitive.
 pub fn merkleize_keys(mut keys: PublicKeyHashes) -> Root {
     let height = if keys.len() == 1 {
         1
@@ -68,8 +71,50 @@ pub fn hash_keys(keys: PublicKeys) -> PublicKeyHashes {
     key_hashes
 }
 
+pub fn decode_pubkeys_x(
+    compressed_encodings: impl IntoIterator<Item = Vec<u8>>,
+) -> (Vec<BigUint>, Vec<u8>) {
+    let (x_coordinates, y_signs): (Vec<_>, Vec<_>) = compressed_encodings
+        .into_iter()
+        .map(|mut bytes| {
+            assert_eq!(bytes.len(), 48);
+            let masked_byte = bytes[47];
+            let cleared_byte = masked_byte & 0x1F;
+            let y_sign = (masked_byte >> 5) & 1;
+            bytes[47] = cleared_byte;
+            let x_coordinate = BigUint::from_bytes_be(&bytes);
+            (x_coordinate, y_sign)
+        })
+        .unzip();
+
+    let y_signs_packed = y_signs
+        .chunks(8)
+        .map(|chunk| {
+            chunk
+                .iter()
+                .enumerate()
+                .fold(0, |acc, (i, &bit)| acc | (bit << i))
+        })
+        .collect_vec();
+
+    (x_coordinates, y_signs_packed)
+}
+
 pub fn digest(input: &[u8]) -> Vec<u8> {
     let mut hasher = Sha256::new();
     hasher.update(input);
     hasher.finalize().to_vec()
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::types::CommitteeUpdateArgs;
+
+    use super::{decode_pubkeys_x, load_circuit_args_env};
+
+    #[test]
+    fn test() {
+        let args: CommitteeUpdateArgs = load_circuit_args_env();
+        let _decoded_keys = decode_pubkeys_x(args.pubkeys_compressed);
+    }
 }

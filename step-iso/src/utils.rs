@@ -13,7 +13,6 @@ pub fn load_circuit_args_env() -> SyncStepArgs {
 #[cfg(test)]
 mod tests {
     use super::load_circuit_args_env;
-
     #[test]
     fn test_load_circuit_args() {
         let _args = load_circuit_args_env();

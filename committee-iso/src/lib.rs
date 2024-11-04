@@ -1,7 +1,6 @@
 pub mod types;
 pub mod utils;
 use types::CommitteeUpdateArgs;
-
 #[cfg(test)]
 mod test {
     use crate::{
@@ -9,7 +8,6 @@ mod test {
         utils::{hash_keys, load_circuit_args_env, merkleize_keys, verify_merkle_proof},
         CommitteeUpdateArgs,
     };
-
     #[test]
     fn test_verify_committee_root() {
         let args: CommitteeUpdateArgs = load_circuit_args_env();
