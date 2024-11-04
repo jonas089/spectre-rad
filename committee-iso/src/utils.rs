@@ -114,34 +114,33 @@ pub fn digest(input: &[u8]) -> Vec<u8> {
 }
 
 pub fn poseidon_commit_pubkeys_compressed(keys: Vec<BigUint>, signs: Vec<u8>) -> [u8; 32] {
-    let mut input: Vec<Vec<u8>> = vec![];
-    for key in keys {
-        let reduced_x = key % BigUint::from_str(&DEFAULT_FIELD_MODULUS).unwrap();
-        input.push(reduced_x.to_bytes_be());
+    let mut poseidon = Poseidon::<Fr>::new_circom(2).unwrap();
+    let mut input: Vec<Vec<u8>> = vec![
+        (keys.get(0).unwrap() % BigUint::from_str(&DEFAULT_FIELD_MODULUS).unwrap()).to_bytes_be(),
+        vec![],
+    ];
+
+    for chunk in signs {
+        let bits = u8_to_bits(chunk);
+        for bit in bits {
+            let mut padded: Vec<u8> = vec![0; 31];
+            padded.push(bit);
+            input[1] = padded;
+            input[0] = poseidon
+                .hash_bytes_be(&input.iter().map(|array| &array[..]).collect::<Vec<&[u8]>>()[..])
+                .unwrap()
+                .to_vec();
+        }
     }
+    input.get(0).unwrap().as_slice().try_into().unwrap()
+}
 
-    let signs_first_half =
-        BigUint::from_bytes_be(&signs[0..32]) % BigUint::from_str(&DEFAULT_FIELD_MODULUS).unwrap();
-    let signs_second_half =
-        BigUint::from_bytes_be(&signs[32..]) % BigUint::from_str(&DEFAULT_FIELD_MODULUS).unwrap();
-
-    input.push(signs_first_half.to_bytes_be());
-    input.push(signs_second_half.to_bytes_be());
-
-    let parameters = PoseidonParameters {
-        // Warning! These params need to be addressed
-        ark: vec![],
-        mds: vec![],
-        full_rounds: 8,
-        partial_rounds: 57,
-        width: 514,
-        alpha: 5,
-    };
-
-    // 2 sign, 512x X => 514 total
-    let mut poseidon = Poseidon::<Fr>::new(parameters);
-    let input_finalized = &input.iter().map(|array| &array[..]).collect::<Vec<&[u8]>>()[..];
-    poseidon.hash_bytes_be(input_finalized).unwrap()
+fn u8_to_bits(byte: u8) -> [u8; 8] {
+    let mut bits = [0u8; 8];
+    for i in 0..8 {
+        bits[7 - i] = (byte >> i) & 1;
+    }
+    bits
 }
 
 #[cfg(test)]
@@ -156,7 +155,8 @@ mod tests {
         let args: CommitteeUpdateArgs = load_circuit_args_env();
         let compressed: (Vec<num_bigint::BigUint>, Vec<u8>) =
             decode_pubkeys_x(args.pubkeys_compressed.clone());
-        poseidon_commit_pubkeys_compressed(compressed.0, compressed.1);
+        let commitment = poseidon_commit_pubkeys_compressed(compressed.0, compressed.1);
+        println!("Commitment: {:?}", &commitment);
     }
 
     #[test]

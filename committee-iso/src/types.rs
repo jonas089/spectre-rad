@@ -19,9 +19,24 @@ pub struct CommitteeUpdateArgs {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CommitteeCircuitInput {
-    pub pubkeys: Vec<Vec<u8>>,
-    pub branch: Vec<Vec<u8>>,
-    pub state_root: Vec<u8>,
+    pub pubkeys: PublicKeys,
+    pub branch: Branch,
+    pub state_root: Root,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommitteeCircuitOutput {
+    pub committee_root: Root,
+    pub poseidon_commitment: Vec<u8>,
+}
+
+impl CommitteeCircuitOutput {
+    pub fn new(committee_root: Root, poseidon_commitment: [u8; 32]) -> Self {
+        Self {
+            committee_root,
+            poseidon_commitment: poseidon_commitment.to_vec(),
+        }
+    }
 }
 
 lazy_static! {
