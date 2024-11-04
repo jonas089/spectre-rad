@@ -108,6 +108,8 @@ pub fn digest(input: &[u8]) -> Vec<u8> {
 
 #[cfg(test)]
 mod tests {
+    use ark_bn254::Fr;
+
     use crate::types::CommitteeUpdateArgs;
 
     use super::{decode_pubkeys_x, load_circuit_args_env};
@@ -115,6 +117,17 @@ mod tests {
     #[test]
     fn test() {
         let args: CommitteeUpdateArgs = load_circuit_args_env();
-        let _decoded_keys = decode_pubkeys_x(args.pubkeys_compressed);
+        let _decoded_keys: (Vec<num_bigint::BigUint>, Vec<u8>) =
+            decode_pubkeys_x(args.pubkeys_compressed.clone());
+    }
+
+    #[test]
+    fn poseidon_setup() {
+        use light_poseidon::Poseidon;
+        use light_poseidon::PoseidonBytesHasher;
+        // BigUint is 32 Bytes
+        let mut poseidon = Poseidon::<Fr>::new_circom(2).unwrap();
+        let hash = poseidon.hash_bytes_be(&[&[1u8; 32], &[2u8; 32]]).unwrap();
+        println!("{:?}", &hash);
     }
 }

@@ -922,10 +922,12 @@ dependencies = [
 name = "committee-iso"
 version = "0.1.0"
 dependencies = [
+ "ark-bn254",
  "ethereum-consensus-types",
  "hex",
  "itertools 0.13.0",
  "lazy_static",
+ "light-poseidon",
  "num-bigint",
  "serde",
  "serde_json",
@@ -2579,6 +2581,18 @@ checksum = "2e99fb7a497b1e3339bc746195567ed8d3e24945ecd636e3619d20b9de9e9149"
 dependencies = [
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "light-poseidon"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c9a85a9752c549ceb7578064b4ed891179d20acd85f27318573b64d2d7ee7ee"
+dependencies = [
+ "ark-bn254",
+ "ark-ff 0.4.2",
+ "num-bigint",
+ "thiserror",
 ]
 
 [[package]]
