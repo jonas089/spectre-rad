@@ -4,7 +4,8 @@
 > This repository is a hackathon submission for AlignedLayer that is a proof of concept for integrating their infrastructure into Chainsafe's lightclient operations
 
 > [!WARNING]
-> Todo: Utilize precompiles to accelerate hashing
+> Work in progress. This branch attempts to reimplement Spectre whilst utilizing Risc0 optimizations for `v1.1.2`
+> AlignedLayer currently is not compatible with Risc0 `1.1.2`
 
 # Context for Judges
 Spectre, a ZK lightclient developed and operated by Chainsafe Systems,
