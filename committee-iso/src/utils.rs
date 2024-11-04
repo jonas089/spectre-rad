@@ -2,7 +2,6 @@ use ark_bn254::Fr;
 use itertools::Itertools;
 use light_poseidon::Poseidon;
 use light_poseidon::PoseidonBytesHasher;
-use light_poseidon::PoseidonParameters;
 use num_bigint::BigUint;
 use sha2::{Digest, Sha256};
 use std::str::FromStr;
