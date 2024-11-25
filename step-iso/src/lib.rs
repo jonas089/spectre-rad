@@ -40,8 +40,8 @@ pub fn aggregate_pubkey(args: SyncStepArgs) -> G1Affine {
 
 #[cfg(test)]
 mod tests {
-    use crate::{aggregate_pubkey, uint64_to_le_256, utils::load_circuit_args_env};
-    use committee_iso::utils::{digest, merkleize_keys, verify_merkle_proof};
+    use crate::{aggregate_pubkey, utils::load_circuit_args_env};
+    use committee_iso::utils::{digest, merkleize_keys, uint64_to_le_256, verify_merkle_proof};
     #[test]
     fn test_aggregate_pubkey_commitment() {
         let args = load_circuit_args_env();
@@ -64,15 +64,6 @@ mod tests {
             9,
         );
 
-        /*let attested_header_root = merkleize_keys(vec![
-            args.attested_header.slot.to_be_bytes().to_vec(),
-            args.attested_header.proposer_index.to_be_bytes().to_vec(),
-            args.attested_header.parent_root.to_vec(),
-            args.attested_header.state_root.to_vec(),
-            args.attested_header.body_root.to_vec(),
-        ]);*/
-        // todo: verify attested header root
-
         let finalized_header_root = merkleize_keys(vec![
             uint64_to_le_256(args.finalized_header.slot),
             uint64_to_le_256(args.finalized_header.proposer_index as u64),
@@ -87,11 +78,14 @@ mod tests {
             &args.attested_header.state_root.to_vec(),
             105,
         );
-    }
-}
 
-fn uint64_to_le_256(value: u64) -> Vec<u8> {
-    let mut bytes = value.to_le_bytes().to_vec(); // Convert to little-endian 8 bytes
-    bytes.extend(vec![0u8; 24]); // Pad with 24 zeros to make it 32 bytes
-    bytes
+        /*let attested_header_root = merkleize_keys(vec![
+            args.attested_header.slot.to_be_bytes().to_vec(),
+            args.attested_header.proposer_index.to_be_bytes().to_vec(),
+            args.attested_header.parent_root.to_vec(),
+            args.attested_header.state_root.to_vec(),
+            args.attested_header.body_root.to_vec(),
+        ]);*/
+        // todo: verify attested header root
+    }
 }

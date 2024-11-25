@@ -116,6 +116,12 @@ pub fn precompile_sha2_commitment(keys: Vec<BigUint>, signs: Vec<u8>) -> [u8; 32
     digest(&input).try_into().unwrap()
 }
 
+pub fn uint64_to_le_256(value: u64) -> Vec<u8> {
+    let mut bytes = value.to_le_bytes().to_vec(); // Convert to little-endian 8 bytes
+    bytes.extend(vec![0u8; 24]); // Pad with 24 zeros to make it 32 bytes
+    bytes
+}
+
 #[cfg(test)]
 mod tests {
     use super::{decode_pubkeys_x, load_circuit_args_env};
