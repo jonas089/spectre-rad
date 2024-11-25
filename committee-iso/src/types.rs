@@ -27,14 +27,14 @@ pub struct CommitteeCircuitInput {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CommitteeCircuitOutput {
     pub committee_root: Root,
-    pub poseidon_commitment: Vec<u8>,
+    pub commitment: Vec<u8>,
 }
 
 impl CommitteeCircuitOutput {
-    pub fn new(committee_root: Root, poseidon_commitment: [u8; 32]) -> Self {
+    pub fn new(committee_root: Root, commitment: [u8; 32]) -> Self {
         Self {
             committee_root,
-            poseidon_commitment: poseidon_commitment.to_vec(),
+            commitment: commitment.to_vec(),
         }
     }
 }
