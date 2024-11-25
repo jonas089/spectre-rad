@@ -6,6 +6,7 @@ mod client;
 
 #[tokio::main]
 async fn main() {
+    todo!("Update Client to support all circuits!");
     let cli: Cli = Cli::parse();
     run(cli).await;
 }
@@ -14,7 +15,7 @@ async fn main() {
 mod test_risc0 {
     use committee_circuit::{RZ_COMMITTEE_ELF, RZ_COMMITTEE_ID};
     use committee_iso::{
-        types::{CommitteeCircuitInput, CommitteeUpdateArgs, Root},
+        types::{CommitteeCircuitInput, CommitteeCircuitOutput, CommitteeUpdateArgs},
         utils::load_circuit_args_env,
     };
     use risc0_zkvm::{default_prover, ExecutorEnv};
@@ -31,7 +32,7 @@ mod test_risc0 {
         let committee_update_inputs: CommitteeCircuitInput = CommitteeCircuitInput {
             pubkeys: committee_update.pubkeys_compressed,
             branch: committee_update.sync_committee_branch,
-            state_root: committee_update.finalized_header.state_root.to_vec(),
+            finalized_header: committee_update.finalized_header,
         };
         let env = ExecutorEnv::builder()
             .write(&committee_update_inputs)
@@ -44,9 +45,9 @@ mod test_risc0 {
         // A receipt in Risc0 is a wrapper struct around the proof itself and the public journal.
         // Use this for verification with Aligned.
         let receipt = prove_info.receipt;
-        let output: Root = receipt.journal.decode().unwrap();
+        let output: CommitteeCircuitOutput = receipt.journal.decode().unwrap();
         receipt.verify(RZ_COMMITTEE_ID).unwrap();
-        println!("Verified Committee Root: {:?}", &output);
+        println!("Public output: {:?}", &output);
         let duration = start_time.elapsed();
         println!("Elapsed time: {:?}", duration);
     }
@@ -60,7 +61,7 @@ mod test_risc0 {
         let committee_update_inputs: CommitteeCircuitInput = CommitteeCircuitInput {
             pubkeys: committee_update.pubkeys_compressed,
             branch: committee_update.sync_committee_branch,
-            state_root: committee_update.finalized_header.state_root.to_vec(),
+            finalized_header: committee_update.finalized_header,
         };
         let env = ExecutorEnv::builder()
             .write(&committee_update_inputs)

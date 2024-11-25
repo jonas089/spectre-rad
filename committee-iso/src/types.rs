@@ -21,20 +21,26 @@ pub struct CommitteeUpdateArgs {
 pub struct CommitteeCircuitInput {
     pub pubkeys: PublicKeys,
     pub branch: Branch,
-    pub state_root: Root,
+    pub finalized_header: BeaconBlockHeader,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CommitteeCircuitOutput {
     pub committee_root: Root,
-    pub commitment: Vec<u8>,
+    pub commitment_pkeys: Vec<u8>,
+    pub commitment_state_root: Vec<u8>,
 }
 
 impl CommitteeCircuitOutput {
-    pub fn new(committee_root: Root, commitment: [u8; 32]) -> Self {
+    pub fn new(
+        committee_root: Root,
+        commitment_pkeys: [u8; 32],
+        commitment_state_root: Vec<u8>,
+    ) -> Self {
         Self {
             committee_root,
-            commitment: commitment.to_vec(),
+            commitment_pkeys: commitment_pkeys.to_vec(),
+            commitment_state_root,
         }
     }
 }

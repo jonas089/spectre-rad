@@ -49,6 +49,13 @@ mod tests {
         let commitment = digest(&aggregated_pubkey.to_compressed().to_vec());
         //let signature_bytes = args.signature_compressed;
         println!("Aggregate commitment: {:?}", &commitment);
+        /*let attested_header_root = merkleize_keys(vec![
+            uint64_to_le_256(args.attested_header.slot),
+            uint64_to_le_256(args.attested_header.proposer_index as u64),
+            args.attested_header.parent_root.to_vec(),
+            args.attested_header.state_root.to_vec(),
+            args.attested_header.body_root.to_vec(),
+        ]);*/
 
         todo!("Verify the signature against the aggregated key!")
     }
@@ -78,14 +85,5 @@ mod tests {
             &args.attested_header.state_root.to_vec(),
             105,
         );
-
-        /*let attested_header_root = merkleize_keys(vec![
-            args.attested_header.slot.to_be_bytes().to_vec(),
-            args.attested_header.proposer_index.to_be_bytes().to_vec(),
-            args.attested_header.parent_root.to_vec(),
-            args.attested_header.state_root.to_vec(),
-            args.attested_header.body_root.to_vec(),
-        ]);*/
-        // todo: verify attested header root
     }
 }

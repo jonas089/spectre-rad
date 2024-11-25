@@ -84,7 +84,7 @@ async fn generate_and_submit_committee_proof_aligned(
     let committee_update_inputs: CommitteeCircuitInput = CommitteeCircuitInput {
         pubkeys: committee_update.pubkeys_compressed,
         branch: committee_update.sync_committee_branch,
-        state_root: committee_update.finalized_header.state_root.to_vec(),
+        finalized_header: committee_update.finalized_header,
     };
     let env = ExecutorEnv::builder()
         .write(&committee_update_inputs)
