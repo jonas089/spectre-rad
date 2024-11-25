@@ -15,6 +15,7 @@ mod test {
         let key_hashs: PublicKeyHashes = hash_keys(args.pubkeys_compressed.clone());
         let committee_root_ssz: Root = merkleize_keys(key_hashs);
         let finalized_state_root: Root = args.finalized_header.state_root.to_vec();
+        // todo!("Commit the finalized header root");
         verify_merkle_proof(
             args.sync_committee_branch,
             committee_root_ssz,

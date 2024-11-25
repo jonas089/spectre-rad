@@ -65,8 +65,6 @@ mod tests {
             9,
         );
 
-        todo!("Fix merkle verification!");
-
         let attested_header_root = merkleize_keys(vec![
             args.attested_header.slot.to_be_bytes().to_vec(),
             args.attested_header.proposer_index.to_be_bytes().to_vec(),
