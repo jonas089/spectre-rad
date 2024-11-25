@@ -1,10 +1,7 @@
 use aligned_sdk::core::types::Network;
 use clap::{Parser, Subcommand};
 use committee_circuit::RZ_COMMITTEE_ELF;
-use committee_iso::{
-    types::{CommitteeCircuitInput, CommitteeUpdateArgs},
-    utils::load_circuit_args,
-};
+use committee_iso::{types::CommitteeUpdateArgs, utils::load_circuit_args};
 use prover::aligned;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
@@ -81,13 +78,8 @@ async fn generate_and_submit_committee_proof_aligned(
     gas: u64,
 ) {
     let committee_update: CommitteeUpdateArgs = load_circuit_args(path);
-    let committee_update_inputs: CommitteeCircuitInput = CommitteeCircuitInput {
-        pubkeys: committee_update.pubkeys_compressed,
-        branch: committee_update.sync_committee_branch,
-        finalized_header: committee_update.finalized_header,
-    };
     let env = ExecutorEnv::builder()
-        .write(&committee_update_inputs)
+        .write(&committee_update)
         .unwrap()
         .build()
         .unwrap();

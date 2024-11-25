@@ -22,4 +22,4 @@ pub struct SyncStepArgs {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SyncStepCircuitInput {}
+pub struct SyncStepCircuitOutput {}

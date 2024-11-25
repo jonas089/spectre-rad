@@ -1,5 +1,5 @@
 use committee_iso::{
-    types::{CommitteeCircuitInput, CommitteeCircuitOutput, PublicKeyHashes, Root},
+    types::{PublicKeyHashes, Root},
     utils::{
         decode_pubkeys_x, hash_keys, merkleize_keys, precompile_sha2_commitment, uint64_to_le_256,
         verify_merkle_proof,

@@ -18,13 +18,6 @@ pub struct CommitteeUpdateArgs {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CommitteeCircuitInput {
-    pub pubkeys: PublicKeys,
-    pub branch: Branch,
-    pub finalized_header: BeaconBlockHeader,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CommitteeCircuitOutput {
     pub committee_root: Root,
     pub commitment_pkeys: Vec<u8>,
