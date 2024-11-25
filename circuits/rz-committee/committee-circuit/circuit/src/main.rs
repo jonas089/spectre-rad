@@ -14,7 +14,6 @@ fn main() {
     let finalized_state_root: Root = args.state_root;
     let (keys, signs) = decode_pubkeys_x(args.pubkeys);
     let commitment = precompile_sha2_commitment(keys, signs);
-    let commitment = [0; 32];
 
     verify_merkle_proof(args.branch, committee_root_ssz, &finalized_state_root, 110);
     env::commit(&CommitteeCircuitOutput::new(
