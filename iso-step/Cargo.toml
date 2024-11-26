@@ -12,3 +12,6 @@ ethereum-consensus-types = { git = "https://github.com/ChainSafe/ethereum-consen
 bls12_381 = "0.8.0"
 itertools = "0.13.0"
 committee-iso = { path = "../iso-committee" }
+sha2 = { git = "https://github.com/jonas089/risc0-precompiles" }
+ark-ec = "0.5.0"
+blst = "0.3.13"
