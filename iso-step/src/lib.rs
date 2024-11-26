@@ -69,7 +69,7 @@ mod tests {
     };
 
     #[test]
-    fn test_aggregate_pubkey_commitment() {
+    fn test_aggregate_pubkey_commitment_and_verify_signature() {
         const DST: &[u8] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_";
         let args = load_circuit_args_env();
         let aggregated_pubkey = aggregate_pubkey(args.clone());
