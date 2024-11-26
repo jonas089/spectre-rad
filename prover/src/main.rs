@@ -22,6 +22,7 @@ mod test_risc0 {
     use risc0_zkvm::{default_prover, ExecutorEnv};
     use step_circuit::{RZ_STEP_ELF, RZ_STEP_ID};
     use step_iso::{types::SyncStepArgs, utils::load_circuit_args_env as load_step_args_env};
+
     #[test]
     fn test_committee_circuit_risc0() {
         use std::time::Instant;

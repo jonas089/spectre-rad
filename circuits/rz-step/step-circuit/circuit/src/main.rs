@@ -1,9 +1,6 @@
 use committee_iso::{
     types::{PublicKeyHashes, Root},
-    utils::{
-        decode_pubkeys_x, hash_keys, merkleize_keys, precompile_sha2_commitment, uint64_to_le_256,
-        verify_merkle_proof,
-    },
+    utils::{decode_pubkeys_x, hash_keys, merkleize_keys, uint64_to_le_256, verify_merkle_proof},
 };
 use risc0_zkvm::guest::env;
 use step_iso::types::{SyncStepArgs, SyncStepCircuitOutput};
@@ -34,7 +31,7 @@ fn main() {
     );
 
     // currently quite expensive due to non-precompile curve arithmetic
-    let aggreate_key_commitment: Vec<u8> = verify_aggregate_signature(args.clone());
+    let aggregate_key_commitment: Vec<u8> = verify_aggregate_signature(args.clone());
     /*env::commit(&CommitteeCircuitOutput::new(
         finalized_state_root,
         commitment,

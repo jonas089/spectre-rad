@@ -9,12 +9,14 @@ pub mod types;
 pub mod utils;
 
 fn aggregate_pubkey(args: SyncStepArgs) -> G1Affine {
+    // performance overhead
     let pubkey_affines: Vec<G1Affine> = args
         .pubkeys_uncompressed
         .as_slice()
         .iter()
         .map(|bytes| G1Affine::from_uncompressed(&bytes.as_slice().try_into().unwrap()).unwrap())
         .collect();
+
     let mut generator = G1Projective::identity();
     let participation_bits = args.pariticipation_bits;
     for (affine, bits) in itertools::multizip((pubkey_affines, participation_bits)) {
