@@ -7,24 +7,32 @@ use committee_iso::{
 };
 use risc0_zkvm::guest::env;
 use step_iso::aggregate_pubkey;
+use step_iso::types::{SyncStepArgs, SyncStepCircuitOutput};
 
 fn main() {
-    /*let args: CommitteeCircuitInput = env::read();
-    let key_hashs: PublicKeyHashes = hash_keys(args.pubkeys.clone());
-    let committee_root_ssz: Root = merkleize_keys(key_hashs);
-    let finalized_state_root: Root = args.finalized_header.state_root.to_vec();
-    let (keys, signs) = decode_pubkeys_x(args.pubkeys);
-    let commitment = precompile_sha2_commitment(keys, signs);
-    // todo: compute and commit the finalized_header_root!
-    let finalized_header_root: Vec<u8> = merkleize_keys(vec![
-        uint64_to_le_256(args.finalized_header.slot as u64),
+    let args: SyncStepArgs = env::read();
+    verify_merkle_proof(
+        args.execution_payload_branch.to_vec(),
+        args.execution_payload_root,
+        &args.finalized_header.body_root.to_vec(),
+        9,
+    );
+
+    let finalized_header_root = merkleize_keys(vec![
+        uint64_to_le_256(args.finalized_header.slot),
         uint64_to_le_256(args.finalized_header.proposer_index as u64),
         args.finalized_header.parent_root.to_vec(),
-        finalized_state_root.clone(),
+        args.finalized_header.state_root.to_vec(),
         args.finalized_header.body_root.to_vec(),
     ]);
-    verify_merkle_proof(args.branch, committee_root_ssz, &finalized_state_root, 110);
-    env::commit(&CommitteeCircuitOutput::new(
+
+    verify_merkle_proof(
+        args.finality_branch,
+        finalized_header_root,
+        &args.attested_header.state_root.to_vec(),
+        105,
+    );
+    /*env::commit(&CommitteeCircuitOutput::new(
         finalized_state_root,
         commitment,
         finalized_header_root,
