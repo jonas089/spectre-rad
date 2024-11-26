@@ -6,20 +6,23 @@ mod client;
 
 #[tokio::main]
 async fn main() {
+    todo!("Update Client to support all circuits!");
     let cli: Cli = Cli::parse();
     run(cli).await;
 }
 
 #[cfg(test)]
 mod test_risc0 {
+    use crate::aligned::{self, constants::ETH_RPC_URL};
     use committee_circuit::{RZ_COMMITTEE_ELF, RZ_COMMITTEE_ID};
     use committee_iso::{
-        types::{CommitteeCircuitInput, CommitteeUpdateArgs, Root},
-        utils::load_circuit_args_env,
+        types::{CommitteeCircuitOutput, CommitteeUpdateArgs},
+        utils::load_circuit_args_env as load_committee_args_env,
     };
     use risc0_zkvm::{default_prover, ExecutorEnv};
+    use step_circuit::{RZ_STEP_ELF, RZ_STEP_ID};
+    use step_iso::{types::SyncStepArgs, utils::load_circuit_args_env as load_step_args_env};
 
-    use crate::aligned::{self, constants::ETH_RPC_URL};
     #[test]
     fn test_committee_circuit_risc0() {
         use std::time::Instant;
@@ -27,26 +30,40 @@ mod test_risc0 {
             .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
             .init();
         let start_time = Instant::now();
-        let committee_update: CommitteeUpdateArgs = load_circuit_args_env();
-        let committee_update_inputs: CommitteeCircuitInput = CommitteeCircuitInput {
-            pubkeys: committee_update.pubkeys_compressed,
-            branch: committee_update.sync_committee_branch,
-            state_root: committee_update.finalized_header.state_root.to_vec(),
-        };
+        let committee_update: CommitteeUpdateArgs = load_committee_args_env();
         let env = ExecutorEnv::builder()
-            .write(&committee_update_inputs)
+            .write(&committee_update)
             .unwrap()
             .build()
             .unwrap();
 
         let prover = default_prover();
         let prove_info = prover.prove(env, RZ_COMMITTEE_ELF).unwrap();
-        // A receipt in Risc0 is a wrapper struct around the proof itself and the public journal.
-        // Use this for verification with Aligned.
         let receipt = prove_info.receipt;
-        let output: Root = receipt.journal.decode().unwrap();
+        let output: CommitteeCircuitOutput = receipt.journal.decode().unwrap();
         receipt.verify(RZ_COMMITTEE_ID).unwrap();
-        println!("Verified Committee Root: {:?}", &output);
+        println!("Public output: {:?}", &output);
+        let duration = start_time.elapsed();
+        println!("Elapsed time: {:?}", duration);
+    }
+
+    #[test]
+    fn test_step_circuit_risc0() {
+        use std::time::Instant;
+        tracing_subscriber::fmt()
+            .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+            .init();
+        let start_time = Instant::now();
+        let sync_step: SyncStepArgs = load_step_args_env();
+        let env = ExecutorEnv::builder()
+            .write(&sync_step)
+            .unwrap()
+            .build()
+            .unwrap();
+        let prover = default_prover();
+        let prove_info = prover.prove(env, RZ_STEP_ELF).unwrap();
+        let receipt = prove_info.receipt;
+        receipt.verify(RZ_STEP_ID).unwrap();
         let duration = start_time.elapsed();
         println!("Elapsed time: {:?}", duration);
     }
@@ -56,14 +73,9 @@ mod test_risc0 {
         tracing_subscriber::fmt()
             .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
             .init();
-        let committee_update: CommitteeUpdateArgs = load_circuit_args_env();
-        let committee_update_inputs: CommitteeCircuitInput = CommitteeCircuitInput {
-            pubkeys: committee_update.pubkeys_compressed,
-            branch: committee_update.sync_committee_branch,
-            state_root: committee_update.finalized_header.state_root.to_vec(),
-        };
+        let committee_update: CommitteeUpdateArgs = load_committee_args_env();
         let env = ExecutorEnv::builder()
-            .write(&committee_update_inputs)
+            .write(&committee_update)
             .unwrap()
             .build()
             .unwrap();
