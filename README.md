@@ -1,45 +1,8 @@
 # Non-Halo2 implementation of Spectre for use with LLVM-compatible ZKVMs (Risc0, SP1)
 
 > [!NOTE]
-> This repository is a hackathon submission for AlignedLayer that is a proof of concept for integrating their infrastructure into Chainsafe's lightclient operations
-
-> [!WARNING]
-> Work in progress. This branch attempts to reimplement Spectre whilst utilizing Risc0 optimizations for `v1.1.2`
-> AlignedLayer currently is not compatible with Risc0 `1.1.2`
-
-# Context for Judges
-Spectre, a ZK lightclient developed and operated by Chainsafe Systems,
-mainly consists of two ZK circuits:
-
-- CommitteeUpdateCircuit
-- StepCircuit
-
-see [here](https://github.com/ChainSafe/Spectre/tree/main/lightclient-circuits%2Fsrc) the original implementation in [Halo2](https://zcash.github.io/halo2/).
-
-For the hackathon I developed a proof of concept on how to re-implement the Spectre lightclient in Risc0 with end to end tests for proof verification on AlignedLayer.
-
-My implementation focuses on:
-
-- integration of AlignedLayer infrastructure
-- modular design that is easily extendable
-- a Risc0 implementation of Spectre's CommitteeUpdateCircuit
-- real world test data
-
-For the scope of this hackathon I chose to demonstrate how an integration with Aligned is possible for Spectre 
-by implementing one of the two circuits that are necessary to run the full light client. 
-
-Due to my modular design choices it is possible to extend this implementation to support all of Spectre's functionality and 
-the StepCircuit. This is however not what I am submitting for the hackathon and it is important to clarify that this proof of concept
-only has some of Spectre's functionality. The functionality that it has however is fully integrated with AlignedLayer / proofs for the CommitteeUpdateCircuit
-are verifiable on Aligend.
-
-How the circuit works:
-
-1. The 512 public keys and expected root of the merkle tree are loaded from the test data
-2. The merkle tree with the 512 keys as leafs is hashed using `sha256`
-3. It is asserted / constrained that the computed merkle root matches the expected merkle root
-
-The merkle root will be committed to the journal upon successful verification.
+> The original Halo2 implementation of Spectre is located at `Chainsafe`.
+> This implementation of Spectre leverages ZKVMs like Risc0 for increased performance and groth16 support.
 
 # Spectre Use Cases
 Spectre is a trustless light-client for `Ethereum`. With Spectre it is possible to cryptographically verify the integrity of Ethereum `state root`.
@@ -50,27 +13,9 @@ of nodes.
 
 TLDR; Spectre makes blockchain queries secure by proving that the state is valid through cryptography(ZK). 
 
-# Overview of components
-This submission consists of:
-
-- a Risc0 implementation of the CommitteeUpdateCircuit (Chainsafe Spectre)
-- a Client that makes it easy to specify paths to real world committee data, keys & more
-- a Database implementation that will premanently store information of all proofs that have been verified on Aligned.
-- end to end integration tests that can be run in isolation
-
-The circuit logic is located in `committee-iso/src/`
-
-The risc0 guest is located in `circuits/committee-circuit/`
-
-The AlignedLayer integration is located in `prover/src/aligned.rs`
-
-The Client logic is loated in `prover/src/client.rs`
-
-The Database logic is located in `prover/src/aligned/storage.rs`
-
 ## Naming convention for crates
 
-`*-iso`: Raw Rust implementation of a Spectre component in Isolation. Example: `committee-iso` for the `CommitteeUpdateCircuit` logic.
+`iso-*`: Raw Rust implementation of a Spectre component in Isolation. Example: `committee-iso` for the `CommitteeUpdateCircuit` logic.
 
 `circuit/rz-*`: Risc0 circuit implementation of an `iso` component.
 
@@ -85,7 +30,7 @@ Prerequisites:
 
 - Rust installation
 - Risc0 toolchain
-- Risc0 client `1.0.1`
+- Risc0 client `1.1.2`
 
 [Install Risc0](https://dev.risczero.com/api/zkvm/install)
 
@@ -119,6 +64,11 @@ Test data for the circuit can be found in `data/rotation_512.json`.
 It contains a committee update for Beacon with `512` public keys, a merkle branch and the resulting root.
 
 ## Command line Client interactions
+
+> [!WARNING]
+> The Client currently only supports the `CommitteeUpdate` circuit in `Risc0`.
+
+
 `cargo run` output:
 
 ```js

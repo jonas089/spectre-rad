@@ -9,8 +9,8 @@ step-circuit = { path = "../circuits/rz-step/step-circuit" }
 risc0-zkvm = "=1.1.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 serde = "1.0"
-committee-iso = { path = "../committee-iso" }
-step-iso = { path = "../step-iso" }
+committee-iso = { path = "../iso-committee" }
+step-iso = { path = "../iso-step" }
 aligned-sdk = { git = "https://github.com/yetanotherco/aligned_layer", tag = "v0.9.2" }
 hex = "0.4.0"
 rpassword = "7.3.1"

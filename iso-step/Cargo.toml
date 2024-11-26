@@ -11,4 +11,4 @@ ethereum-consensus-types = { git = "https://github.com/ChainSafe/ethereum-consen
 ] }
 bls12_381 = "0.8.0"
 itertools = "0.13.0"
-committee-iso = { path = "../committee-iso" }
+committee-iso = { path = "../iso-committee" }
