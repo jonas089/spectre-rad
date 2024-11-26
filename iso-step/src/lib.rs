@@ -50,9 +50,9 @@ pub fn verify_aggregate_signature(args: SyncStepArgs) -> Commitment {
     let signing_root = digest(&add_left_right(attested_header_root, &domain));
     let signature = bls::Signature::from_bytes(&signature_bytes).unwrap();
     let public_key = bls::PublicKey::deserialize(&aggregate_key.to_compressed()).unwrap();
-    //let res = signature.verify(true, &signing_root, DST, &[], &public_key, true);
+    let res = signature.verify(true, &signing_root, DST, &[], &public_key, true);
     // revert if signature is invalid
-    //assert_eq!(res, BLST_ERROR::BLST_SUCCESS);
+    assert_eq!(res, BLST_ERROR::BLST_SUCCESS);
     // return the aggregate key commitment
     commitment
 }
