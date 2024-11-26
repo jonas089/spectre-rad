@@ -2,7 +2,7 @@ use crate::types::SyncStepArgs;
 use std::{env, fs};
 
 pub fn load_circuit_args(path: &str) -> SyncStepArgs {
-    serde_json::from_slice(&fs::read(&path).unwrap()).unwrap()
+    serde_json::from_slice(&fs::read(path).unwrap()).unwrap()
 }
 
 pub fn load_circuit_args_env() -> SyncStepArgs {

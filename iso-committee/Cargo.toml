@@ -16,3 +16,4 @@ num-bigint = "0.4.6"
 hex = "0.4.3"
 ark-bn254 = "0.4.0"
 ark-ff = "0.4.0"
+ssz_rs = { git = "https://github.com/ralexstokes/ssz-rs", rev = "5f1ec833718efa07bbbff427ab28a1eeaa706164" }

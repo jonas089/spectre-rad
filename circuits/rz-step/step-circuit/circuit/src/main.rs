@@ -1,5 +1,5 @@
 use committee_iso::{
-    types::{PublicKeyHashes, Root},
+    types::PublicKeyHashes,
     utils::{decode_pubkeys_x, hash_keys, merkleize_keys, uint64_to_le_256, verify_merkle_proof},
 };
 use risc0_zkvm::guest::env;

@@ -6,12 +6,9 @@ edition = "2021"
 [dependencies]
 serde_json = "1"
 serde = { version = "1", features = ["derive"] }
-ethereum-consensus-types = { git = "https://github.com/ChainSafe/ethereum-consensus-types", branch = "capella", features = [
-    "serde",
-] }
 bls12_381 = "0.8.0"
 itertools = "0.13.0"
 committee-iso = { path = "../iso-committee" }
 sha2 = { git = "https://github.com/jonas089/risc0-precompiles" }
-ark-ec = "0.5.0"
 blst = "0.3.13"
+ssz_rs = { git = "https://github.com/ralexstokes/ssz-rs", rev = "5f1ec833718efa07bbbff427ab28a1eeaa706164" }
