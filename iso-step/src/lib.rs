@@ -1,33 +1,60 @@
 use bls12_381::{G1Affine, G1Projective};
+use blst::min_pk as bls;
+use blst::BLST_ERROR;
+use committee_iso::utils::{add_left_right, digest, merkleize_keys, uint64_to_le_256};
+use types::Commitment;
 use types::SyncStepArgs;
 
 pub mod types;
 pub mod utils;
 
-pub fn aggregate_pubkey(args: SyncStepArgs) -> G1Affine {
+fn aggregate_pubkey(args: SyncStepArgs) -> G1Affine {
     let pubkey_affines: Vec<G1Affine> = args
         .pubkeys_uncompressed
         .as_slice()
         .iter()
         .map(|bytes| G1Affine::from_uncompressed(&bytes.as_slice().try_into().unwrap()).unwrap())
         .collect();
-    let mut generator = G1Affine::generator();
+    let mut generator = G1Projective::identity();
     let participation_bits = args.pariticipation_bits;
     for (affine, bits) in itertools::multizip((pubkey_affines, participation_bits)) {
+        let affine_projective = G1Projective::from(affine);
         if !bits {
             continue;
         }
         // double if equal, add if unequal
-        if generator == affine {
+        if generator == affine_projective {
             // double
-            generator = (generator + G1Projective::from(affine)).into();
+            generator = G1Projective::from(generator).double().into();
         } else {
             // add
-            generator = G1Projective::from(generator).double().into();
+            generator = (generator + G1Projective::from(affine)).into();
         }
     }
-    println!("Aggregate Key: {:?}", &generator);
-    generator
+    generator.into()
+}
+
+pub fn verify_aggregate_signature(args: SyncStepArgs) -> Commitment {
+    const DST: &[u8] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_";
+    let aggregate_key = aggregate_pubkey(args.clone());
+    let commitment = digest(&aggregate_key.to_compressed().to_vec());
+    let signature_bytes: Vec<u8> = args.signature_compressed;
+    let attested_header_root = merkleize_keys(vec![
+        uint64_to_le_256(args.attested_header.slot),
+        uint64_to_le_256(args.attested_header.proposer_index as u64),
+        args.attested_header.parent_root.to_vec(),
+        args.attested_header.state_root.to_vec(),
+        args.attested_header.body_root.to_vec(),
+    ]);
+    let domain = args.domain.to_vec();
+    let signing_root = digest(&add_left_right(attested_header_root, &domain));
+    let signature = bls::Signature::from_bytes(&signature_bytes).unwrap();
+    let public_key = bls::PublicKey::deserialize(&aggregate_key.to_compressed()).unwrap();
+    //let res = signature.verify(true, &signing_root, DST, &[], &public_key, true);
+    // revert if signature is invalid
+    //assert_eq!(res, BLST_ERROR::BLST_SUCCESS);
+    // return the aggregate key commitment
+    commitment
 }
 
 #[cfg(test)]

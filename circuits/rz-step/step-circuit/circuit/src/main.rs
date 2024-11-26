@@ -6,14 +6,14 @@ use committee_iso::{
     },
 };
 use risc0_zkvm::guest::env;
-use step_iso::aggregate_pubkey;
 use step_iso::types::{SyncStepArgs, SyncStepCircuitOutput};
+use step_iso::verify_aggregate_signature;
 
 fn main() {
     let args: SyncStepArgs = env::read();
     verify_merkle_proof(
         args.execution_payload_branch.to_vec(),
-        args.execution_payload_root,
+        args.execution_payload_root.clone(),
         &args.finalized_header.body_root.to_vec(),
         9,
     );
@@ -27,11 +27,14 @@ fn main() {
     ]);
 
     verify_merkle_proof(
-        args.finality_branch,
+        args.finality_branch.clone(),
         finalized_header_root,
         &args.attested_header.state_root.to_vec(),
         105,
     );
+
+    // currently quite expensive due to non-precompile curve arithmetic
+    let aggreate_key_commitment: Vec<u8> = verify_aggregate_signature(args.clone());
     /*env::commit(&CommitteeCircuitOutput::new(
         finalized_state_root,
         commitment,

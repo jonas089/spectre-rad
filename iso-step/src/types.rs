@@ -6,6 +6,7 @@ pub type SignatureCompressed = Vec<u8>;
 pub type Branch = Vec<Vec<u8>>;
 pub type Root = Vec<u8>;
 pub type Leaf = Vec<u8>;
+pub type Commitment = Vec<u8>;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SyncStepArgs {
