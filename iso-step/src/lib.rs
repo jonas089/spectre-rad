@@ -1,4 +1,7 @@
+#[cfg(not(feature = "sp1"))]
 use bls12_381::{G1Affine, G1Projective};
+#[cfg(feature = "sp1")]
+use bls12_381_sp1::{G1Affine, G1Projective};
 
 use committee_iso::utils::{add_left_right, digest, merkleize_keys, uint64_to_le_256};
 use types::Commitment;

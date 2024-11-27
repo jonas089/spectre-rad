@@ -1,12 +1,16 @@
-use itertools::Itertools;
-use num_bigint::BigUint;
-use sha2::{Digest, Sha256};
-use std::{env, fs};
-
 use crate::{
     types::{Branch, Leaf, PublicKeyHashes, PublicKeys, ZERO_HASHES},
     CommitteeUpdateArgs,
 };
+use itertools::Itertools;
+use num_bigint::BigUint;
+#[cfg(feature = "default")]
+use sha2::{Digest, Sha256};
+#[cfg(feature = "risc0")]
+use sha2_risc0::{Digest, Sha256};
+#[cfg(feature = "sp1")]
+use sha2_sp1::{Digest, Sha256};
+use std::{env, fs};
 
 pub fn load_circuit_args(path: &str) -> CommitteeUpdateArgs {
     serde_json::from_slice(&fs::read(&path).unwrap()).unwrap()
