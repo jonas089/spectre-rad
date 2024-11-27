@@ -4,7 +4,7 @@ use crate::{
 };
 use itertools::Itertools;
 use num_bigint::BigUint;
-#[cfg(feature = "default")]
+#[cfg(all(not(feature = "risc0"), not(feature = "sp1")))]
 use sha2::{Digest, Sha256};
 #[cfg(feature = "risc0")]
 use sha2_risc0::{Digest, Sha256};
