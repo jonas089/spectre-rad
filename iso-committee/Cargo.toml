@@ -6,10 +6,6 @@ edition = "2021"
 [dependencies]
 serde_json = "1"
 serde = { version = "1", features = ["derive"] }
-ethereum-consensus-types = { git = "https://github.com/ChainSafe/ethereum-consensus-types", branch = "capella", features = [
-    "serde",
-] }
-sha2 = { git = "https://github.com/jonas089/risc0-precompiles" }
 lazy_static = "1.5.0"
 itertools = "0.13.0"
 num-bigint = "0.4.6"
@@ -17,3 +13,4 @@ hex = "0.4.3"
 ark-bn254 = "0.4.0"
 ark-ff = "0.4.0"
 ssz_rs = { git = "https://github.com/ralexstokes/ssz-rs", rev = "5f1ec833718efa07bbbff427ab28a1eeaa706164" }
+sha2 = "0.10.8"
