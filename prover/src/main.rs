@@ -20,6 +20,7 @@ mod test_risc0 {
         utils::load_circuit_args_env as load_committee_args_env,
     };
     use risc0_zkvm::{default_prover, ExecutorEnv};
+    use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
     use step_circuit::{RZ_STEP_ELF, RZ_STEP_ID};
     use step_iso::{types::SyncStepArgs, utils::load_circuit_args_env as load_step_args_env};
 
@@ -64,6 +65,34 @@ mod test_risc0 {
         let prove_info = prover.prove(env, RZ_STEP_ELF).unwrap();
         let receipt = prove_info.receipt;
         receipt.verify(RZ_STEP_ID).unwrap();
+        let duration = start_time.elapsed();
+        println!("Elapsed time: {:?}", duration);
+    }
+
+    #[test]
+    fn test_step_circuit_sp1() {
+        // todo: currently the bls signature is not verified in SP1
+        // the reason for this is that blst is not supported so we'll have to
+        // use point arithmetic, but the rest of the circuit is already too expensive
+        // ECC optimizations are required and the precompile alone is seemingly not enough!
+        use std::time::Instant;
+        sp1_sdk::utils::setup_logger();
+        let start_time = Instant::now();
+        const STEP_ELF: &[u8] = include_elf!("sp1-step");
+        let sync_args: SyncStepArgs = load_step_args_env();
+        let client = ProverClient::new();
+        let mut stdin = SP1Stdin::new();
+        stdin.write_vec(serde_json::to_vec(&sync_args).expect("Failed to serialize"));
+        let (pk, vk) = client.setup(STEP_ELF);
+        // Generate the proof
+        let proof = client
+            .prove(&pk, stdin)
+            .run()
+            .expect("failed to generate proof");
+        println!("Successfully generated proof!");
+        // Verify the proof.
+        client.verify(&proof, &vk).expect("failed to verify proof");
+        println!("Successfully verified proof!");
         let duration = start_time.elapsed();
         println!("Elapsed time: {:?}", duration);
     }

@@ -1,9 +1,10 @@
 use bls12_381::{G1Affine, G1Projective};
-use blst::min_pk as bls;
-use blst::BLST_ERROR;
+
 use committee_iso::utils::{add_left_right, digest, merkleize_keys, uint64_to_le_256};
 use types::Commitment;
 use types::SyncStepArgs;
+#[cfg(feature = "blst")]
+use {blst::min_pk as bls, blst::BLST_ERROR};
 
 pub mod types;
 pub mod utils;
@@ -50,11 +51,15 @@ pub fn verify_aggregate_signature(args: SyncStepArgs) -> Commitment {
     ]);
     let domain = args.domain.to_vec();
     let signing_root = digest(&add_left_right(attested_header_root, &domain));
-    let signature = bls::Signature::from_bytes(&signature_bytes).unwrap();
-    let public_key = bls::PublicKey::deserialize(&aggregate_key.to_compressed()).unwrap();
-    let res = signature.verify(true, &signing_root, DST, &[], &public_key, true);
-    // revert if signature is invalid
-    assert_eq!(res, BLST_ERROR::BLST_SUCCESS);
+
+    #[cfg(feature = "blst")]
+    {
+        let signature = bls::Signature::from_bytes(&signature_bytes).unwrap();
+        let public_key = bls::PublicKey::deserialize(&aggregate_key.to_compressed()).unwrap();
+        let res = signature.verify(true, &signing_root, DST, &[], &public_key, true);
+        // revert if signature is invalid
+        assert_eq!(res, BLST_ERROR::BLST_SUCCESS);
+    }
     // return the aggregate key commitment
     commitment
 }
@@ -62,11 +67,11 @@ pub fn verify_aggregate_signature(args: SyncStepArgs) -> Commitment {
 #[cfg(test)]
 mod tests {
     use crate::{aggregate_pubkey, utils::load_circuit_args_env};
-    use blst::min_pk as bls;
-    use blst::BLST_ERROR;
     use committee_iso::utils::{
         add_left_right, digest, merkleize_keys, uint64_to_le_256, verify_merkle_proof,
     };
+    #[cfg(feature = "blst")]
+    use {blst::min_pk as bls, blst::BLST_ERROR};
 
     #[test]
     fn test_aggregate_pubkey_commitment_and_verify_signature() {
@@ -85,10 +90,14 @@ mod tests {
         ]);
         let domain = args.domain.to_vec();
         let signing_root = digest(&add_left_right(attested_header_root, &domain));
-        let signature = bls::Signature::from_bytes(&signature_bytes).unwrap();
-        let public_key = bls::PublicKey::deserialize(&aggregated_pubkey.to_compressed()).unwrap();
-        let res = signature.verify(true, &signing_root, DST, &[], &public_key, true);
-        assert_eq!(res, BLST_ERROR::BLST_SUCCESS);
+        #[cfg(feature = "blst")]
+        {
+            let signature = bls::Signature::from_bytes(&signature_bytes).unwrap();
+            let public_key =
+                bls::PublicKey::deserialize(&aggregated_pubkey.to_compressed()).unwrap();
+            let res = signature.verify(true, &signing_root, DST, &[], &public_key, true);
+            assert_eq!(res, BLST_ERROR::BLST_SUCCESS);
+        }
     }
 
     #[test]

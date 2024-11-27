@@ -6,9 +6,19 @@ edition = "2021"
 [dependencies]
 serde_json = "1"
 serde = { version = "1", features = ["derive"] }
-bls12_381 = "0.8.0"
 itertools = "0.13.0"
 committee-iso = { path = "../iso-committee" }
-sha2 = { git = "https://github.com/jonas089/risc0-precompiles" }
-blst = "0.3.13"
 ssz_rs = { git = "https://github.com/ralexstokes/ssz-rs", rev = "5f1ec833718efa07bbbff427ab28a1eeaa706164" }
+
+sha2 = { version = "0.10.8", optional = true }
+blst = { version = "0.3.13", optional = true }
+sha2_risc0 = { package = "sha2", git = "https://github.com/jonas089/risc0-precompiles", optional = true }
+sha2_sp1 = { package = "sha2", git = "https://github.com/sp1-patches/RustCrypto-hashes", optional = true }
+
+bls12_381 = { version = "0.8.0", optional = true }
+bls12_381_sp1 = { package = "bls12_381", git = "https://github.com/succinctlabs/bls12_381/", optional = true }
+[features]
+default = ["sha2", "bls12_381"]
+risc0 = ["sha2_risc0"]
+sp1 = ["sha2_sp1", "bls12_381_sp1"]
+blst = ["dep:blst"]
