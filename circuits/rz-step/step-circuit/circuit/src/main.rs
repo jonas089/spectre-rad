@@ -30,11 +30,5 @@ fn main() {
         105,
     );
 
-    // currently quite expensive due to non-precompile curve arithmetic
     let aggregate_key_commitment: Vec<u8> = verify_aggregate_signature(args.clone());
-    /*env::commit(&CommitteeCircuitOutput::new(
-        finalized_state_root,
-        commitment,
-        finalized_header_root,
-    ));*/
 }
