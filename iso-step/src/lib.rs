@@ -37,6 +37,7 @@ fn aggregate_pubkey(args: SyncStepArgs) -> G1Affine {
             generator = (generator + G1Projective::from(affine)).into();
         }
     }
+
     generator.into()
 }
 
