@@ -18,7 +18,9 @@ fn aggregate_pubkey(args: SyncStepArgs) -> G1Affine {
         .pubkeys_uncompressed
         .as_slice()
         .iter()
-        .map(|bytes| G1Affine::from_uncompressed(&bytes.as_slice().try_into().unwrap()).unwrap())
+        .map(|bytes| {
+            G1Affine::from_uncompressed_unchecked(&bytes.as_slice().try_into().unwrap()).unwrap()
+        })
         .collect();
 
     let mut generator = G1Projective::identity();
