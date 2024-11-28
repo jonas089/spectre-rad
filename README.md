@@ -75,6 +75,16 @@ Example output:
 Verified Committee Root: [25, 122, 75, 125, 192, 12, 117, 238, 92, 109, 3, 192, 224, 63, 84, 28, 196, 131, 90, 32, 180, 39, 160, 7, 188, 177, 162, 100, 181, 205, 38, 142]
 ```
 
+## Metal Acceleration
+
+Use the `-F metal` flag to enable `metal` acceleration on MacOS, for example:
+
+```
+cargo test test_step_circuit_risc0 --release -F metal
+```
+
+to run the accelerated `step circuit`.
+
 ## Test Data
 
 Test data for the circuit can be found in `data/rotation_512.json`. 
