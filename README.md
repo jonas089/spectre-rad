@@ -1,4 +1,4 @@
-# Non-Halo2 implementation of Spectre for use with LLVM-compatible ZKVMs (Risc0, SP1)
+# Fast, Modular & Secure Risc0 Ethereum Light Client
 
 ## Summary of current state - bottlenecks
 
