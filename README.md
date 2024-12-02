@@ -97,7 +97,7 @@ In ZKVMs we refer to public outputs as information committed to the `journal`. I
 > then the block is `trusted`.
 
 
-## Generate a proof for the Committee Circuit in Risc0
+## Generate (&Verify) a proof for the Committee Circuit in Risc0
 
 Prerequisites:
 
@@ -109,12 +109,16 @@ Prerequisites:
 
 `rzup install cargo-risczero <version>`
 
+Run this command:
+
 ```bash
-cargo test test_risc0 -- --nocapture
+cargo test test_committee_circuit_risc0 -- --nocapture
 ```
 
-Make sure to specify the path to `rotation_512.json` as an environment variable when running any of the integration tests.
-This is not required when using the client.
+- `-F metal` for metal acceleration (M2, M3 Macbooks)
+- `-F cuda` for cuda acceleration (NVIDIA GPUs)
+
+Make sure to specify the path to `rotation_512.json` as an environment variable when running any of the integration tests that are related to the committee circuit.
 
 Example:
 
@@ -130,6 +134,22 @@ Example output:
      Running `target/debug/host`
 Verified Committee Root: [25, 122, 75, 125, 192, 12, 117, 238, 92, 109, 3, 192, 224, 63, 84, 28, 196, 131, 90, 32, 180, 39, 160, 7, 188, 177, 162, 100, 181, 205, 38, 142]
 ```
+
+## Generate (&Verify) a proof for the Step Circuit in Risc0
+
+Run this command:
+
+```bash
+cargo test test_step_circuit_risc0 -- --nocapture
+```
+
+Make sure to specify the path to `sync_step_512.json` as an environment variable when running any of the integration tests that are related to the step circuit.
+
+Example:
+
+`see above`
+
+
 
 ## Metal Acceleration
 
