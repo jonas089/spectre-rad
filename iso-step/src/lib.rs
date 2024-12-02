@@ -1,22 +1,19 @@
+//#[cfg(all(not(feature = "sp1"), not(feature = "risc0")))]
 use bls12_381::{
     hash_to_curve::{self, ExpandMsgXmd, HashToCurve, Message},
     pairing, G1Affine, G1Projective, G2Affine, G2Projective,
 };
+/*#[cfg(all(feature = "sp1"))]
+use bls12_381_sp1::{
+    hash_to_curve,
+    hash_to_curve::{ExpandMessage, ExpandMsgXmd, HashToCurve, InitExpandMessage},
+    pairing, G1Affine, G1Projective, G2Affine, G2Projective,
+};*/
 use committee_iso::utils::{
     add_left_right, compute_digest, merkleize_keys, uint64_to_le_256, Sha256,
 };
 use types::Commitment;
 use types::SyncStepArgs;
-/*#[cfg(all(feature = "sp1", not(feature = "default")))]
-use {
-    bls12_381_sp1::{
-        hash_to_curve,
-        hash_to_curve::{ExpandMessage, ExpandMsgXmd, InitExpandMessage},
-        G1Affine, G1Projective,
-    },
-};*/
-#[cfg(feature = "blst")]
-use {blst::min_pk as bls, blst::BLST_ERROR};
 
 pub mod types;
 pub mod utils;
@@ -71,11 +68,12 @@ pub fn verify_aggregate_signature(args: SyncStepArgs) -> Commitment {
             DST,
         );
     let signature: G2Affine =
-        G2Affine::from_compressed(&args.signature_compressed.try_into().unwrap()).unwrap();
+        G2Affine::from_compressed_unchecked(&args.signature_compressed.try_into().unwrap())
+            .unwrap();
     // e(hash_msg,pub_key)=e(signature,g1)
     assert_eq!(
         pairing(&aggregate_key, &message_g2.into()),
-        pairing(&G1Affine::generator(), &signature,)
+        pairing(&G1Affine::generator(), &signature)
     );
     vec![]
 }
@@ -84,8 +82,6 @@ pub fn verify_aggregate_signature(args: SyncStepArgs) -> Commitment {
 mod tests {
     use crate::{utils::load_circuit_args_env, verify_aggregate_signature};
     use committee_iso::utils::{merkleize_keys, uint64_to_le_256, verify_merkle_proof};
-    #[cfg(feature = "blst")]
-    use {blst::min_pk as bls, blst::BLST_ERROR};
 
     #[test]
     fn test_aggregate_pubkey_commitment_and_verify_signature() {

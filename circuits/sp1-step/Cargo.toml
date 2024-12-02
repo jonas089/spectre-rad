@@ -10,6 +10,9 @@ serde = { version = "1", features = ["derive"] }
 bls12_381 = { git = "https://github.com/sp1-patches/bls12_381" }
 itertools = "0.13.0"
 committee-iso = { path = "../../iso-committee", features = [
+    "sp1",
 ], default-features = false }
-step-iso = { path = "../../iso-step", default-features = false }
+step-iso = { path = "../../iso-step", features = [
+    "sp1",
+], default-features = false }
 bincode = "1.3.3"
