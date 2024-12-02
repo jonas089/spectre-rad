@@ -70,7 +70,7 @@ In ZKVMs we refer to public outputs as information committed to the `journal`. I
 
 | Output | Type |
 | ------------- | ------------- |
-| Finalized State Root  | [u8;32] |
+| Finalized Block (Header) Root  | [u8;32] |
 | Key Commitment  | [u8;32] |
 
 ### 2. StepCircuit
@@ -87,7 +87,7 @@ In ZKVMs we refer to public outputs as information committed to the `journal`. I
 
 | Output | Type |
 | ------------- | ------------- |
-| Finalized State Root | [u8;32] |
+| Finalized Block (Header) Root | [u8;32] |
 | Key Commitment  | [u8;32] |
 
 > [!NOTE]

@@ -37,14 +37,14 @@ pub struct CommitteeUpdateArgs {
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct CommitteeCircuitOutput {
-    pub state_root: Vec<u8>,
+    pub block_root: Vec<u8>,
     pub commitment_pkeys: Vec<u8>,
 }
 
 impl CommitteeCircuitOutput {
-    pub fn new(state_root: Vec<u8>, commitment_pkeys: [u8; 32]) -> Self {
+    pub fn new(block_root: Vec<u8>, commitment_pkeys: [u8; 32]) -> Self {
         Self {
-            state_root,
+            block_root,
             commitment_pkeys: commitment_pkeys.to_vec(),
         }
     }

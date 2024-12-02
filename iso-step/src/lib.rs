@@ -102,6 +102,7 @@ mod tests {
             9,
         );
 
+        // equivalent to a block hash
         let finalized_header_root = merkleize_keys(vec![
             uint64_to_le_256(args.finalized_header.slot),
             uint64_to_le_256(args.finalized_header.proposer_index as u64),
