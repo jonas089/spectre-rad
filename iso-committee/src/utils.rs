@@ -26,9 +26,9 @@ pub fn verify_merkle_proof(branch: Branch, leaf: Leaf, root: &Vec<u8>, mut ginde
     let mut computed_hash = leaf;
     for node in branch {
         if gindex % 2 == 0 {
-            computed_hash = digest(&add_left_right(computed_hash, &node));
+            computed_hash = compute_digest(&add_left_right(computed_hash, &node));
         } else {
-            computed_hash = digest(&add_left_right(node, &computed_hash));
+            computed_hash = compute_digest(&add_left_right(node, &computed_hash));
         }
         gindex /= 2;
     }
@@ -53,7 +53,7 @@ pub fn merkleize_keys(mut keys: PublicKeyHashes) -> Vec<u8> {
         keys = padded_keys
             .into_iter()
             .tuples()
-            .map(|(left, right)| digest(&add_left_right(left, &right)))
+            .map(|(left, right)| compute_digest(&add_left_right(left, &right)))
             .collect::<Vec<Vec<u8>>>();
     }
     keys.pop().unwrap()
@@ -70,7 +70,7 @@ pub fn hash_keys(keys: PublicKeys) -> PublicKeyHashes {
     for key in keys {
         let mut padded_key = key.clone();
         padded_key.resize(64, 0);
-        key_hashes.push(digest(&padded_key));
+        key_hashes.push(compute_digest(&padded_key));
     }
     key_hashes
 }
@@ -105,7 +105,7 @@ pub fn decode_pubkeys_x(
     (x_coordinates, y_signs_packed)
 }
 
-pub fn digest(input: &[u8]) -> Vec<u8> {
+pub fn compute_digest(input: &[u8]) -> Vec<u8> {
     let mut hasher = Sha256::new();
     hasher.update(input);
     hasher.finalize().to_vec()
@@ -117,7 +117,7 @@ pub fn commit_to_keys(keys: Vec<BigUint>, signs: Vec<u8>) -> [u8; 32] {
         input.extend_from_slice(&key.to_bytes_be());
     }
     input.extend_from_slice(&signs);
-    digest(&input).try_into().unwrap()
+    compute_digest(&input).try_into().unwrap()
 }
 
 pub fn uint64_to_le_256(value: u64) -> Vec<u8> {

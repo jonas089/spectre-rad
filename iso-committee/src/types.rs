@@ -1,4 +1,4 @@
-use crate::utils::digest;
+use crate::utils::compute_digest;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 
@@ -59,7 +59,7 @@ impl CommitteeCircuitOutput {
 lazy_static! {
     pub static ref ZERO_HASHES: [[u8; 32]; 2] = {
         std::iter::successors(Some([0; 32]), |&prev| {
-            Some(digest(&[prev, prev].concat()).try_into().unwrap())
+            Some(compute_digest(&[prev, prev].concat()).try_into().unwrap())
         })
         .take(2)
         .collect_vec()
