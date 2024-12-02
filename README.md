@@ -47,6 +47,56 @@ TLDR; Spectre makes blockchain queries secure by proving that the state is valid
 
 `prover`: A special crate that generates proofs using either of the `circuits`. This crate will be extended to support verification on `AlignedLayer`.
 
+## Benchmarks
+
+## Circuit Inputs and Outputs
+In ZKVMs we refer to public outputs as information committed to the `journal`. Inputs can either be committed or kept a secret.
+
+### The Beacon Header
+|  Input  | Type |
+| ------------- | ------------- |
+| slot  | int  |
+| proposer_index  | int  |
+| parent_root | Vec<u8> |
+| state_root | Vec<u8> |
+| body_root | Vec<u8> |
+
+### 1. CommitteUpdateCircuit
+|  Input  | Type |
+| ------------- | ------------- |
+| Public Keys Compressed  | [u8;49] |
+| Finalized Header  | BeaconBlockHeader  |
+| Sync Committee Branch | Vec<Vec<u8>> |
+
+| Output | Type |
+| ------------- | ------------- |
+| Finalized State Root  | [u8;32] |
+| Key Commitment  | [u8;32] |
+
+### 2. StepCircuit
+| Input | Type |
+| ------------- | ------------- |
+| Aggregate Signature  | [u8;32] |
+| Public Keys Uncompressed  | Vec<[u8;96]> |
+| Participation bits  | Vec<bool> |
+| Attested Header  | BeaconBlockHeader |
+| Finalized Header | BeaconBlockHeader |
+| Execution Payload Root | Vec<u8> |
+| Execution Payload Branch | Vec<Vec<u8>> |
+| domain | [u8;32] |
+
+| Output | Type |
+| ------------- | ------------- |
+| Finalized State Root | [u8;32] |
+| Key Commitment  | [u8;32] |
+
+> [!NOTE]
+> If the merkle proofs are `valid`,
+> and the data was `signed` by the committee,
+> and the root is `unique`,
+> then the block is `trusted`.
+
+
 ## Generate a proof for the Committee Circuit in Risc0
 
 Prerequisites:
@@ -96,11 +146,15 @@ to run the accelerated `step circuit`.
 Test data for the circuit can be found in `data/rotation_512.json`. 
 It contains a committee update for Beacon with `512` public keys, a merkle branch and the resulting root.
 
-## Command line Client interactions
+# Integrations - third party proof verification infrastructure
 
+Integrations can be found in `prover/integrations/*`. The first integration `POC` for the Aligned Builders Hackathon can be found in `prover/integrations/*`.
+Note that this will only work for the `Risc0` version(s) supported by Aligned. I will keep an eye on them and update the integration once support for `1.1.x` has arrived.
+In the meantime performance optimizations in `1.1.x` are a priority.
+
+## 1. Aligned Layer (awaiting support for Risc0 1.1.x, last checked 1.0.1)
 > [!WARNING]
 > The Client currently only supports the `CommitteeUpdate` circuit in `Risc0`.
-
 
 `cargo run` output:
 

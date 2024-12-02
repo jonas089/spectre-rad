@@ -36,4 +36,7 @@ pub struct SyncStepArgs {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct SyncStepCircuitOutput {}
+pub struct SyncStepCircuitOutput {
+    pub finalized_state_root: [u8; 32],
+    pub aggregate_key_commitment: [u8; 32],
+}

@@ -31,6 +31,5 @@ fn main() {
     env::commit(&CommitteeCircuitOutput::new(
         finalized_state_root,
         commitment,
-        finalized_header_root,
     ));
 }

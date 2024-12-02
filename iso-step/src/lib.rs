@@ -51,7 +51,6 @@ fn aggregate_pubkey(args: SyncStepArgs) -> G1Affine {
 
 pub fn verify_aggregate_signature(args: SyncStepArgs) -> Commitment {
     const DST: &[u8] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_";
-    // DATA: public key
     let aggregate_key: G1Affine = aggregate_pubkey(args.clone());
     let attested_header_root = merkleize_keys(vec![
         uint64_to_le_256(args.attested_header.slot),
@@ -70,12 +69,15 @@ pub fn verify_aggregate_signature(args: SyncStepArgs) -> Commitment {
     let signature: G2Affine =
         G2Affine::from_compressed_unchecked(&args.signature_compressed.try_into().unwrap())
             .unwrap();
+
     // e(hash_msg,pub_key)=e(signature,g1)
     assert_eq!(
         pairing(&aggregate_key, &message_g2.into()),
         pairing(&G1Affine::generator(), &signature)
     );
-    vec![]
+
+    // return commitment to aggregate pubkey
+    compute_digest(&aggregate_key.to_compressed().to_vec())
 }
 
 #[cfg(test)]

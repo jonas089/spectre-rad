@@ -5,6 +5,7 @@ use step_iso::{types::SyncStepArgs, verify_aggregate_signature};
 sp1_zkvm::entrypoint!(main);
 
 pub fn main() {
+    todo!("SP1 is not yet fully supported, please wait for this warning to be removed!");
     let args: SyncStepArgs = serde_json::from_slice(&sp1_zkvm::io::read_vec()).unwrap();
     verify_merkle_proof(
         args.execution_payload_branch.to_vec(),

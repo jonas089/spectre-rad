@@ -31,4 +31,9 @@ fn main() {
     );
 
     let aggregate_key_commitment: Vec<u8> = verify_aggregate_signature(args.clone());
+    let output = SyncStepCircuitOutput {
+        finalized_state_root: args.finalized_header.state_root,
+        aggregate_key_commitment,
+    };
+    env::commit(&output);
 }
