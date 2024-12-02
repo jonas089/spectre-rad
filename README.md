@@ -2,12 +2,8 @@
 
 ## Summary of current state - bottlenecks
 
-The step circuit written in `Risc0` is fast and efficient. Submitting proofs to `Aligned Layer` is possible.
-Both the `Risc0` and `SP1` step circuits are highly inefficient and struggle with the `ECC` point arithmetic.
-The precompile for `SP1` doesn't seem to resolve this issue with respect to parsing uncompressed points as `G1Affine`.
-
 > [!NOTE]
-> I was able to solve this by using `from_uncompressed_unchecked` instead of `from_uncompressed`. 📈
+> I was able to solve a serious performance issue by using `from_uncompressed_unchecked` instead of `from_uncompressed`. 📈
 > This is still secure since the pubkeys are public inputs. ⛓
 > If you are a developer note that in cases where the pubkeys are private inputs this would be problematic! ⛓️‍💥
 
