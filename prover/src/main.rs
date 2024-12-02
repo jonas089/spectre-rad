@@ -1,8 +1,8 @@
 use clap::Parser;
 use client::{run, Cli};
 
-pub mod aligned;
 mod client;
+pub mod integrations;
 
 #[tokio::main]
 async fn main() {
@@ -13,7 +13,7 @@ async fn main() {
 
 #[cfg(test)]
 mod test_risc0 {
-    use crate::aligned::{self, constants::ETH_RPC_URL};
+    use crate::integrations::aligned::{self, constants::ETH_RPC_URL};
     use committee_circuit::{RZ_COMMITTEE_ELF, RZ_COMMITTEE_ID};
     use committee_iso::{
         types::{CommitteeCircuitOutput, CommitteeUpdateArgs},
@@ -24,6 +24,7 @@ mod test_risc0 {
     use step_circuit::{RZ_STEP_ELF, RZ_STEP_ID};
     use step_iso::{types::SyncStepArgs, utils::load_circuit_args_env as load_step_args_env};
 
+    // Risc0 Committee Circuit
     #[test]
     fn test_committee_circuit_risc0() {
         use std::time::Instant;
@@ -48,6 +49,7 @@ mod test_risc0 {
         println!("Elapsed time: {:?}", duration);
     }
 
+    // Risc0 Step Circuit
     #[test]
     fn test_step_circuit_risc0() {
         use std::time::Instant;
@@ -69,12 +71,9 @@ mod test_risc0 {
         println!("Elapsed time: {:?}", duration);
     }
 
+    // SP1 Step Circuit
     #[test]
     fn test_step_circuit_sp1() {
-        // todo: currently the bls signature is not verified in SP1
-        // the reason for this is that blst is not supported so we'll have to
-        // use point arithmetic, but the rest of the circuit is already too expensive
-        // ECC optimizations are required and the precompile alone is seemingly not enough!
         use std::time::Instant;
         sp1_sdk::utils::setup_logger();
         let start_time = Instant::now();
@@ -97,6 +96,7 @@ mod test_risc0 {
         println!("Elapsed time: {:?}", duration);
     }
 
+    // Aligned Layer
     #[tokio::test]
     async fn test_committee_submit_aligned() {
         tracing_subscriber::fmt()

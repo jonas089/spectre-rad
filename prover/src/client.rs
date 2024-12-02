@@ -2,7 +2,7 @@ use aligned_sdk::core::types::Network;
 use clap::{Parser, Subcommand};
 use committee_circuit::RZ_COMMITTEE_ELF;
 use committee_iso::{types::CommitteeUpdateArgs, utils::load_circuit_args};
-use prover::aligned;
+use prover::integrations::aligned;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
 #[derive(Parser)]

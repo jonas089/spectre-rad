@@ -1,4 +1,4 @@
-# Non-Halo2 implementation of Spectre for use with LLVM-compatible ZKVMs (Risc0, SP1)
+# Fast, Modular & Secure ZK Ethereum Light Client 🧪
 
 ## Summary of current state - bottlenecks
 
@@ -7,20 +7,13 @@ Both the `Risc0` and `SP1` step circuits are highly inefficient and struggle wit
 The precompile for `SP1` doesn't seem to resolve this issue with respect to parsing uncompressed points as `G1Affine`.
 
 > [!NOTE]
-> I was able to solve this by using `from_uncompressed_unchecked` instead of `from_uncompressed`.
-> This is still secure since the pubkeys are public inputs.
-> If you are a developer note that in cases where the pubkeys are private inputs this would be problematic!
+> I was able to solve this by using `from_uncompressed_unchecked` instead of `from_uncompressed`. 📈
+> This is still secure since the pubkeys are public inputs. ⛓
+> If you are a developer note that in cases where the pubkeys are private inputs this would be problematic! ⛓️‍💥
 
-Blst is not supported by `SP1` and there for is only used in `Risc0` context, though it might be entirely removed at some point in the future.
-Currently verifying the aggregate signature in `SP1` is not possible due to the `blst` restriction. 
+`Risc0` does not have a precompile for `bls12_381` but to my surprise it generally seems to be `faster than SP1` with respect to both hashing and `ECC` arithmetic. I was reassured that `Risc0` will receive a precompile for `bls12_381` SOON ⏱.
 
-We will most likely have to implement or find a custom verifier
-using curve arithmetic that depends on the precompile. This should be sufficiently fast. The main concern for now is to parse the keys as `G1Affine` and optimize the
-aggregation logic or perhaps outsource it (if possible at all).
-
-Risc0 does not have a precompile for `bls12_381` but to my surprise it generally seems to be `faster than SP1` with respect to both hashing and `ECC` arithmetic.
-Once properly optimized it could very well be that there is a way to effectively utilize the `SP1` precompile to exceed the proving speed of `Risc0`.
-A `Risc0` precompile for the entirety of `bls12_381` would be extremely useful here (definitely worth reaching out to the team at Risc0).
+Benchmarks for both `Risc0` and `SP1` will be added to this README SOON ⏳!
 
 
 > [!NOTE]
@@ -47,7 +40,57 @@ TLDR; Spectre makes blockchain queries secure by proving that the state is valid
 
 `prover`: A special crate that generates proofs using either of the `circuits`. This crate will be extended to support verification on `AlignedLayer`.
 
-## Generate a proof for the Committee Circuit in Risc0
+## Benchmarks
+
+## Circuit Inputs and Outputs
+In ZKVMs we refer to public outputs as information committed to the `journal`. Inputs can either be committed or kept a secret.
+
+### The Beacon Header
+|  Input  | Type |
+| ------------- | ------------- |
+| slot  | int  |
+| proposer_index  | int  |
+| parent_root | Vec<u8> |
+| state_root | Vec<u8> |
+| body_root | Vec<u8> |
+
+### 1. CommitteUpdateCircuit
+|  Input  | Type |
+| ------------- | ------------- |
+| Public Keys Compressed  | [u8;49] |
+| Finalized Header  | BeaconBlockHeader  |
+| Sync Committee Branch | Vec<Vec<u8>> |
+
+| Output | Type |
+| ------------- | ------------- |
+| Finalized Block (Header) Root  | [u8;32] |
+| Key Commitment  | [u8;32] |
+
+### 2. StepCircuit
+| Input | Type |
+| ------------- | ------------- |
+| Aggregate Signature  | [u8;32] |
+| Public Keys Uncompressed  | Vec<[u8;96]> |
+| Participation bits  | Vec<bool> |
+| Attested Header  | BeaconBlockHeader |
+| Finalized Header | BeaconBlockHeader |
+| Execution Payload Root | Vec<u8> |
+| Execution Payload Branch | Vec<Vec<u8>> |
+| domain | [u8;32] |
+
+| Output | Type |
+| ------------- | ------------- |
+| Finalized Block (Header) Root | [u8;32] |
+| Key Commitment  | [u8;32] |
+
+> [!NOTE]
+> If the merkle proofs are `valid`,
+> and the data was `signed` by the committee,
+> and the root is `unique`,
+> then the block is `trusted`.
+
+
+## Generate (&Verify) a proof for the Committee Circuit in Risc0
 
 Prerequisites:
 
@@ -59,12 +102,16 @@ Prerequisites:
 
 `rzup install cargo-risczero <version>`
 
+Run this command:
+
 ```bash
-cargo test test_risc0 -- --nocapture
+cargo test --bin prover --bin prover --bin prover --bin prover test_committee_circuit_risc0 -- --nocapture
 ```
 
-Make sure to specify the path to `rotation_512.json` as an environment variable when running any of the integration tests.
-This is not required when using the client.
+- `-F metal` for metal acceleration (M2, M3 Macbooks)
+- `-F cuda` for cuda acceleration (NVIDIA GPUs)
+
+Make sure to specify the path to `rotation_512.json` as an environment variable when running any of the integration tests that are related to the committee circuit.
 
 Example:
 
@@ -81,12 +128,28 @@ Example output:
 Verified Committee Root: [25, 122, 75, 125, 192, 12, 117, 238, 92, 109, 3, 192, 224, 63, 84, 28, 196, 131, 90, 32, 180, 39, 160, 7, 188, 177, 162, 100, 181, 205, 38, 142]
 ```
 
+## Generate (&Verify) a proof for the Step Circuit in Risc0
+
+Run this command:
+
+```bash
+cargo test --bin prover --bin prover --bin prover --bin prover test_step_circuit_risc0 -- --nocapture
+```
+
+Make sure to specify the path to `sync_step_512.json` as an environment variable when running any of the integration tests that are related to the step circuit.
+
+Example:
+
+`see above`
+
+
+
 ## Metal Acceleration
 
 Use the `-F metal` flag to enable `metal` acceleration on MacOS, for example:
 
-```
-cargo test test_step_circuit_risc0 --release -F metal
+```bash
+cargo test --bin prover --bin prover --bin prover test_step_circuit_risc0 --release -F metal
 ```
 
 to run the accelerated `step circuit`.
@@ -96,69 +159,12 @@ to run the accelerated `step circuit`.
 Test data for the circuit can be found in `data/rotation_512.json`. 
 It contains a committee update for Beacon with `512` public keys, a merkle branch and the resulting root.
 
-## Command line Client interactions
+# Integrations - third party proof verification infrastructure
 
-> [!WARNING]
-> The Client currently only supports the `CommitteeUpdate` circuit in `Risc0`.
+Integrations can be found in `prover/integrations/*`. The first integration `POC` for the Aligned Builders Hackathon can be found in `prover/integrations/*`.
+Note that this will only work for the `Risc0` version(s) supported by Aligned. I will keep an eye on them and update the integration once support for `1.1.x` has arrived.
+In the meantime performance optimizations in `1.1.x` are a priority.
 
+## Aligned Layer
 
-`cargo run` output:
-
-```js
-Commands:
-  prove  
-  help   Print this message or the help of the given subcommand(s)
-```
-
-`prove` command arguments:
-
-```js
-  --path <PATH>
-  --rpc <RPC>
-  --chain-id <CHAIN_ID>
-  --network <NETWORK>
-  --keystore <KEYSTORE>
-  --password <PASSWORD>
-  --gas <GAS>
-```
-
-Full Example command:
-
-```
-cargo run prove --path data/rotation_512.json --rpc https://ethereum-holesky-rpc.publicnode.com --chain-id 17000 --network Holesky --address ec3f9f8FF528862aa99Bf4648Fa4844C3d9a50a3 --keystore aligned/keystore0 --password 1234 --gas 3000000000000
-```
-
-## Proof Generation and Submission E2E Video
-
-[click here](https://youtu.be/fHt3cDbzV0U)
-
-The video was significantly sped up to illustrate the insertion of multiple `proofs` in the sqlite database that is created
-on the client side. Each proof that was successfully verified using the client will be inserted into the database so that the 
-inclusion proof on the verification chain can later be obtained.
-
-## Integration test to submit a Risc0 proof to AlignedLayer for verification
-
-Prerequisite:
-- Holesky funded account & keystore (see [AlignedLayer docs](https://docs.alignedlayer.com/))
-- Keystore should be placed in `./aligned/`
-
-Generate and submit the proof:
-
-```bash
-cargo test test_committee_submit_aligned
-```
-
-Example output:
-
-```rust
-successes:
-
----- test_risc0::test_committee_submit_aligned stdout ----
-Proof submitted and verified successfully on batch ebe6ea81087c1f4063f0a1d3b632e64be6925d8903fd1acacfede0241427e459
-
-
-successes:
-    test_risc0::test_committee_submit_aligned
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 687.50s
-```
+Read more [here](https://github.com/jonas089/spectre-rad/tree/breaking/prover/src/integrations/aligned).

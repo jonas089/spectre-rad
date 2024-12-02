@@ -10,18 +10,17 @@ itertools = "0.13.0"
 committee-iso = { path = "../iso-committee" }
 ssz_rs = { git = "https://github.com/ralexstokes/ssz-rs", rev = "5f1ec833718efa07bbbff427ab28a1eeaa706164" }
 
-sha2 = { version = "0.10.8", optional = true }
-blst = { version = "0.3.13", optional = true }
+sha2 = "0.10.8"
 sha2_risc0 = { package = "sha2", git = "https://github.com/risc0/RustCrypto-hashes", optional = true }
 sha2_sp1 = { package = "sha2", git = "https://github.com/sp1-patches/RustCrypto-hashes", optional = true }
 
-bls12_381 = { version = "0.8.0", features = ["experimental"] }
+bls12_381 = { git = "https://github.com/zkcrypto/bls12_381", rev = "9ea427c0eb1a7e2ac16902a322aea156c496ddb0", features = [
+    "experimental",
+] }
 bls12_381_sp1 = { package = "bls12_381", git = "https://github.com/succinctlabs/bls12_381/", optional = true, features = [
     "experimental",
 ] }
 
 [features]
-default = ["dep:sha2"]
 risc0 = ["sha2_risc0", "committee-iso/risc0"]
 sp1 = ["sha2_sp1", "bls12_381_sp1", "committee-iso/sp1"]
-blst = ["dep:blst"]

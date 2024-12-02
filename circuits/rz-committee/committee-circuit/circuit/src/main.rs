@@ -14,7 +14,14 @@ fn main() {
     let finalized_state_root: Vec<u8> = args.finalized_header.state_root.to_vec();
     let (keys, signs) = decode_pubkeys_x(args.pubkeys_compressed);
     let commitment = commit_to_keys(keys, signs);
-    // todo: compute and commit the finalized_header_root!
+
+    verify_merkle_proof(
+        args.sync_committee_branch,
+        committee_root_ssz,
+        &finalized_state_root,
+        110,
+    );
+
     let finalized_header_root: Vec<u8> = merkleize_keys(vec![
         uint64_to_le_256(args.finalized_header.slot as u64),
         uint64_to_le_256(args.finalized_header.proposer_index as u64),
@@ -22,15 +29,9 @@ fn main() {
         finalized_state_root.clone(),
         args.finalized_header.body_root.to_vec(),
     ]);
-    verify_merkle_proof(
-        args.sync_committee_branch,
-        committee_root_ssz,
-        &finalized_state_root,
-        110,
-    );
+
     env::commit(&CommitteeCircuitOutput::new(
-        finalized_state_root,
-        commitment,
-        finalized_header_root,
+        finalized_header_root.try_into().unwrap(),
+        commitment.try_into().unwrap(),
     ));
 }
