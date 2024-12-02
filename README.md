@@ -1,4 +1,4 @@
-# Fast, Modular & Secure Risc0 Ethereum Light Client
+# Fast, Modular & Secure ZK Ethereum Light Client 🧪
 
 ## Summary of current state - bottlenecks
 
@@ -7,20 +7,13 @@ Both the `Risc0` and `SP1` step circuits are highly inefficient and struggle wit
 The precompile for `SP1` doesn't seem to resolve this issue with respect to parsing uncompressed points as `G1Affine`.
 
 > [!NOTE]
-> I was able to solve this by using `from_uncompressed_unchecked` instead of `from_uncompressed`.
-> This is still secure since the pubkeys are public inputs.
-> If you are a developer note that in cases where the pubkeys are private inputs this would be problematic!
+> I was able to solve this by using `from_uncompressed_unchecked` instead of `from_uncompressed`. 📈
+> This is still secure since the pubkeys are public inputs. ⛓
+> If you are a developer note that in cases where the pubkeys are private inputs this would be problematic! ⛓️‍💥
 
-Blst is not supported by `SP1` and there for is only used in `Risc0` context, though it might be entirely removed at some point in the future.
-Currently verifying the aggregate signature in `SP1` is not possible due to the `blst` restriction. 
+`Risc0` does not have a precompile for `bls12_381` but to my surprise it generally seems to be `faster than SP1` with respect to both hashing and `ECC` arithmetic. I was reassured that `Risc0` will receive a precompile for `bls12_381` SOON ⏱.
 
-We will most likely have to implement or find a custom verifier
-using curve arithmetic that depends on the precompile. This should be sufficiently fast. The main concern for now is to parse the keys as `G1Affine` and optimize the
-aggregation logic or perhaps outsource it (if possible at all).
-
-Risc0 does not have a precompile for `bls12_381` but to my surprise it generally seems to be `faster than SP1` with respect to both hashing and `ECC` arithmetic.
-Once properly optimized it could very well be that there is a way to effectively utilize the `SP1` precompile to exceed the proving speed of `Risc0`.
-A `Risc0` precompile for the entirety of `bls12_381` would be extremely useful here (definitely worth reaching out to the team at Risc0).
+Benchmarks for both `Risc0` and `SP1` will be added to this README SOON ⏳!
 
 
 > [!NOTE]
@@ -174,7 +167,8 @@ In the meantime performance optimizations in `1.1.x` are a priority.
 
 ## 1. Aligned Layer (awaiting support for Risc0 1.1.x, last checked 1.0.1)
 > [!WARNING]
-> The Client currently only supports the `CommitteeUpdate` circuit in `Risc0`.
+> 🚧 Under construction
+> 🚧 The Aligned Layer integration and Client will be finished once the circuits reach the desired proving speeds.
 
 `cargo run` output:
 
