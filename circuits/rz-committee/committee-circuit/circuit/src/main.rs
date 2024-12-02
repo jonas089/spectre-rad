@@ -31,7 +31,7 @@ fn main() {
     ]);
 
     env::commit(&CommitteeCircuitOutput::new(
-        finalized_header_root,
-        commitment,
+        finalized_header_root.try_into().unwrap(),
+        commitment.try_into().unwrap(),
     ));
 }
