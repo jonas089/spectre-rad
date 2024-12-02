@@ -1,25 +1,22 @@
-#[cfg(any(feature = "default", feature = "risc0"))]
 use bls12_381::{
     hash_to_curve,
-    hash_to_curve::{ExpandMessage, ExpandMsgXmd, InitExpandMessage},
+    hash_to_curve::HashToCurve,
+    hash_to_curve::{ExpandMessage, ExpandMsgXmd},
     G1Affine, G1Projective,
 };
-use committee_iso::utils::{add_left_right, compute_digest, merkleize_keys, uint64_to_le_256};
-#[cfg(feature = "default")]
-use sha2::{Digest, Sha256};
-#[cfg(feature = "risc0")]
-use sha2_risc0::{Digest, Sha256};
+use committee_iso::utils::{
+    add_left_right, compute_digest, merkleize_keys, uint64_to_le_256, Sha256,
+};
 use types::Commitment;
 use types::SyncStepArgs;
-#[cfg(all(feature = "sp1", not(feature = "default")))]
+/*#[cfg(all(feature = "sp1", not(feature = "default")))]
 use {
     bls12_381_sp1::{
         hash_to_curve,
         hash_to_curve::{ExpandMessage, ExpandMsgXmd, InitExpandMessage},
         G1Affine, G1Projective,
     },
-    sha2_sp1::{Digest, Sha256},
-};
+};*/
 #[cfg(feature = "blst")]
 use {blst::min_pk as bls, blst::BLST_ERROR};
 
@@ -76,8 +73,10 @@ pub fn verify_aggregate_signature(args: SyncStepArgs) -> Commitment {
 
     // DATA: message hash -> should be hash to curve bls12_381
     let message_not_on_curve: Vec<u8> = add_left_right(attested_header_root, &domain);
-
-    //let mut expander = ExpandMsgXmd::<Sha256>::init_expand(message_not_on_curve, DST, 48);
+    let message_g1 = <G1Projective as HashToCurve<ExpandMsgXmd<Sha256>>>::encode_to_curve(
+        [message_not_on_curve],
+        DST,
+    );
     // Prepare a buffer to hold the expanded bytes
     /*let mut output = vec![0u8; 48];
     expander.read_into(&mut output);*/
