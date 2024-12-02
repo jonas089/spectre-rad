@@ -105,7 +105,7 @@ Prerequisites:
 Run this command:
 
 ```bash
-cargo test --bin prover --bin prover --bin prover --bin prover test_committee_circuit_risc0 -- --nocapture
+cargo test --bin prover test_committee_circuit_risc0 -- --nocapture
 ```
 
 - `-F metal` for metal acceleration (M2, M3 Macbooks)
@@ -133,7 +133,7 @@ Verified Committee Root: [25, 122, 75, 125, 192, 12, 117, 238, 92, 109, 3, 192, 
 Run this command:
 
 ```bash
-cargo test --bin prover --bin prover --bin prover --bin prover test_step_circuit_risc0 -- --nocapture
+cargo test --bin prover test_step_circuit_risc0 -- --nocapture
 ```
 
 Make sure to specify the path to `sync_step_512.json` as an environment variable when running any of the integration tests that are related to the step circuit.
@@ -149,7 +149,7 @@ Example:
 Use the `-F metal` flag to enable `metal` acceleration on MacOS, for example:
 
 ```bash
-cargo test --bin prover --bin prover --bin prover test_step_circuit_risc0 --release -F metal
+cargo test --bin prover test_step_circuit_risc0 --release -F metal
 ```
 
 to run the accelerated `step circuit`.
