@@ -1,14 +1,13 @@
-//#[cfg(all(not(feature = "sp1"), not(feature = "risc0")))]
+#[cfg(not(feature = "sp1"))]
 use bls12_381::{
-    hash_to_curve::{self, ExpandMsgXmd, HashToCurve, Message},
+    hash_to_curve::{ExpandMsgXmd, HashToCurve},
     pairing, G1Affine, G1Projective, G2Affine, G2Projective,
 };
-/*#[cfg(all(feature = "sp1"))]
+#[cfg(feature = "sp1")]
 use bls12_381_sp1::{
-    hash_to_curve,
-    hash_to_curve::{ExpandMessage, ExpandMsgXmd, HashToCurve, InitExpandMessage},
+    hash_to_curve::{ExpandMsgXmd, HashToCurve},
     pairing, G1Affine, G1Projective, G2Affine, G2Projective,
-};*/
+};
 use committee_iso::utils::{
     add_left_right, compute_digest, merkleize_keys, uint64_to_le_256, Sha256,
 };
