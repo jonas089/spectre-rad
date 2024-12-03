@@ -111,6 +111,12 @@ cargo test --bin prover test_committee_circuit_risc0 -- --nocapture
 - `-F metal` for metal acceleration (M2, M3 Macbooks)
 - `-F cuda` for cuda acceleration (NVIDIA GPUs)
 
+> [!NOTE]
+> Running the step circuit in `Risc0` only really makes sense on powerful hardware,
+> currently it takes 40 minutes on my M3 Max Macbook Pro.
+> `SP1` does not have metal acceleration so therefore `cuda` is recommended. 
+> For `Risc0` a strong Nvidia GPU or Rig should be better than the M3.
+
 Make sure to specify the path to `rotation_512.json` as an environment variable when running any of the integration tests that are related to the committee circuit.
 
 Example:
