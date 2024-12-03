@@ -17,7 +17,7 @@ Benchmarks for both `Risc0` and `SP1` will be added to this README SOON ⏳!
 > This implementation of Spectre leverages ZKVMs like Risc0 for increased performance and groth16 support.
 
 # Spectre Use Cases
-Spectre is a trustless light-client for `Ethereum`. With Spectre it is possible to cryptographically verify the integrity of Ethereum `state root`.
+Spectre is a trust minimized light-client for `Ethereum`. With Spectre it is possible to cryptographically verify the integrity of Ethereum `state root`.
 Lightclients are essentially cryptographic infrastructure that make all queries to a blockchain verifiable and therefore enhance security.
 Without lightclients the development of secure decentralized applications would be challenging since they would have to query many nodes rather than 
 relying a single source of truth. Additionally there would be no way to verify the integrity of the state transitions even when querying a large number
