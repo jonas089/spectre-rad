@@ -31,10 +31,9 @@ pub fn main() {
         105,
     );
     let aggregate_key_commitment: Vec<u8> = verify_aggregate_signature(args.clone());
-    let output = SyncStepCircuitOutput {
+    let output: SyncStepCircuitOutput = SyncStepCircuitOutput {
         finalized_block_root: finalized_header_root.try_into().unwrap(),
         aggregate_key_commitment: aggregate_key_commitment.try_into().unwrap(),
     };
-
-    // todo: commit output
+    sp1_zkvm::io::commit(&output);
 }
