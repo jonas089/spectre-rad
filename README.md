@@ -41,9 +41,9 @@ Benchmarking the Step and Committee Circuits on different machines in SP1 and Ri
 ## Proving Speed Benchmarks
 
 ### Committee Circuit
-| Device | Risc0 (sha2 precompile) Elapsed | SP1 (sha2, bls12 precompile) Elapsed |
+| Device | Risc0 (sha2 precompile) Elapsed | SP1 (sha2 precompile) Elapsed |
 | ------------- | ------------- | ------------- |
-| A100 (40GB) Lambda Labs, 30 core CPU | 13.59s | |
+| A100 (40GB) Lambda Labs, 30 core CPU | 13.59s | 41.23s |
 
 ### Step Circuit
 | Device | Risc0 (sha2 precompile) Elapsed | SP1 (sha2, bls12 precompile) Elapsed |
