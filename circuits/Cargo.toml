@@ -1,3 +1,3 @@
 [workspace]
-members = ["sp1-step"]
+members = ["sp1-step", "sp1-committee"]
 resolver = "2"
