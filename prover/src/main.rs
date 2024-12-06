@@ -49,6 +49,33 @@ mod test_risc0 {
         println!("Elapsed time: {:?}", duration);
     }
 
+    // SP1 Committee Circuit
+    #[test]
+    fn test_committee_circuit_sp1() {
+        use std::time::Instant;
+        tracing_subscriber::fmt()
+            .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+            .init();
+        let start_time = Instant::now();
+        const COMMITTEE_ELF: &[u8] = include_elf!("sp1-committee");
+        let committee_update: CommitteeUpdateArgs = load_committee_args_env();
+        let client = ProverClient::new();
+        let mut stdin = SP1Stdin::new();
+        stdin.write_vec(serde_json::to_vec(&committee_update).expect("Failed to serialize"));
+        let (pk, vk) = client.setup(COMMITTEE_ELF);
+        // Generate the proof
+        let proof = client
+            .prove(&pk, stdin)
+            .run()
+            .expect("failed to generate proof");
+        println!("Successfully generated proof!");
+        // Verify the proof.
+        client.verify(&proof, &vk).expect("failed to verify proof");
+        println!("Successfully verified proof!");
+        let duration = start_time.elapsed();
+        println!("Elapsed time: {:?}", duration);
+    }
+
     // Risc0 Step Circuit
     #[test]
     fn test_step_circuit_risc0() {
