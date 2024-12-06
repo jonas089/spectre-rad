@@ -36,9 +36,7 @@ TLDR; Spectre makes blockchain queries secure by proving that the state is valid
 
 `prover`: A special crate that generates proofs using either of the `circuits`. This crate will be extended to support verification on `AlignedLayer`.
 
-## Benchmarks
-
-## Circuit Inputs and Outputs
+# Circuit Inputs and Outputs
 In ZKVMs we refer to public outputs as information committed to the `journal`. Inputs can either be committed or kept a secret.
 
 ### The Beacon Header
