@@ -3,7 +3,7 @@ use committee_iso::{
     utils::{decode_pubkeys_x, hash_keys, merkleize_keys, uint64_to_le_256, verify_merkle_proof},
 };
 use risc0_zkvm::guest::env;
-use step_iso::types::{SyncStepArgs, SyncStepCircuitOutput};
+use step_iso::types::{SyncStepArgs, SyncStepCircuitInput, SyncStepCircuitOutput};
 use step_iso::verify_aggregate_signature;
 
 fn main() {
@@ -31,7 +31,7 @@ fn main() {
         105,
     );
 
-    verify_aggregate_signature(args.clone(), input.committee_commitment);
+    verify_aggregate_signature(args.clone(), inputs.committee_commitment);
     let output = SyncStepCircuitOutput {
         finalized_block_root: finalized_header_root.try_into().unwrap(),
     };

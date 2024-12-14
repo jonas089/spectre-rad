@@ -12,7 +12,7 @@ async fn main() {
 }
 
 #[cfg(test)]
-mod test_risc0 {
+mod test_circuits {
     use crate::integrations::aligned::{self, constants::ETH_RPC_URL};
     use committee_circuit::{RZ_COMMITTEE_ELF, RZ_COMMITTEE_ID};
     use committee_iso::{
@@ -22,7 +22,10 @@ mod test_risc0 {
     use risc0_zkvm::{default_prover, ExecutorEnv};
     use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
     use step_circuit::{RZ_STEP_ELF, RZ_STEP_ID};
-    use step_iso::{types::SyncStepArgs, utils::load_circuit_args_env as load_step_args_env};
+    use step_iso::{
+        types::{SyncStepArgs, SyncStepCircuitInput},
+        utils::load_circuit_args_env as load_step_args_env,
+    };
 
     // Risc0 Committee Circuit
     #[test]
@@ -84,9 +87,17 @@ mod test_risc0 {
             .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
             .init();
         let start_time = Instant::now();
-        let sync_step: SyncStepArgs = load_step_args_env();
+        let sync_step_args: SyncStepArgs = load_step_args_env();
+        let commitment: [u8; 32] = [
+            105, 137, 53, 187, 214, 9, 37, 142, 162, 195, 216, 252, 41, 0, 37, 135, 102, 197, 110,
+            192, 183, 234, 101, 253, 40, 247, 143, 101, 172, 85, 164, 105,
+        ];
+        let inputs: SyncStepCircuitInput = SyncStepCircuitInput {
+            args: sync_step_args,
+            committee_commitment: commitment,
+        };
         let env = ExecutorEnv::builder()
-            .write(&sync_step)
+            .write(&inputs)
             .unwrap()
             .build()
             .unwrap();
@@ -105,10 +116,18 @@ mod test_risc0 {
         sp1_sdk::utils::setup_logger();
         let start_time = Instant::now();
         const STEP_ELF: &[u8] = include_elf!("sp1-step");
-        let sync_args: SyncStepArgs = load_step_args_env();
+        let sync_step_args: SyncStepArgs = load_step_args_env();
+        let commitment: [u8; 32] = [
+            105, 137, 53, 187, 214, 9, 37, 142, 162, 195, 216, 252, 41, 0, 37, 135, 102, 197, 110,
+            192, 183, 234, 101, 253, 40, 247, 143, 101, 172, 85, 164, 105,
+        ];
+        let inputs: SyncStepCircuitInput = SyncStepCircuitInput {
+            args: sync_step_args,
+            committee_commitment: commitment,
+        };
         let client = ProverClient::new();
         let mut stdin = SP1Stdin::new();
-        stdin.write_vec(serde_json::to_vec(&sync_args).expect("Failed to serialize"));
+        stdin.write_vec(serde_json::to_vec(&inputs).expect("Failed to serialize"));
         let (pk, vk) = client.setup(STEP_ELF);
         // Generate the proof
         let proof = client
