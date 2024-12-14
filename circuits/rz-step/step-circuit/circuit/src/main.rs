@@ -1,7 +1,9 @@
 use committee_iso::utils::{merkleize_keys, uint64_to_le_256, verify_merkle_proof};
 use risc0_zkvm::guest::env;
-use step_iso::types::{SyncStepArgs, SyncStepCircuitInput, SyncStepCircuitOutput};
-use step_iso::verify_aggregate_signature;
+use step_iso::{
+    types::{SyncStepArgs, SyncStepCircuitInput, SyncStepCircuitOutput},
+    verify_aggregate_signature,
+};
 
 fn main() {
     let inputs: SyncStepCircuitInput = env::read();
