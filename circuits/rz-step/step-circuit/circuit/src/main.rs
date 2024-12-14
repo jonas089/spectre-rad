@@ -1,7 +1,4 @@
-use committee_iso::{
-    types::PublicKeyHashes,
-    utils::{decode_pubkeys_x, hash_keys, merkleize_keys, uint64_to_le_256, verify_merkle_proof},
-};
+use committee_iso::utils::{merkleize_keys, uint64_to_le_256, verify_merkle_proof};
 use risc0_zkvm::guest::env;
 use step_iso::types::{SyncStepArgs, SyncStepCircuitInput, SyncStepCircuitOutput};
 use step_iso::verify_aggregate_signature;
