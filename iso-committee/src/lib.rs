@@ -6,7 +6,10 @@ use types::CommitteeUpdateArgs;
 mod test {
     use crate::{
         types::PublicKeyHashes,
-        utils::{hash_keys, load_circuit_args_env, merkleize_keys, verify_merkle_proof},
+        utils::{
+            commit_to_keys, decode_pubkeys_x, hash_keys, load_circuit_args_env, merkleize_keys,
+            verify_merkle_proof,
+        },
         CommitteeUpdateArgs,
     };
     #[test]
@@ -21,5 +24,12 @@ mod test {
             &finalized_state_root,
             110,
         );
+    }
+    #[test]
+    fn test_compute_pubkey_commitment() {
+        let args: CommitteeUpdateArgs = load_circuit_args_env();
+        let keys = decode_pubkeys_x(args.pubkeys_compressed);
+        let commitment = commit_to_keys(keys.0, keys.1);
+        println!("Commitment: {:?}", &commitment);
     }
 }

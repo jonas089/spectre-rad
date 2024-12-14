@@ -1,14 +1,14 @@
 #![no_main]
-
 use committee_iso::utils::{merkleize_keys, uint64_to_le_256, verify_merkle_proof};
 use step_iso::{
-    types::{SyncStepArgs, SyncStepCircuitOutput},
+    types::{SyncStepArgs, SyncStepCircuitInput, SyncStepCircuitOutput},
     verify_aggregate_signature,
 };
 sp1_zkvm::entrypoint!(main);
 
 pub fn main() {
-    let args: SyncStepArgs = serde_json::from_slice(&sp1_zkvm::io::read_vec()).unwrap();
+    let inputs: SyncStepCircuitInput = serde_json::from_slice(&sp1_zkvm::io::read_vec()).unwrap();
+    let args: SyncStepArgs = inputs.args;
     verify_merkle_proof(
         args.execution_payload_branch.to_vec(),
         args.execution_payload_root.clone(),
@@ -30,10 +30,9 @@ pub fn main() {
         &args.attested_header.state_root.to_vec(),
         105,
     );
-    let aggregate_key_commitment: Vec<u8> = verify_aggregate_signature(args.clone());
+    verify_aggregate_signature(args.clone(), inputs.committee_commitment);
     let output: SyncStepCircuitOutput = SyncStepCircuitOutput {
         finalized_block_root: finalized_header_root.try_into().unwrap(),
-        aggregate_key_commitment: aggregate_key_commitment.try_into().unwrap(),
     };
     sp1_zkvm::io::commit(&output);
 }

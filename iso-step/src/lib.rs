@@ -9,7 +9,8 @@ use bls12_381_sp1::{
     pairing, G1Affine, G1Projective, G2Affine, G2Projective,
 };
 use committee_iso::utils::{
-    add_left_right, compute_digest, merkleize_keys, uint64_to_le_256, Sha256,
+    add_left_right, commit_to_keys, compute_digest, decode_pubkeys_x, merkleize_keys,
+    uint64_to_le_256, Sha256,
 };
 use types::Commitment;
 use types::SyncStepArgs;
@@ -17,8 +18,7 @@ use types::SyncStepArgs;
 pub mod types;
 pub mod utils;
 
-fn aggregate_pubkey(args: SyncStepArgs) -> G1Affine {
-    // performance overhead
+fn aggregate_pubkey(args: SyncStepArgs) -> (G1Affine, Commitment) {
     let pubkey_affines: Vec<G1Affine> = args
         .pubkeys_uncompressed
         .as_slice()
@@ -27,6 +27,14 @@ fn aggregate_pubkey(args: SyncStepArgs) -> G1Affine {
             G1Affine::from_uncompressed_unchecked(&bytes.as_slice().try_into().unwrap()).unwrap()
         })
         .collect();
+
+    let pubkeys_compressed: Vec<Vec<u8>> = pubkey_affines
+        .iter()
+        .map(|uncompressed| uncompressed.to_compressed().to_vec())
+        .collect();
+
+    let pubkeys_decoded = decode_pubkeys_x(pubkeys_compressed);
+    let pubkey_commitment: Commitment = commit_to_keys(pubkeys_decoded.0, pubkeys_decoded.1);
 
     let mut generator = G1Projective::identity();
     let participation_bits = args.pariticipation_bits;
@@ -45,12 +53,13 @@ fn aggregate_pubkey(args: SyncStepArgs) -> G1Affine {
         }
     }
 
-    generator.into()
+    (generator.into(), pubkey_commitment)
 }
 
-pub fn verify_aggregate_signature(args: SyncStepArgs) -> Commitment {
+pub fn verify_aggregate_signature(args: SyncStepArgs, committee_commitment: [u8; 32]) {
     const DST: &[u8] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_";
-    let aggregate_key: G1Affine = aggregate_pubkey(args.clone());
+    let (aggregate_key, commitment): (G1Affine, Commitment) = aggregate_pubkey(args.clone());
+    assert_eq!(commitment, committee_commitment);
     let attested_header_root = merkleize_keys(vec![
         uint64_to_le_256(args.attested_header.slot),
         uint64_to_le_256(args.attested_header.proposer_index as u64),
@@ -74,9 +83,6 @@ pub fn verify_aggregate_signature(args: SyncStepArgs) -> Commitment {
         pairing(&aggregate_key, &message_g2.into()),
         pairing(&G1Affine::generator(), &signature)
     );
-
-    // return commitment to aggregate pubkey
-    compute_digest(&aggregate_key.to_compressed().to_vec())
 }
 
 #[cfg(test)]
@@ -87,7 +93,11 @@ mod tests {
     #[test]
     fn test_aggregate_pubkey_commitment_and_verify_signature() {
         let args = load_circuit_args_env();
-        verify_aggregate_signature(args.clone());
+        let commitment: [u8; 32] = [
+            105, 137, 53, 187, 214, 9, 37, 142, 162, 195, 216, 252, 41, 0, 37, 135, 102, 197, 110,
+            192, 183, 234, 101, 253, 40, 247, 143, 101, 172, 85, 164, 105,
+        ];
+        verify_aggregate_signature(args.clone(), commitment);
     }
 
     #[test]

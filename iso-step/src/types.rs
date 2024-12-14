@@ -20,7 +20,7 @@ pub type PublicKeysUncompressed = Vec<Vec<u8>>;
 pub type SignatureCompressed = Vec<u8>;
 pub type Branch = Vec<Vec<u8>>;
 pub type Leaf = Vec<u8>;
-pub type Commitment = Vec<u8>;
+pub type Commitment = [u8; 32];
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct SyncStepArgs {
@@ -36,7 +36,12 @@ pub struct SyncStepArgs {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct SyncStepCircuitInput {
+    pub args: SyncStepArgs,
+    pub committee_commitment: [u8; 32],
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct SyncStepCircuitOutput {
     pub finalized_block_root: [u8; 32],
-    pub aggregate_key_commitment: [u8; 32],
 }

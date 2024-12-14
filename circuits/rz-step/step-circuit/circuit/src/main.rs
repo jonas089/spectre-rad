@@ -7,7 +7,8 @@ use step_iso::types::{SyncStepArgs, SyncStepCircuitOutput};
 use step_iso::verify_aggregate_signature;
 
 fn main() {
-    let args: SyncStepArgs = env::read();
+    let inputs: SyncStepCircuitInput = env::read();
+    let args: SyncStepArgs = inputs.args;
     verify_merkle_proof(
         args.execution_payload_branch.to_vec(),
         args.execution_payload_root.clone(),
@@ -30,10 +31,9 @@ fn main() {
         105,
     );
 
-    let aggregate_key_commitment: Vec<u8> = verify_aggregate_signature(args.clone());
+    verify_aggregate_signature(args.clone(), input.committee_commitment);
     let output = SyncStepCircuitOutput {
         finalized_block_root: finalized_header_root.try_into().unwrap(),
-        aggregate_key_commitment: aggregate_key_commitment.try_into().unwrap(),
     };
     env::commit(&output);
 }
