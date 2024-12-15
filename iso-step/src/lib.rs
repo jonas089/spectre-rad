@@ -61,8 +61,8 @@ pub fn verify_aggregate_signature(args: SyncStepArgs, committee_commitment: [u8;
     let (aggregate_key, commitment): (G1Affine, Commitment) = aggregate_pubkey(args.clone());
     assert_eq!(commitment, committee_commitment);
     let attested_header_root = merkleize_keys(vec![
-        uint64_to_le_256(args.attested_header.slot),
-        uint64_to_le_256(args.attested_header.proposer_index as u64),
+        uint64_to_le_256(args.attested_header.slot.parse::<u64>().unwrap()),
+        uint64_to_le_256(args.attested_header.proposer_index.parse::<u64>().unwrap()),
         args.attested_header.parent_root.to_vec(),
         args.attested_header.state_root.to_vec(),
         args.attested_header.body_root.to_vec(),
@@ -113,8 +113,8 @@ mod tests {
 
         // equivalent to a block hash
         let finalized_header_root = merkleize_keys(vec![
-            uint64_to_le_256(args.finalized_header.slot),
-            uint64_to_le_256(args.finalized_header.proposer_index as u64),
+            uint64_to_le_256(args.finalized_header.slot.parse::<u64>().unwrap()),
+            uint64_to_le_256(args.finalized_header.proposer_index.parse::<u64>().unwrap()),
             args.finalized_header.parent_root.to_vec(),
             args.finalized_header.state_root.to_vec(),
             args.finalized_header.body_root.to_vec(),

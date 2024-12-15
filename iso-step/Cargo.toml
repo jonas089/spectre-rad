@@ -21,6 +21,8 @@ bls12_381_sp1 = { package = "bls12_381", git = "https://github.com/sp1-patches/b
     "experimental",
 ] }
 
+borsh = { version = "1.5.3", features = ["derive"] }
+
 [features]
 risc0 = ["sha2_risc0", "committee-iso/risc0"]
 sp1 = ["sha2_sp1", "bls12_381_sp1", "committee-iso/sp1"]

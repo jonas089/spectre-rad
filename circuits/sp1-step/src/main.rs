@@ -17,8 +17,8 @@ pub fn main() {
     );
 
     let finalized_header_root: Vec<u8> = merkleize_keys(vec![
-        uint64_to_le_256(args.finalized_header.slot),
-        uint64_to_le_256(args.finalized_header.proposer_index as u64),
+        uint64_to_le_256(args.finalized_header.slot.parse::<u64>().unwrap()),
+        uint64_to_le_256(args.finalized_header.proposer_index.parse::<u64>().unwrap()),
         args.finalized_header.parent_root.to_vec(),
         args.finalized_header.state_root.to_vec(),
         args.finalized_header.body_root.to_vec(),

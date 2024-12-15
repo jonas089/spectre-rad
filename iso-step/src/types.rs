@@ -3,14 +3,10 @@ pub type Root = Node;
 pub type Slot = u64;
 pub type ValidatorIndex = usize;
 
-#[derive(
-    Default, Debug, SimpleSerialize, Clone, PartialEq, Eq, serde::Deserialize, serde::Serialize,
-)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
 pub struct BeaconBlockHeader {
-    #[serde(with = "ssz_rs::serde::as_str")]
-    pub slot: Slot,
-    #[serde(with = "ssz_rs::serde::as_str")]
-    pub proposer_index: ValidatorIndex,
+    pub slot: String,
+    pub proposer_index: String,
     pub parent_root: Root,
     pub state_root: Root,
     pub body_root: Root,
