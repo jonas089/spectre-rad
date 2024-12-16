@@ -37,8 +37,7 @@ mod test_circuits {
         let start_time = Instant::now();
         let committee_update: CommitteeUpdateArgs = load_committee_args_env();
         let env = ExecutorEnv::builder()
-            .write(&committee_update)
-            .unwrap()
+            .write_slice(&borsh::to_vec(&committee_update).unwrap())
             .build()
             .unwrap();
 
@@ -64,7 +63,7 @@ mod test_circuits {
         let committee_update: CommitteeUpdateArgs = load_committee_args_env();
         let client = ProverClient::new();
         let mut stdin = SP1Stdin::new();
-        stdin.write_vec(serde_json::to_vec(&committee_update).expect("Failed to serialize"));
+        stdin.write_vec(borsh::to_vec(&committee_update).expect("Failed to serialize"));
         let (pk, vk) = client.setup(COMMITTEE_ELF);
         // Generate the proof
         let proof = client
@@ -97,8 +96,7 @@ mod test_circuits {
             committee_commitment: commitment,
         };
         let env = ExecutorEnv::builder()
-            .write(&inputs)
-            .unwrap()
+            .write_slice(&borsh::to_vec(&inputs).unwrap())
             .build()
             .unwrap();
         let prover = default_prover();
@@ -127,7 +125,7 @@ mod test_circuits {
         };
         let client = ProverClient::new();
         let mut stdin = SP1Stdin::new();
-        stdin.write_vec(serde_json::to_vec(&inputs).expect("Failed to serialize"));
+        stdin.write_vec(borsh::to_vec(&inputs).expect("Failed to serialize"));
         let (pk, vk) = client.setup(STEP_ELF);
         // Generate the proof
         let proof = client
@@ -150,8 +148,7 @@ mod test_circuits {
             .init();
         let committee_update: CommitteeUpdateArgs = load_committee_args_env();
         let env = ExecutorEnv::builder()
-            .write(&committee_update)
-            .unwrap()
+            .write_slice(&borsh::to_vec(&committee_update).unwrap())
             .build()
             .unwrap();
 

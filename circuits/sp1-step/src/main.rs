@@ -7,8 +7,9 @@ use step_iso::{
 sp1_zkvm::entrypoint!(main);
 
 pub fn main() {
-    let inputs: SyncStepCircuitInput = serde_json::from_slice(&sp1_zkvm::io::read_vec()).unwrap();
+    let inputs: SyncStepCircuitInput = borsh::from_slice(&sp1_zkvm::io::read_vec()).unwrap();
     let args: SyncStepArgs = inputs.args;
+
     verify_merkle_proof(
         args.execution_payload_branch.to_vec(),
         args.execution_payload_root.clone(),

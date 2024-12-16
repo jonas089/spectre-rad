@@ -6,9 +6,12 @@ use committee_iso::{
     },
 };
 use risc0_zkvm::guest::env;
+use std::io::Read;
 
 fn main() {
-    let args: CommitteeUpdateArgs = env::read();
+    let mut buffer: Vec<u8> = vec![];
+    let _ = env::stdin().read_to_end(&mut buffer);
+    let args: CommitteeUpdateArgs = borsh::from_slice(&buffer).unwrap();
     let key_hashs: PublicKeyHashes = hash_keys(args.pubkeys_compressed.clone());
     let committee_root_ssz: Vec<u8> = merkleize_keys(key_hashs);
     let finalized_state_root: Vec<u8> = args.finalized_header.state_root.to_vec();

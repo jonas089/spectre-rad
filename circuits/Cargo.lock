@@ -288,15 +288,6 @@ dependencies = [
 
 [[package]]
 name = "block-buffer"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4152116fd6e9dadb291ae18fc1ec3575ed6d84c29642d97890f4b4a3417297e4"
-dependencies = [
- "generic-array",
-]
-
-[[package]]
-name = "block-buffer"
 version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71"
@@ -401,6 +392,7 @@ version = "0.1.0"
 dependencies = [
  "ark-bn254",
  "ark-ff 0.4.2",
+ "borsh",
  "hex",
  "itertools 0.13.0",
  "lazy_static",
@@ -409,7 +401,7 @@ dependencies = [
  "serde_json",
  "sha2 0.10.6",
  "sha2 0.10.7",
- "ssz_rs 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched)",
+ "ssz_rs",
 ]
 
 [[package]]
@@ -792,12 +784,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
 
 [[package]]
-name = "opaque-debug"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
-
-[[package]]
 name = "pairing"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1126,19 +1112,6 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.9.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d58a1e1bf39749807d89cf2d98ac2dfa0ff1cb3faa38fbb64dd88ac8013d800"
-dependencies = [
- "block-buffer 0.9.0",
- "cfg-if",
- "cpufeatures",
- "digest 0.9.0",
- "opaque-debug",
-]
-
-[[package]]
-name = "sha2"
 version = "0.10.6"
 source = "git+https://github.com/RustCrypto/hashes/?rev=9df20e865c3d141526074568984ba21a99429ea1#9df20e865c3d141526074568984ba21a99429ea1"
 dependencies = [
@@ -1184,6 +1157,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "bls12_381 0.8.0 (git+https://github.com/sp1-patches/bls12_381)",
+ "borsh",
  "committee-iso",
  "itertools 0.13.0",
  "serde",
@@ -1208,6 +1182,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "bls12_381 0.8.0 (git+https://github.com/sp1-patches/bls12_381)",
+ "borsh",
  "committee-iso",
  "itertools 0.13.0",
  "serde",
@@ -1234,43 +1209,21 @@ dependencies = [
 [[package]]
 name = "ssz_rs"
 version = "0.9.0"
-source = "git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164#5f1ec833718efa07bbbff427ab28a1eeaa706164"
+source = "git+https://github.com/jonas089/ssz-rs-patched?branch=borsh#a18856d406c14cb7b778f8037388378b6ab098d4"
 dependencies = [
  "alloy-primitives",
  "bitvec",
- "hex",
- "serde",
- "sha2 0.9.9",
- "ssz_rs_derive 0.9.0 (git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164)",
-]
-
-[[package]]
-name = "ssz_rs"
-version = "0.9.0"
-source = "git+https://github.com/jonas089/ssz-rs-patched#d929c16991ff1d36063d09cf1b41e0877c5b32df"
-dependencies = [
- "alloy-primitives",
- "bitvec",
+ "borsh",
  "hex",
  "serde",
  "sha2 0.10.8",
- "ssz_rs_derive 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched)",
+ "ssz_rs_derive",
 ]
 
 [[package]]
 name = "ssz_rs_derive"
 version = "0.9.0"
-source = "git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164#5f1ec833718efa07bbbff427ab28a1eeaa706164"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "ssz_rs_derive"
-version = "0.9.0"
-source = "git+https://github.com/jonas089/ssz-rs-patched#d929c16991ff1d36063d09cf1b41e0877c5b32df"
+source = "git+https://github.com/jonas089/ssz-rs-patched?branch=borsh#a18856d406c14cb7b778f8037388378b6ab098d4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1296,7 +1249,7 @@ dependencies = [
  "serde_json",
  "sha2 0.10.8",
  "sha2 0.11.0-pre.3",
- "ssz_rs 0.9.0 (git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164)",
+ "ssz_rs",
 ]
 
 [[package]]

@@ -842,15 +842,6 @@ checksum = "0d8c1fef690941d3e7788d328517591fecc684c084084702d6ff1641e993699a"
 
 [[package]]
 name = "block-buffer"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4152116fd6e9dadb291ae18fc1ec3575ed6d84c29642d97890f4b4a3417297e4"
-dependencies = [
- "generic-array 0.14.7",
-]
-
-[[package]]
-name = "block-buffer"
 version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71"
@@ -1255,6 +1246,7 @@ version = "0.1.0"
 dependencies = [
  "ark-bn254",
  "ark-ff 0.4.2",
+ "borsh",
  "hex",
  "itertools 0.13.0",
  "lazy_static",
@@ -1264,7 +1256,7 @@ dependencies = [
  "sha2 0.10.6",
  "sha2 0.10.7",
  "sha2 0.10.8 (git+https://github.com/risc0/RustCrypto-hashes)",
- "ssz_rs 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched)",
+ "ssz_rs",
 ]
 
 [[package]]
@@ -1392,18 +1384,18 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-channel"
-version = "0.5.13"
+version = "0.5.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33480d6946193aa8033910124896ca395333cae7e2d1113d1fef6c3272217df2"
+checksum = "06ba6d68e24814cb8de6bb986db8222d3a027d15872cabc0d18817bc3c0e4471"
 dependencies = [
  "crossbeam-utils",
 ]
 
 [[package]]
 name = "crossbeam-deque"
-version = "0.8.5"
+version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "613f8cc01fe9cf1a3eb3d7f488fd2fa8388403e97039e2f73692932e291a770d"
+checksum = "9dd111b7b7f7d55b72c0a6ae361660ee5853c9af73f70c3c2ef6858b950e2e51"
 dependencies = [
  "crossbeam-epoch",
  "crossbeam-utils",
@@ -1420,18 +1412,18 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-queue"
-version = "0.3.11"
+version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df0346b5d5e76ac2fe4e327c5fd1118d6be7c51dfb18f9b7922923f287471e35"
+checksum = "0f58bbc28f91df819d0aa2a2c00cd19754769c2fad90579b3592b1c9ba7a3115"
 dependencies = [
  "crossbeam-utils",
 ]
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.20"
+version = "0.8.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22ec99545bb0ed0ea7bb9b8e1e9122ea386ff8a48c0922e43f36d45ab09e0e80"
+checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
 
 [[package]]
 name = "crunchy"
@@ -4308,12 +4300,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
 
 [[package]]
-name = "opaque-debug"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
-
-[[package]]
 name = "open-fastrlp"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5101,6 +5087,7 @@ version = "0.1.0"
 dependencies = [
  "aligned-sdk",
  "bincode",
+ "borsh",
  "clap",
  "committee-circuit",
  "committee-iso",
@@ -6327,19 +6314,6 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.9.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d58a1e1bf39749807d89cf2d98ac2dfa0ff1cb3faa38fbb64dd88ac8013d800"
-dependencies = [
- "block-buffer 0.9.0",
- "cfg-if",
- "cpufeatures",
- "digest 0.9.0",
- "opaque-debug",
-]
-
-[[package]]
-name = "sha2"
 version = "0.10.6"
 source = "git+https://github.com/RustCrypto/hashes/?rev=9df20e865c3d141526074568984ba21a99429ea1#9df20e865c3d141526074568984ba21a99429ea1"
 dependencies = [
@@ -6547,6 +6521,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "bls12_381 0.8.0 (git+https://github.com/sp1-patches/bls12_381)",
+ "borsh",
  "committee-iso",
  "itertools 0.13.0",
  "serde",
@@ -6976,6 +6951,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "bls12_381 0.8.0 (git+https://github.com/sp1-patches/bls12_381)",
+ "borsh",
  "committee-iso",
  "itertools 0.13.0",
  "serde",
@@ -7034,43 +7010,21 @@ dependencies = [
 [[package]]
 name = "ssz_rs"
 version = "0.9.0"
-source = "git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164#5f1ec833718efa07bbbff427ab28a1eeaa706164"
+source = "git+https://github.com/jonas089/ssz-rs-patched?branch=borsh#a18856d406c14cb7b778f8037388378b6ab098d4"
 dependencies = [
  "alloy-primitives 0.4.2",
  "bitvec",
- "hex",
- "serde",
- "sha2 0.9.9",
- "ssz_rs_derive 0.9.0 (git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164)",
-]
-
-[[package]]
-name = "ssz_rs"
-version = "0.9.0"
-source = "git+https://github.com/jonas089/ssz-rs-patched#d929c16991ff1d36063d09cf1b41e0877c5b32df"
-dependencies = [
- "alloy-primitives 0.4.2",
- "bitvec",
+ "borsh",
  "hex",
  "serde",
  "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "ssz_rs_derive 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched)",
+ "ssz_rs_derive",
 ]
 
 [[package]]
 name = "ssz_rs_derive"
 version = "0.9.0"
-source = "git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164#5f1ec833718efa07bbbff427ab28a1eeaa706164"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "ssz_rs_derive"
-version = "0.9.0"
-source = "git+https://github.com/jonas089/ssz-rs-patched#d929c16991ff1d36063d09cf1b41e0877c5b32df"
+source = "git+https://github.com/jonas089/ssz-rs-patched?branch=borsh#a18856d406c14cb7b778f8037388378b6ab098d4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -7120,7 +7074,7 @@ dependencies = [
  "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "sha2 0.10.8 (git+https://github.com/risc0/RustCrypto-hashes)",
  "sha2 0.11.0-pre.3",
- "ssz_rs 0.9.0 (git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164)",
+ "ssz_rs",
 ]
 
 [[package]]

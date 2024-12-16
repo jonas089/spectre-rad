@@ -1,12 +1,15 @@
 use committee_iso::utils::{merkleize_keys, uint64_to_le_256, verify_merkle_proof};
 use risc0_zkvm::guest::env;
+use std::io::Read;
 use step_iso::{
     types::{SyncStepArgs, SyncStepCircuitInput, SyncStepCircuitOutput},
     verify_aggregate_signature,
 };
 
 fn main() {
-    let inputs: SyncStepCircuitInput = env::read();
+    let mut buffer: Vec<u8> = vec![];
+    let _ = env::stdin().read_to_end(&mut buffer);
+    let inputs: SyncStepCircuitInput = borsh::from_slice(&buffer).unwrap();
     let args: SyncStepArgs = inputs.args;
     verify_merkle_proof(
         args.execution_payload_branch.to_vec(),

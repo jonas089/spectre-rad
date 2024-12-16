@@ -9,7 +9,7 @@ use committee_iso::{
 sp1_zkvm::entrypoint!(main);
 
 pub fn main() {
-    let args: CommitteeUpdateArgs = serde_json::from_slice(&sp1_zkvm::io::read_vec()).unwrap();
+    let args: CommitteeUpdateArgs = borsh::from_slice(&sp1_zkvm::io::read_vec()).unwrap();
     let key_hashs: PublicKeyHashes = hash_keys(args.pubkeys_compressed.clone());
     let committee_root_ssz: Vec<u8> = merkleize_keys(key_hashs);
     let finalized_state_root: Vec<u8> = args.finalized_header.state_root.to_vec();
