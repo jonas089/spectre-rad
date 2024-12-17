@@ -43,12 +43,12 @@ Benchmarking the Step and Committee Circuits on different machines in SP1 and Ri
 ### Committee Circuit
 | Device | Risc0 (sha2 precompile) Elapsed | SP1 (sha2 precompile) Elapsed |
 | ------------- | ------------- | ------------- |
-| A100 (40GB) Lambda Labs, 30 core CPU | 13.59s | 41.23s |
+| A100 (40GB) Lambda Labs, 30 core CPU | 13.59s | 40.51s |
 
 ### Step Circuit
 | Device | Risc0 (sha2 precompile) Elapsed | SP1 (sha2, bls12 precompile) Elapsed |
 | ------------- | ------------- | ------------- | 
-| A100 (40GB) Lambda Labs, 30 core CPU | 427.51s | 418.87s |
+| A100 (40GB) Lambda Labs, 30 core CPU | 321.69s | 418.87s |
 
 # Circuit Inputs and Outputs
 In ZKVMs we refer to public outputs as information committed to the `journal`. Inputs can either be committed or kept a secret.
