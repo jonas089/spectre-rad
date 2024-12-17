@@ -20,6 +20,7 @@ bls12_381 = { git = "https://github.com/zkcrypto/bls12_381", rev = "9ea427c0eb1a
 bls12_381_sp1 = { package = "bls12_381", git = "https://github.com/sp1-patches/bls12_381", optional = true, features = [
     "experimental",
 ] }
+sp1-derive = "3.4.0"
 
 [features]
 risc0 = ["sha2_risc0", "committee-iso/risc0"]

@@ -7074,6 +7074,7 @@ dependencies = [
  "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "sha2 0.10.8 (git+https://github.com/risc0/RustCrypto-hashes)",
  "sha2 0.11.0-pre.3",
+ "sp1-derive",
  "ssz_rs",
 ]
 

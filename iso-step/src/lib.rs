@@ -14,7 +14,6 @@ use committee_iso::utils::{
 };
 use types::Commitment;
 use types::SyncStepArgs;
-
 pub mod types;
 pub mod utils;
 
@@ -46,7 +45,7 @@ fn aggregate_pubkey(args: SyncStepArgs) -> (G1Affine, Commitment) {
         // double if equal, add if unequal
         if generator == affine_projective {
             // double
-            generator = G1Projective::from(generator).double().into();
+            generator = generator.double().into();
         } else {
             // add
             generator = (generator + G1Projective::from(affine)).into();
@@ -56,6 +55,7 @@ fn aggregate_pubkey(args: SyncStepArgs) -> (G1Affine, Commitment) {
     (generator.into(), pubkey_commitment)
 }
 
+#[sp1_derive::cycle_tracker]
 pub fn verify_aggregate_signature(args: SyncStepArgs, committee_commitment: [u8; 32]) {
     const DST: &[u8] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_";
     let (aggregate_key, commitment): (G1Affine, Commitment) = aggregate_pubkey(args.clone());
