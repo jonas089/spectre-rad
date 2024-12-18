@@ -1,6 +1,6 @@
 # Fast, Modular & Secure ZK Ethereum Light Client 🧪
 
-On an `A100` server from lambda labs, this zk light client can verify a committee update and step in `~81 seconds`.
+On an `A100` server from lambda labs, this zk light client can verify a committee update and step in `~97 seconds`.
 
 ## Summary of current state - bottlenecks
 
@@ -45,7 +45,7 @@ Benchmarking the Step and Committee Circuits on different machines in SP1 and Ri
 ### Committee Circuit
 | Device | Risc0 (sha2 precompile) Elapsed | SP1 (sha2 precompile) Elapsed |
 | ------------- | ------------- | ------------- |
-| A100 (40GB) Lambda Labs, 30 core CPU | 13.59s | 40.51s |
+| A100 (40GB) Lambda Labs, 30 core CPU | 29.50s | 40.51s |
 
 ### Step Circuit
 | Device | Risc0 (sha2 precompile) Elapsed | SP1 (sha2, bls12 precompile) Elapsed |
