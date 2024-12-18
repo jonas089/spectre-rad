@@ -1,0 +1,92 @@
+name: Check downstream compiles
+
+on:
+  push:
+    branches:
+      - zkvm
+  pull_request:
+    branches:
+      - zkvm
+
+jobs:
+  check-aptos-lc-compiles:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up git private repo access
+        run: |
+          git config --global url."https://${{ secrets.REPO_TOKEN }}@github.com/".insteadOf ssh://git@github.com
+          git config --global url."https://${{ secrets.REPO_TOKEN }}@github.com".insteadOf https://github.com
+      - uses: actions/checkout@v4
+        with:
+          repository: argumentcomputer/ci-workflows
+          path: ${{ github.workspace }}/ci-workflows
+      - uses: ./ci-workflows/.github/actions/ci-env
+      - uses: ./ci-workflows/.github/actions/install-deps
+        with:
+          packages: "pkg-config libudev-dev"
+      - name: Install cargo-prove and WP1 toolchain
+        run: |
+          git clone https://github.com/wormhole-foundation/wp1.git
+          cd wp1/cli
+          cargo install --locked --path .
+          cd ~
+          cargo prove install-toolchain
+      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@nextest
+      - name: Set env
+        run: |
+          echo "DOWNSTREAM_REPO=$(echo "wormhole-foundation/example-zk-light-clients-internal" | awk -F'/' '{ print $2 }')" | tee -a $GITHUB_ENV
+          echo "UPSTREAM_REPO=$(echo "argumentcomputer/bls12_381" | awk -F'/' '{ print $2 }')" | tee -a $GITHUB_ENV
+      - uses: actions/checkout@v4
+        with:
+          ref: zkvm
+          path: ${{ github.workspace }}/${{ env.UPSTREAM_REPO }}
+          submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          repository: "wormhole-foundation/${{ env.DOWNSTREAM_REPO }}"
+          path: ${{ github.workspace }}/${{ env.DOWNSTREAM_REPO }}
+          token: ${{ secrets.REPO_TOKEN }}
+          submodules: recursive
+      - uses: ./ci-workflows/.github/actions/check-downstream-compiles
+        with:
+          upstream-path: "${{ env.UPSTREAM_REPO }}"
+          downstream-path: "${{ env.DOWNSTREAM_REPO }}/aptos"
+
+  check-wp1-compiles:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up git private repo access
+        run: |
+          git config --global url."https://${{ secrets.REPO_TOKEN }}@github.com/".insteadOf ssh://git@github.com
+          git config --global url."https://${{ secrets.REPO_TOKEN }}@github.com".insteadOf https://github.com
+      - uses: actions/checkout@v4
+        with:
+          repository: argumentcomputer/ci-workflows
+          path: ${{ github.workspace }}/ci-workflows
+      - uses: ./ci-workflows/.github/actions/ci-env
+      - name: Set env
+        run: |
+          echo "DOWNSTREAM_REPO=$(echo "wormhole-foundation/wp1" | awk -F'/' '{ print $2 }')" | tee -a $GITHUB_ENV
+          echo "UPSTREAM_REPO=$(echo "argumentcomputer/bls12_381" | awk -F'/' '{ print $2 }')" | tee -a $GITHUB_ENV
+      - uses: actions/checkout@v4
+        with:
+          ref: zkvm
+          path: ${{ github.workspace }}/${{ env.UPSTREAM_REPO }}
+          submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          repository: "wormhole-foundation/${{ env.DOWNSTREAM_REPO }}"
+          path: ${{ github.workspace }}/${{ env.DOWNSTREAM_REPO }}
+          token: ${{ secrets.REPO_TOKEN }}
+          submodules: recursive
+      - name: Setup CI for wp1
+        uses: ./wp1/.github/actions/setup
+        with:
+          pull_token: ${{ secrets.REPO_TOKEN }}
+          perf: false
+      - uses: ./ci-workflows/.github/actions/check-downstream-compiles
+        with:
+          upstream-path: "${{ env.UPSTREAM_REPO }}"
+          downstream-path: "${{ env.DOWNSTREAM_REPO }}"

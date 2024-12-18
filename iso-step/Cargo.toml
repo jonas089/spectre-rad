@@ -17,7 +17,7 @@ sha2_sp1 = { package = "sha2", git = "https://github.com/sp1-patches/RustCrypto-
 bls12_381 = { git = "https://github.com/zkcrypto/bls12_381", rev = "9ea427c0eb1a7e2ac16902a322aea156c496ddb0", features = [
     "experimental",
 ] }
-bls12_381_sp1 = { package = "bls12_381", git = "https://github.com/sp1-patches/bls12_381", optional = true, features = [
+bls12_381_sp1 = { package = "bls12_381", path = "../bls12_381", optional = true, features = [
     "experimental",
 ] }
 sp1-derive = "3.4.0"
