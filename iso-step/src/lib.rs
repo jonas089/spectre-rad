@@ -79,10 +79,10 @@ pub fn verify_aggregate_signature(args: SyncStepArgs, committee_commitment: [u8;
             .unwrap();
 
     // e(hash_msg,pub_key)=e(signature,g1)
-    /*assert_eq!(
+    assert_eq!(
         pairing(&aggregate_key, &message_g2.into()),
         pairing(&G1Affine::generator(), &signature)
-    );*/
+    );
 }
 
 #[cfg(test)]
