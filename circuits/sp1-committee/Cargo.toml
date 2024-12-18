@@ -7,7 +7,6 @@ edition = "2021"
 sp1-zkvm = "3.4.0"
 serde_json = "1"
 serde = { version = "1", features = ["derive"] }
-bls12_381 = { git = "https://github.com/sp1-patches/bls12_381" }
 itertools = "0.13.0"
 committee-iso = { path = "../../iso-committee", features = [
     "sp1",
