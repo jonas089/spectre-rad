@@ -52,8 +52,14 @@ mod test_circuits {
     }
 
     // SP1 Committee Circuit
-    #[test]
-    fn test_committee_circuit_sp1() {
+
+    enum ProverOps {
+        Default,
+        Groth16,
+        Plonk,
+    }
+
+    fn test_committee_circuit_sp1(ops: ProverOps) {
         use std::time::Instant;
         tracing_subscriber::fmt()
             .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
@@ -66,16 +72,46 @@ mod test_circuits {
         stdin.write_vec(borsh::to_vec(&committee_update).expect("Failed to serialize"));
         let (pk, vk) = client.setup(COMMITTEE_ELF);
         // Generate the proof
-        let proof = client
-            .prove(&pk, stdin)
-            .run()
-            .expect("failed to generate proof");
+        let proof = {
+            match ops {
+                ProverOps::Default => client
+                    .prove(&pk, stdin)
+                    .run()
+                    .expect("failed to generate proof"),
+                ProverOps::Groth16 => client
+                    .prove(&pk, stdin)
+                    .groth16()
+                    .run()
+                    .expect("failed to generate proof"),
+                ProverOps::Plonk => client
+                    .prove(&pk, stdin)
+                    .plonk()
+                    .run()
+                    .expect("failed to generate proof"),
+            }
+        };
         println!("Successfully generated proof!");
         // Verify the proof.
         client.verify(&proof, &vk).expect("failed to verify proof");
         println!("Successfully verified proof!");
         let duration = start_time.elapsed();
         println!("Elapsed time: {:?}", duration);
+    }
+
+    #[test]
+    fn test_committee_circuit_default_sp1() {
+        test_committee_circuit_sp1(ProverOps::Default);
+    }
+
+    // SP1 Committee Circuit Wrapped
+    #[test]
+    fn test_committee_circuit_groth16_sp1() {
+        test_committee_circuit_sp1(ProverOps::Groth16);
+    }
+
+    #[test]
+    fn test_committee_circuit_plonk_sp1() {
+        test_committee_circuit_sp1(ProverOps::Plonk);
     }
 
     // Risc0 Step Circuit
@@ -108,8 +144,7 @@ mod test_circuits {
     }
 
     // SP1 Step Circuit
-    #[test]
-    fn test_step_circuit_sp1() {
+    fn test_step_circuit_sp1(ops: ProverOps) {
         use std::time::Instant;
         sp1_sdk::utils::setup_logger();
         let start_time = Instant::now();
@@ -128,16 +163,45 @@ mod test_circuits {
         stdin.write_vec(borsh::to_vec(&inputs).expect("Failed to serialize"));
         let (pk, vk) = client.setup(STEP_ELF);
         // Generate the proof
-        let proof = client
-            .prove(&pk, stdin)
-            .run()
-            .expect("failed to generate proof");
+        let proof = {
+            match ops {
+                ProverOps::Default => client
+                    .prove(&pk, stdin)
+                    .run()
+                    .expect("failed to generate proof"),
+                ProverOps::Groth16 => client
+                    .prove(&pk, stdin)
+                    .groth16()
+                    .run()
+                    .expect("failed to generate proof"),
+                ProverOps::Plonk => client
+                    .prove(&pk, stdin)
+                    .plonk()
+                    .run()
+                    .expect("failed to generate proof"),
+            }
+        };
         println!("Successfully generated proof!");
         // Verify the proof.
         client.verify(&proof, &vk).expect("failed to verify proof");
         println!("Successfully verified proof!");
         let duration = start_time.elapsed();
         println!("Elapsed time: {:?}", duration);
+    }
+
+    #[test]
+    fn test_step_circuit_default_sp1() {
+        test_step_circuit_sp1(ProverOps::Default);
+    }
+
+    #[test]
+    fn test_step_circuit_groth16_sp1() {
+        test_step_circuit_sp1(ProverOps::Groth16);
+    }
+
+    #[test]
+    fn test_step_circuit_plonk_sp1() {
+        test_step_circuit_sp1(ProverOps::Plonk);
     }
 
     // Aligned Layer

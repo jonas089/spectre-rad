@@ -158,8 +158,6 @@ Example:
 
 `see above`
 
-
-
 ## Metal Acceleration
 
 Use the `-F metal` flag to enable `metal` acceleration on MacOS, for example:
@@ -172,8 +170,18 @@ to run the accelerated `step circuit`.
 
 ## Test Data
 
-Test data for the circuit can be found in `data/rotation_512.json`. 
-It contains a committee update for Beacon with `512` public keys, a merkle branch and the resulting root.
+Test data for the circuit can be found in `data/*.json`. 
+The `rotation_512.json` file is used with the committee circuit,
+the `sync_step_512.json` file is used with the step circuit.
+
+## Deployment - Theory
+
+In order to deploy this prover in production, one would have to query one or more trusted Ethereum consensus nodes for `sync steps` and `committee updates`. 
+Whenever a new `committee update` occurs, it must be applied before new `sync steps` can be proven. A solidity contract should handle the `committee updates` seperately to 
+the `sync steps` and aim to expose the most recent trusted Ethereum root.
+
+> [!NOTE]
+> `Sync steps` are always verified against the most recent committee.
 
 # Integrations - third party proof verification infrastructure
 
