@@ -10,3 +10,6 @@ async fn main() {
     let cli: Cli = Cli::parse();
     run(cli).await;
 }
+
+// Scenario A: Finality step update => only requires step circuit (with uncompressed keys)
+// Scenario B: Committee update => requires both the committee update circuit and step circuit (with compressed and uncompressed keys)

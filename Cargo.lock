@@ -5379,6 +5379,7 @@ dependencies = [
  "committee-iso",
  "ethers 2.0.14 (git+https://github.com/yetanotherco/ethers-rs.git?tag=v2.0.15-fix-reconnections)",
  "hex",
+ "reqwest 0.12.12",
  "risc0-zkvm",
  "rpassword",
  "rusqlite",
