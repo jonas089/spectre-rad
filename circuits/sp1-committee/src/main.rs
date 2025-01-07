@@ -1,4 +1,5 @@
 #![no_main]
+use alloy_sol_types::sol;
 use committee_iso::{
     types::{CommitteeCircuitOutput, CommitteeUpdateArgs, PublicKeyHashes},
     utils::{
@@ -6,8 +7,11 @@ use committee_iso::{
         verify_merkle_proof,
     },
 };
+#[cfg(feature = "wrapped")]
+use ::{
+    alloy_primitives::FixedBytes, alloy_sol_types::SolValue, committee_iso::types::WrappedOutput,
+};
 sp1_zkvm::entrypoint!(main);
-use alloy_sol_types::sol;
 
 sol! {
     struct PublicValuesStruct{
@@ -35,8 +39,18 @@ pub fn main() {
         finalized_state_root.clone(),
         args.finalized_header.body_root.to_vec(),
     ]);
+    #[cfg(not(feature = "wrapped"))]
     sp1_zkvm::io::commit(&CommitteeCircuitOutput::new(
         finalized_header_root.try_into().unwrap(),
         commitment.try_into().unwrap(),
     ));
+    #[cfg(feature = "wrapped")]
+    {
+        let bytes = WrappedOutput::abi_encode(&WrappedOutput {
+            root: FixedBytes::<32>::from_slice(&finalized_header_root),
+            commitment: FixedBytes::<32>::from_slice(&commitment),
+        });
+
+        sp1_zkvm::io::commit_slice(&bytes);
+    }
 }

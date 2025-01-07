@@ -1506,22 +1506,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sp1-committee-wrapped"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives 0.8.18",
- "alloy-sol-types",
- "bincode",
- "borsh",
- "committee-iso",
- "itertools 0.13.0",
- "serde",
- "serde_json",
- "sp1-zkvm",
- "step-iso",
-]
-
-[[package]]
 name = "sp1-derive"
 version = "3.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1543,21 +1527,6 @@ dependencies = [
 
 [[package]]
 name = "sp1-step"
-version = "0.1.0"
-dependencies = [
- "bincode",
- "bls12_381 0.8.0",
- "borsh",
- "committee-iso",
- "itertools 0.13.0",
- "serde",
- "serde_json",
- "sp1-zkvm",
- "step-iso",
-]
-
-[[package]]
-name = "sp1-step-wrapped"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives 0.8.18",

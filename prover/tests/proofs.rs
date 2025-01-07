@@ -71,7 +71,7 @@ mod test_circuits {
                 (proof, pk, vk)
             }
             ProverOps::Groth16 => {
-                const COMMITTEE_ELF: &[u8] = include_elf!("sp1-committee-wrapped");
+                const COMMITTEE_ELF: &[u8] = include_elf!("sp1-committee");
                 let (pk, vk) = client.setup(COMMITTEE_ELF);
                 let proof = client
                     .prove(&pk, stdin)
@@ -81,7 +81,7 @@ mod test_circuits {
                 (proof, pk, vk)
             }
             ProverOps::Plonk => {
-                const COMMITTEE_ELF: &[u8] = include_elf!("sp1-committee-wrapped");
+                const COMMITTEE_ELF: &[u8] = include_elf!("sp1-committee");
                 let (pk, vk) = client.setup(COMMITTEE_ELF);
                 let proof = client
                     .prove(&pk, stdin)
@@ -178,7 +178,7 @@ mod test_circuits {
                 (proof, pk, vk)
             }
             ProverOps::Groth16 => {
-                const STEP_ELF: &[u8] = include_elf!("sp1-step-wrapped");
+                const STEP_ELF: &[u8] = include_elf!("sp1-step");
                 let (pk, vk) = client.setup(STEP_ELF);
                 let proof = client
                     .prove(&pk, stdin)
@@ -188,7 +188,7 @@ mod test_circuits {
                 (proof, pk, vk)
             }
             ProverOps::Plonk => {
-                const STEP_ELF: &[u8] = include_elf!("sp1-step-wrapped");
+                const STEP_ELF: &[u8] = include_elf!("sp1-step");
                 let (pk, vk) = client.setup(STEP_ELF);
                 let proof = client
                     .prove(&pk, stdin)

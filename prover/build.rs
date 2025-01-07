@@ -1,8 +1,11 @@
-use sp1_helper::build_program_with_args;
+use sp1_helper::{build_program_with_args, BuildArgs};
 
 fn main() {
-    build_program_with_args("../circuits/sp1-step", Default::default());
-    build_program_with_args("../circuits/sp1-step-wrapped", Default::default());
-    build_program_with_args("../circuits/sp1-committee", Default::default());
-    build_program_with_args("../circuits/sp1-committee-wrapped", Default::default());
+    let mut args: BuildArgs = Default::default();
+    #[cfg(feature = "wrapped")]
+    {
+        args.features = vec!["wrapped".to_string()];
+    }
+    build_program_with_args("../circuits/sp1-step", args.clone());
+    build_program_with_args("../circuits/sp1-committee", args);
 }

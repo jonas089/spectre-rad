@@ -5,6 +5,8 @@ use step_iso::{
     verify_aggregate_signature,
 };
 sp1_zkvm::entrypoint!(main);
+#[cfg(feature = "wrapped")]
+use ::{alloy_primitives::FixedBytes, alloy_sol_types::SolValue, step_iso::types::WrappedOutput};
 
 pub fn main() {
     let inputs: SyncStepCircuitInput = borsh::from_slice(&sp1_zkvm::io::read_vec()).unwrap();
@@ -32,8 +34,19 @@ pub fn main() {
         105,
     );
     verify_aggregate_signature(args.clone(), inputs.committee_commitment);
-    let output: SyncStepCircuitOutput = SyncStepCircuitOutput {
-        finalized_block_root: finalized_header_root.try_into().unwrap(),
-    };
-    sp1_zkvm::io::commit(&output);
+    #[cfg(not(feature = "wrapped"))]
+    {
+        let output: SyncStepCircuitOutput = SyncStepCircuitOutput {
+            finalized_block_root: finalized_header_root.try_into().unwrap(),
+        };
+        sp1_zkvm::io::commit(&output);
+    }
+    #[cfg(feature = "wrapped")]
+    {
+        let bytes = WrappedOutput::abi_encode(&WrappedOutput {
+            slot: u32::from_str_radix(&args.finalized_header.slot, 10).unwrap(),
+            root: FixedBytes::<32>::from_slice(&finalized_header_root),
+        });
+        sp1_zkvm::io::commit_slice(&bytes);
+    }
 }

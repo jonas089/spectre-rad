@@ -5,9 +5,7 @@ members = [
     "prover",
     "iso-step",
     "circuits/sp1-step",
-    "circuits/sp1-step-wrapped",
     "circuits/sp1-committee",
-    "circuits/sp1-committee-wrapped",
 ]
 
 # Always optimize; building and running the guest takes much longer without optimization.

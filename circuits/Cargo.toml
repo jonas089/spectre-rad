@@ -1,8 +1,3 @@
 [workspace]
-members = [
-    "sp1-step",
-    "sp1-step-wrapped",
-    "sp1-committee",
-    "sp1-committee-wrapped",
-]
+members = ["sp1-step", "sp1-committee"]
 resolver = "2"
