@@ -2,6 +2,7 @@ pub mod constants;
 pub mod types;
 pub mod utils;
 use types::CommitteeUpdateArgs;
+
 #[cfg(test)]
 mod test {
     use crate::{

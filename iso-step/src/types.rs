@@ -1,6 +1,7 @@
 pub type Root = ssz_rs::Node;
 pub type Slot = u64;
 pub type ValidatorIndex = usize;
+use alloy_sol_types::sol;
 use borsh::{BorshDeserialize, BorshSerialize};
 use serde::{Deserialize, Serialize};
 
@@ -43,4 +44,11 @@ pub struct SyncStepCircuitInput {
 #[derive(Debug, Clone, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub struct SyncStepCircuitOutput {
     pub finalized_block_root: [u8; 32],
+}
+
+sol! {
+    struct WrappedOutput{
+        uint32 slot;
+        bytes32 root;
+    }
 }

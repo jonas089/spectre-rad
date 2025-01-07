@@ -21,6 +21,8 @@ bls12_381_sp1 = { package = "bls12_381", path = "../bls12_381", optional = true,
     "experimental",
 ] }
 sp1-derive = "3.4.0"
+alloy-sol-types = "0.8.18"
+
 
 [features]
 risc0 = ["sha2_risc0", "committee-iso/risc0"]

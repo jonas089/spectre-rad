@@ -1,20 +1,15 @@
 #![no_main]
+use alloy_primitives::FixedBytes;
 use committee_iso::{
-    types::{CommitteeCircuitOutput, CommitteeUpdateArgs, PublicKeyHashes},
+    types::{CommitteeUpdateArgs, PublicKeyHashes, WrappedOutput},
     utils::{
         commit_to_keys, decode_pubkeys_x, hash_keys, merkleize_keys, uint64_to_le_256,
         verify_merkle_proof,
     },
 };
 sp1_zkvm::entrypoint!(main);
-use alloy_sol_types::sol;
+use alloy_sol_types::SolType;
 
-sol! {
-    struct PublicValuesStruct{
-        bytes32 root;
-        bytes32 commitment;
-    }
-}
 pub fn main() {
     let args: CommitteeUpdateArgs = borsh::from_slice(&sp1_zkvm::io::read_vec()).unwrap();
     let key_hashs: PublicKeyHashes = hash_keys(args.pubkeys_compressed.clone());
@@ -35,8 +30,11 @@ pub fn main() {
         finalized_state_root.clone(),
         args.finalized_header.body_root.to_vec(),
     ]);
-    sp1_zkvm::io::commit(&CommitteeCircuitOutput::new(
-        finalized_header_root.try_into().unwrap(),
-        commitment.try_into().unwrap(),
-    ));
+
+    let bytes = WrappedOutput::abi_encode(&WrappedOutput {
+        root: FixedBytes::<32>::from_slice(&finalized_header_root),
+        commitment: FixedBytes::<32>::from_slice(&commitment),
+    });
+
+    sp1_zkvm::io::commit_slice(&bytes);
 }

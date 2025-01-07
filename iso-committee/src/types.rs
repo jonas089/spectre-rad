@@ -1,4 +1,5 @@
 use crate::utils::compute_digest;
+use alloy_sol_types::sol;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 
@@ -58,4 +59,11 @@ lazy_static! {
         .try_into()
         .unwrap()
     };
+}
+
+sol! {
+    struct WrappedOutput{
+        bytes32 root;
+        bytes32 commitment;
+    }
 }
