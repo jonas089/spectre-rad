@@ -97,7 +97,7 @@ pub async fn step_args_from_finality_update<S: Spec>(
         )
         .is_ok(),
         "Execution payload merkle proof verification failed"
-    );
+    );*/
     assert!(
         ssz_rs::is_valid_merkle_branch(
             finality_update
@@ -117,7 +117,7 @@ pub async fn step_args_from_finality_update<S: Spec>(
         )
         .is_ok(),
         "Finality merkle proof verification failed"
-    );*/
+    );
 
     Ok(SyncStepArgs {
         signature_compressed: finality_update

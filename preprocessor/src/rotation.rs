@@ -75,7 +75,7 @@ where
             .unwrap(),
     );
 
-    /*assert!(
+    assert!(
         ssz_rs::is_valid_merkle_branch(
             update.next_sync_committee.pubkeys.hash_tree_root().unwrap(),
             &sync_committee_branch
@@ -88,7 +88,7 @@ where
         )
         .is_ok(),
         "Execution payload merkle proof verification failed"
-    );*/
+    );
 
     let args = CommitteeUpdateArgs {
         pubkeys_compressed,
