@@ -6,6 +6,8 @@ members = [
     "iso-step",
     "circuits/sp1-step",
     "circuits/sp1-committee",
+    "preprocessor",
+    "eth-types",
 ]
 
 # Always optimize; building and running the guest takes much longer without optimization.

@@ -1,0 +1,21 @@
+[package]
+name = "eth-types"
+version = "0.1.0"
+authors = ["The appliedzkp team", "timoftime <timofey@chainsafe.io>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+pasta_curves = "0.5.1"
+uint = "0.9.1"
+hex = "0.4"
+serde = { version = "1.0.130", features = ["derive"] }
+serde_json = "1.0.78"
+itertools = "0.12.0"
+regex = "1.5.4"
+lazy_static = "1.4"
+subtle = "2.4"
+num = "0.4"
+num-bigint = { version = "0.4", features = ["rand"] }
+strum_macros = "0.24"
+strum = "0.24"

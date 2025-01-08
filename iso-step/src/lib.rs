@@ -44,10 +44,8 @@ fn aggregate_pubkey(args: SyncStepArgs) -> (G1Affine, Commitment) {
         }
         // double if equal, add if unequal
         if generator == affine_projective {
-            // double
             generator = generator.double().into();
         } else {
-            // add
             generator = (generator + G1Projective::from(affine)).into();
         }
     }
