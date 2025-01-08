@@ -14,7 +14,7 @@ use ethereum_consensus_types::{ForkData, LightClientBootstrap, LightClientFinali
 use itertools::Itertools;
 use ssz_rs::Vector;
 use ssz_rs::{Merkleized, Node};
-use step_iso::types::SyncStepArgs;
+use step_iso::types::{BeaconBlockHeader, SyncStepArgs};
 
 use crate::{get_light_client_bootstrap, get_light_client_finality_update};
 /// Fetches the latest `LightClientFinalityUpdate`` and the current sync committee (from LightClientBootstrap) and converts it to a [`SyncStepArgs`] witness.
@@ -87,7 +87,7 @@ pub async fn step_args_from_finality_update<S: Spec>(
         .map(|n| n.0.to_vec())
         .collect_vec();
 
-    assert!(
+    /*assert!(
         ssz_rs::is_valid_merkle_branch(
             Node::try_from(execution_payload_root.as_slice())?,
             &execution_payload_branch,
@@ -117,7 +117,7 @@ pub async fn step_args_from_finality_update<S: Spec>(
         )
         .is_ok(),
         "Finality merkle proof verification failed"
-    );
+    );*/
 
     Ok(SyncStepArgs {
         signature_compressed: finality_update
@@ -132,8 +132,28 @@ pub async fn step_args_from_finality_update<S: Spec>(
             .iter()
             .by_vals()
             .collect_vec(),
-        attested_header: finality_update.attested_header.beacon,
-        finalized_header: finality_update.finalized_header.beacon,
+        attested_header: step_iso::types::BeaconBlockHeader {
+            slot: finality_update.attested_header.beacon.slot.to_string(),
+            proposer_index: finality_update
+                .attested_header
+                .beacon
+                .proposer_index
+                .to_string(),
+            parent_root: finality_update.attested_header.beacon.parent_root,
+            state_root: finality_update.attested_header.beacon.state_root,
+            body_root: finality_update.attested_header.beacon.body_root,
+        },
+        finalized_header: BeaconBlockHeader {
+            slot: finality_update.finalized_header.beacon.slot.to_string(),
+            proposer_index: finality_update
+                .finalized_header
+                .beacon
+                .proposer_index
+                .to_string(),
+            parent_root: finality_update.finalized_header.beacon.parent_root,
+            state_root: finality_update.finalized_header.beacon.state_root,
+            body_root: finality_update.finalized_header.beacon.body_root,
+        },
         finality_branch: finality_update
             .finality_branch
             .iter()

@@ -903,7 +903,7 @@ checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 [[package]]
 name = "beacon-api-client"
 version = "0.1.0"
-source = "git+https://github.com/ralexstokes/ethereum-consensus.git?rev=f3bff52e9c43866f231ec40c8ab0e34125a8957f#f3bff52e9c43866f231ec40c8ab0e34125a8957f"
+source = "git+https://github.com/jonas089/ethereum-consensus-patched.git#8ebb4402bd1c8b4fba452520259005fb42285ab0"
 dependencies = [
  "clap 4.5.23",
  "ethereum-consensus",
@@ -2437,7 +2437,7 @@ dependencies = [
 [[package]]
 name = "ethereum-consensus"
 version = "0.1.1"
-source = "git+https://github.com/ralexstokes/ethereum-consensus.git?rev=f3bff52e9c43866f231ec40c8ab0e34125a8957f#f3bff52e9c43866f231ec40c8ab0e34125a8957f"
+source = "git+https://github.com/jonas089/ethereum-consensus-patched.git#8ebb4402bd1c8b4fba452520259005fb42285ab0"
 dependencies = [
  "async-stream",
  "blst",
@@ -2453,7 +2453,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "ssz_rs 0.9.0 (git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164)",
+ "ssz_rs 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched?branch=borsh)",
  "thiserror 1.0.69",
  "tokio",
  "tokio-stream",
@@ -2465,10 +2465,20 @@ version = "0.1.0"
 source = "git+https://github.com/ChainSafe/ethereum-consensus-types?branch=capella#2db91f2261fa21ea336bda01c2a80196f8a0863b"
 dependencies = [
  "blst",
+ "hex-literal",
+ "ssz_rs 0.9.0 (git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164)",
+]
+
+[[package]]
+name = "ethereum-consensus-types"
+version = "0.1.0"
+source = "git+https://github.com/jonas089/ethereum-consensus-types-patched#4aa4489686ff5da36977813892e069fa5516d632"
+dependencies = [
+ "blst",
  "hex",
  "hex-literal",
  "serde",
- "ssz_rs 0.9.0 (git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164)",
+ "ssz_rs 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched?branch=borsh)",
 ]
 
 [[package]]
@@ -5676,7 +5686,7 @@ dependencies = [
  "committee-iso",
  "eth-types",
  "ethereum-consensus",
- "ethereum-consensus-types",
+ "ethereum-consensus-types 0.1.0 (git+https://github.com/jonas089/ethereum-consensus-types-patched)",
  "eyre",
  "group 0.13.0",
  "hex",
@@ -5685,7 +5695,7 @@ dependencies = [
  "reqwest 0.11.27",
  "serde",
  "serde_json",
- "ssz_rs 0.9.0 (git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164)",
+ "ssz_rs 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched?branch=borsh)",
  "step-iso",
  "tokio",
 ]
@@ -5843,7 +5853,7 @@ dependencies = [
  "clap 4.5.23",
  "committee-circuit",
  "committee-iso",
- "ethereum-consensus-types",
+ "ethereum-consensus-types 0.1.0 (git+https://github.com/ChainSafe/ethereum-consensus-types?branch=capella)",
  "ethers 2.0.14 (git+https://github.com/yetanotherco/ethers-rs.git?tag=v2.0.15-fix-reconnections)",
  "hex",
  "itertools 0.13.0",

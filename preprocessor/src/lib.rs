@@ -165,9 +165,11 @@ where
     };
 
     let rotation_args = rotation::rotation_args_from_update(update).await?;
+    println!("Rotation Args: {:?}", &rotation_args);
 
     let sync_args =
         step::step_args_from_finality_update(finality_update, pubkeys_compressed, domain).await?;
+    println!("Step Args: {:?}", sync_args);
 
     Ok((sync_args, rotation_args))
 }
@@ -186,7 +188,6 @@ mod tests {
 
     #[tokio::test]
     async fn test_both_circuit_sepolia() {
-        const K: u32 = 21;
         let client =
             MainnetClient::new(Url::parse("https://lodestar-sepolia.chainsafe.io").unwrap());
 
