@@ -1,12 +1,8 @@
 // The Licensed Work is (c) 2023 ChainSafe
 // Code: https://github.com/ChainSafe/Spectre
 // SPDX-License-Identifier: LGPL-3.0-only
-
-use std::marker::PhantomData;
-
 use beacon_api_client::Client;
 use beacon_api_client::{BlockId, ClientTypes, StateId};
-use committee_iso::types::CommitteeUpdateArgs;
 use eth_types::Spec;
 use ethereum_consensus_types::bls::BlsPublicKey;
 use ethereum_consensus_types::signing::{compute_domain, DomainType};
@@ -39,11 +35,8 @@ where
         { S::BYTES_PER_LOGS_BLOOM },
         { S::MAX_EXTRA_DATA_BYTES },
     > = get_light_client_bootstrap(client, block_root).await?;
-
     let pubkeys_compressed = bootstrap.current_sync_committee.pubkeys;
-
     let attested_state_id = finality_update.attested_header.beacon.state_root;
-
     let fork_version = client
         .get_fork(StateId::Root(attested_state_id))
         .await?
@@ -80,6 +73,7 @@ pub async fn step_args_from_finality_update<S: Spec>(
         .clone()
         .hash_tree_root()?
         .to_vec();
+
     let execution_payload_branch = finality_update
         .finalized_header
         .execution_branch
@@ -87,7 +81,7 @@ pub async fn step_args_from_finality_update<S: Spec>(
         .map(|n| n.0.to_vec())
         .collect_vec();
 
-    /*assert!(
+    assert!(
         ssz_rs::is_valid_merkle_branch(
             Node::try_from(execution_payload_root.as_slice())?,
             &execution_payload_branch,
@@ -97,7 +91,8 @@ pub async fn step_args_from_finality_update<S: Spec>(
         )
         .is_ok(),
         "Execution payload merkle proof verification failed"
-    );*/
+    );
+
     assert!(
         ssz_rs::is_valid_merkle_branch(
             finality_update

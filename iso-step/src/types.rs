@@ -1,5 +1,4 @@
-pub type Root = ssz_rs::Node;
-pub type Slot = u64;
+pub type Node = ssz_rs::Node;
 pub type ValidatorIndex = usize;
 use alloy_sol_types::sol;
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -11,9 +10,9 @@ use serde::{Deserialize, Serialize};
 pub struct BeaconBlockHeader {
     pub slot: String,
     pub proposer_index: String,
-    pub parent_root: Root,
-    pub state_root: Root,
-    pub body_root: Root,
+    pub parent_root: Node,
+    pub state_root: Node,
+    pub body_root: Node,
 }
 
 pub type PublicKeysUncompressed = Vec<Vec<u8>>;

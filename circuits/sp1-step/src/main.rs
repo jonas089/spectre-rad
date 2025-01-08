@@ -12,12 +12,12 @@ pub fn main() {
     let inputs: SyncStepCircuitInput = borsh::from_slice(&sp1_zkvm::io::read_vec()).unwrap();
     let args: SyncStepArgs = inputs.args;
 
-    /*verify_merkle_proof(
+    verify_merkle_proof(
         args.execution_payload_branch.to_vec(),
         args.execution_payload_root.clone(),
         &args.finalized_header.body_root.to_vec(),
         9,
-    );*/
+    );
 
     let finalized_header_root: Vec<u8> = merkleize_keys(vec![
         uint64_to_le_256(args.finalized_header.slot.parse::<u64>().unwrap()),

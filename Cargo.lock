@@ -5847,6 +5847,7 @@ version = "0.1.0"
 dependencies = [
  "aligned-sdk",
  "alloy-sol-types 0.8.18",
+ "beacon-api-client",
  "bincode",
  "bls12_381 0.8.0 (git+https://github.com/zkcrypto/bls12_381?rev=9ea427c0eb1a7e2ac16902a322aea156c496ddb0)",
  "borsh",
@@ -5858,6 +5859,7 @@ dependencies = [
  "hex",
  "itertools 0.13.0",
  "k256 0.13.4",
+ "preprocessor",
  "reqwest 0.12.12",
  "risc0-zkvm",
  "rpassword",
