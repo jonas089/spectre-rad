@@ -14,9 +14,9 @@ required-features = ["test-gen"]
 
 
 [dependencies]
-ssz_rs = { git = "https://github.com/jonas089/ssz-rs-patched", branch = "borsh" }
+ssz_rs = { git = "https://github.com/jonas089/ssz-patched-crates" }
 group = "0.13"
-beacon-api-client = { git = "https://github.com/jonas089/ethereum-consensus-patched.git" }
+beacon-api-client = { git = "https://github.com/jonas089/ssz-patched-crates" }
 step-iso = { path = "../iso-step" }
 committee-iso = { path = "../iso-committee" }
 # misc
@@ -28,7 +28,7 @@ log = "0.4.14"
 itertools = "0.12.0"
 serde = { version = "1.0.130", features = ["derive"] }
 serde_json = "1.0.78"
-ethereum-consensus-types = { git = "https://github.com/jonas089/ethereum-consensus-types-patched", features = [
+ethereum-consensus-types = { git = "https://github.com/jonas089/ssz-patched-crates", features = [
     "serde",
 ] }
 
@@ -37,7 +37,7 @@ eth-types = { path = "../eth-types" }
 reqwest = "0.11.22"
 
 # for test gen binary
-ethereum-consensus = { git = "https://github.com/jonas089/ethereum-consensus-patched.git", optional = true }
+ethereum-consensus = { git = "https://github.com/jonas089/ssz-patched-crates", optional = true }
 blst = { version = "0.3.11", default-features = false, features = [
     "portable",
     "no-threads",

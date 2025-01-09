@@ -903,7 +903,7 @@ checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 [[package]]
 name = "beacon-api-client"
 version = "0.1.0"
-source = "git+https://github.com/jonas089/ethereum-consensus-patched.git#8ebb4402bd1c8b4fba452520259005fb42285ab0"
+source = "git+https://github.com/jonas089/ssz-patched-crates#986b6e9a6045793a424968d94d2baa57fddc3dfa"
 dependencies = [
  "clap 4.5.23",
  "ethereum-consensus",
@@ -1525,7 +1525,7 @@ dependencies = [
  "sha2 0.10.6",
  "sha2 0.10.8 (git+https://github.com/sp1-patches/RustCrypto-hashes?branch=patch-sha2-v0.10.8)",
  "sha2 0.10.8 (git+https://github.com/risc0/RustCrypto-hashes)",
- "ssz_rs 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched?branch=borsh)",
+ "ssz_rs",
 ]
 
 [[package]]
@@ -2437,7 +2437,7 @@ dependencies = [
 [[package]]
 name = "ethereum-consensus"
 version = "0.1.1"
-source = "git+https://github.com/jonas089/ethereum-consensus-patched.git#8ebb4402bd1c8b4fba452520259005fb42285ab0"
+source = "git+https://github.com/jonas089/ssz-patched-crates#986b6e9a6045793a424968d94d2baa57fddc3dfa"
 dependencies = [
  "async-stream",
  "blst",
@@ -2453,7 +2453,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "ssz_rs 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched?branch=borsh)",
+ "ssz_rs",
  "thiserror 1.0.69",
  "tokio",
  "tokio-stream",
@@ -2462,23 +2462,13 @@ dependencies = [
 [[package]]
 name = "ethereum-consensus-types"
 version = "0.1.0"
-source = "git+https://github.com/ChainSafe/ethereum-consensus-types?branch=capella#2db91f2261fa21ea336bda01c2a80196f8a0863b"
-dependencies = [
- "blst",
- "hex-literal",
- "ssz_rs 0.9.0 (git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164)",
-]
-
-[[package]]
-name = "ethereum-consensus-types"
-version = "0.1.0"
-source = "git+https://github.com/jonas089/ethereum-consensus-types-patched#4aa4489686ff5da36977813892e069fa5516d632"
+source = "git+https://github.com/jonas089/ssz-patched-crates#986b6e9a6045793a424968d94d2baa57fddc3dfa"
 dependencies = [
  "blst",
  "hex",
  "hex-literal",
  "serde",
- "ssz_rs 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched?branch=borsh)",
+ "ssz_rs",
 ]
 
 [[package]]
@@ -5686,7 +5676,7 @@ dependencies = [
  "committee-iso",
  "eth-types",
  "ethereum-consensus",
- "ethereum-consensus-types 0.1.0 (git+https://github.com/jonas089/ethereum-consensus-types-patched)",
+ "ethereum-consensus-types",
  "eyre",
  "group 0.13.0",
  "hex",
@@ -5695,7 +5685,7 @@ dependencies = [
  "reqwest 0.11.27",
  "serde",
  "serde_json",
- "ssz_rs 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched?branch=borsh)",
+ "ssz_rs",
  "step-iso",
  "tokio",
 ]
@@ -5854,7 +5844,7 @@ dependencies = [
  "clap 4.5.23",
  "committee-circuit",
  "committee-iso",
- "ethereum-consensus-types 0.1.0 (git+https://github.com/ChainSafe/ethereum-consensus-types?branch=capella)",
+ "ethereum-consensus-types",
  "ethers 2.0.14 (git+https://github.com/yetanotherco/ethers-rs.git?tag=v2.0.15-fix-reconnections)",
  "hex",
  "itertools 0.13.0",
@@ -5868,7 +5858,7 @@ dependencies = [
  "serde_json",
  "sp1-helper",
  "sp1-sdk",
- "ssz_rs 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched?branch=borsh)",
+ "ssz_rs",
  "step-circuit",
  "step-iso",
  "tokio",
@@ -7928,7 +7918,7 @@ dependencies = [
 [[package]]
 name = "ssz_rs"
 version = "0.9.0"
-source = "git+https://github.com/jonas089/ssz-rs-patched?branch=borsh#a18856d406c14cb7b778f8037388378b6ab098d4"
+source = "git+https://github.com/jonas089/ssz-patched-crates#986b6e9a6045793a424968d94d2baa57fddc3dfa"
 dependencies = [
  "alloy-primitives 0.4.2",
  "bitvec",
@@ -7936,36 +7926,13 @@ dependencies = [
  "hex",
  "serde",
  "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "ssz_rs_derive 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched?branch=borsh)",
-]
-
-[[package]]
-name = "ssz_rs"
-version = "0.9.0"
-source = "git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164#5f1ec833718efa07bbbff427ab28a1eeaa706164"
-dependencies = [
- "alloy-primitives 0.4.2",
- "bitvec",
- "hex",
- "serde",
- "sha2 0.9.9",
- "ssz_rs_derive 0.9.0 (git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164)",
+ "ssz_rs_derive",
 ]
 
 [[package]]
 name = "ssz_rs_derive"
 version = "0.9.0"
-source = "git+https://github.com/jonas089/ssz-rs-patched?branch=borsh#a18856d406c14cb7b778f8037388378b6ab098d4"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "ssz_rs_derive"
-version = "0.9.0"
-source = "git+https://github.com/ralexstokes/ssz-rs?rev=5f1ec833718efa07bbbff427ab28a1eeaa706164#5f1ec833718efa07bbbff427ab28a1eeaa706164"
+source = "git+https://github.com/jonas089/ssz-patched-crates#986b6e9a6045793a424968d94d2baa57fddc3dfa"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -8017,7 +7984,7 @@ dependencies = [
  "sha2 0.10.8 (git+https://github.com/sp1-patches/RustCrypto-hashes?branch=patch-sha2-v0.10.8)",
  "sha2 0.10.8 (git+https://github.com/risc0/RustCrypto-hashes)",
  "sp1-derive",
- "ssz_rs 0.9.0 (git+https://github.com/jonas089/ssz-rs-patched?branch=borsh)",
+ "ssz_rs",
 ]
 
 [[package]]

@@ -9,7 +9,7 @@ serde = { version = "1", features = ["derive"] }
 borsh = { version = "1.5.3", features = ["derive"] }
 itertools = "0.13.0"
 committee-iso = { path = "../iso-committee" }
-ssz_rs = { git = "https://github.com/jonas089/ssz-rs-patched", branch = "borsh" }
+ssz_rs = { git = "https://github.com/jonas089/ssz-patched-crates" }
 sha2 = "0.10.8"
 sha2_risc0 = { package = "sha2", git = "https://github.com/risc0/RustCrypto-hashes", optional = true }
 sha2_sp1 = { package = "sha2", git = "https://github.com/sp1-patches/RustCrypto-hashes", branch = "patch-sha2-v0.10.8", optional = true }

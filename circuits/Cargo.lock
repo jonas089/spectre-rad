@@ -1570,7 +1570,7 @@ dependencies = [
 [[package]]
 name = "ssz_rs"
 version = "0.9.0"
-source = "git+https://github.com/jonas089/ssz-rs-patched?branch=borsh#a18856d406c14cb7b778f8037388378b6ab098d4"
+source = "git+https://github.com/jonas089/ssz-patched-crates#986b6e9a6045793a424968d94d2baa57fddc3dfa"
 dependencies = [
  "alloy-primitives 0.4.2",
  "bitvec",
@@ -1584,7 +1584,7 @@ dependencies = [
 [[package]]
 name = "ssz_rs_derive"
 version = "0.9.0"
-source = "git+https://github.com/jonas089/ssz-rs-patched?branch=borsh#a18856d406c14cb7b778f8037388378b6ab098d4"
+source = "git+https://github.com/jonas089/ssz-patched-crates#986b6e9a6045793a424968d94d2baa57fddc3dfa"
 dependencies = [
  "proc-macro2",
  "quote",
