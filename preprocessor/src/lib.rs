@@ -177,6 +177,7 @@ mod tests {
     use eth_types::Testnet;
     use ethereum_consensus_types::signing::{compute_domain, DomainType};
     use ethereum_consensus_types::ForkData;
+    use prover::generate_committee_update_proof_sp1;
 
     use super::*;
     use beacon_api_client::mainnet::Client as MainnetClient;
@@ -262,5 +263,6 @@ mod tests {
             state_root: s.finalized_header.clone().state_root,
             body_root: s.finalized_header.clone().body_root,
         };
+        let _proof = generate_committee_update_proof_sp1(&prover::ProverOps::Default, c);
     }
 }

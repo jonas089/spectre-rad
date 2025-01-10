@@ -1,16 +1,14 @@
 // The Licensed Work is (c) 2023 ChainSafe
 // Code: https://github.com/ChainSafe/Spectre
 // SPDX-License-Identifier: LGPL-3.0-only
+use crate::{get_block_header, get_light_client_update_at_period};
 use beacon_api_client::{BlockId, Client, ClientTypes};
 use committee_iso::types::CommitteeUpdateArgs;
 use eth_types::Spec;
 use ethereum_consensus_types::LightClientUpdateCapella;
 use itertools::Itertools;
 use log::debug;
-use ssz_rs::Merkleized;
-
-use crate::{get_block_header, get_light_client_update_at_period};
-
+use ssz_rs::{Merkleized, Node};
 /// Fetches LightClientUpdate from the beacon client and converts it to a [`CommitteeUpdateArgs`] witness
 pub async fn fetch_rotation_args<S: Spec, C: ClientTypes>(
     client: &Client<C>,
@@ -76,11 +74,11 @@ where
     );
 
     assert!(
-        ssz_rs::is_valid_merkle_branch(
+        ssz_rs::is_valid_merkle_branch::<&[u8]>(
             update.next_sync_committee.pubkeys.hash_tree_root().unwrap(),
             &sync_committee_branch
                 .iter()
-                .map(|n| n.as_ref())
+                .map(|n: &Node| n.as_ref())
                 .collect_vec(),
             S::SYNC_COMMITTEE_PUBKEYS_DEPTH,
             S::SYNC_COMMITTEE_PUBKEYS_ROOT_INDEX,
