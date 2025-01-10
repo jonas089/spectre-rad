@@ -183,7 +183,7 @@ mod tests {
     use reqwest::Url;
 
     #[tokio::test]
-    async fn test_both_circuit_sepolia() {
+    async fn e2e_integration_test() {
         let client =
             MainnetClient::new(Url::parse("https://lodestar-sepolia.chainsafe.io").unwrap());
 

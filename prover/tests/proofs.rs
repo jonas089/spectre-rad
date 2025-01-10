@@ -6,6 +6,7 @@ mod test_circuits {
         types::{CommitteeCircuitOutput, CommitteeUpdateArgs, WrappedOutput},
         utils::load_circuit_args_env as load_committee_args_env,
     };
+    use prover::ProverOps;
     use risc0_zkvm::{default_prover, ExecutorEnv};
     use serde::{Deserialize, Serialize};
     use sp1_sdk::{
@@ -40,13 +41,6 @@ mod test_circuits {
         println!("Public output: {:?}", &output);
         let duration = start_time.elapsed();
         println!("Elapsed time: {:?}", duration);
-    }
-
-    // SP1 Committee Circuit
-    enum ProverOps {
-        Default,
-        Groth16,
-        Plonk,
     }
 
     fn test_committee_circuit_sp1(ops: &ProverOps) -> (SP1ProofWithPublicValues, SP1VerifyingKey) {
