@@ -30,7 +30,7 @@ mod test {
     fn test_compute_pubkey_commitment() {
         let args: CommitteeUpdateArgs = load_circuit_args_env();
         let keys = decode_pubkeys_x(args.pubkeys_compressed);
-        let commitment = commit_to_keys(keys.0, keys.1);
+        let commitment = commit_to_keys(keys.0);
         println!("Commitment: {:?}", &commitment);
     }
 }

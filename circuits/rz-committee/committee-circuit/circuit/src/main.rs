@@ -16,7 +16,7 @@ fn main() {
     let committee_root_ssz: Vec<u8> = merkleize_keys(key_hashs);
     let finalized_state_root: Vec<u8> = args.finalized_header.state_root.to_vec();
     let (keys, signs) = decode_pubkeys_x(args.pubkeys_compressed);
-    let commitment = commit_to_keys(keys, signs);
+    let commitment = commit_to_keys(keys);
 
     verify_merkle_proof(
         args.sync_committee_branch,

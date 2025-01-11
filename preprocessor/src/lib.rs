@@ -172,48 +172,47 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::path::Path;
+
+    use super::*;
+    use alloy_sol_types::SolType;
+    use beacon_api_client::mainnet::Client as MainnetClient;
     use beacon_api_client::StateId;
-    use committee_iso::types::BeaconBlockHeader;
+    use committee_iso::types::{BeaconBlockHeader, WrappedOutput};
     use eth_types::Testnet;
     use ethereum_consensus_types::signing::{compute_domain, DomainType};
     use ethereum_consensus_types::ForkData;
-    use prover::generate_committee_update_proof_sp1;
-
-    use super::*;
-    use beacon_api_client::mainnet::Client as MainnetClient;
+    use prover::{generate_committee_update_proof_sp1, generate_step_proof_sp1};
     use reqwest::Url;
+    use sp1_sdk::ProverClient;
 
-    #[tokio::test]
-    async fn e2e_integration_test() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn beacon_client_e2e_test_prover() {
+        let path = Path::new("/Users/chef/.sp1/circuits/plonk/v3.0.0");
+        tokio::fs::remove_dir_all(path)
+            .await
+            .expect("Failed to remove directory");
         let client =
             MainnetClient::new(Url::parse("https://lodestar-sepolia.chainsafe.io").unwrap());
-
         let block = get_block_header(&client, BlockId::Finalized).await.unwrap();
         let slot = block.slot;
         let period = slot / (32 * 256);
-
         println!(
             "Fetching light client update at current Slot: {} at Period: {}",
             slot, period
         );
-
-        // Fetch light client update and create circuit arguments
         let (s, mut c) = {
             let update = get_light_client_update_at_period(&client, period)
                 .await
                 .unwrap();
-
             let block_root = client
                 .get_beacon_block_root(BlockId::Slot(slot))
                 .await
                 .unwrap();
-
             let bootstrap = get_light_client_bootstrap(&client, block_root)
                 .await
                 .unwrap();
-
             let pubkeys_compressed = bootstrap.current_sync_committee.pubkeys;
-
             let fork_version = client
                 .get_fork(StateId::Head)
                 .await
@@ -233,7 +232,6 @@ mod tests {
                 .await
                 .unwrap()
         };
-
         let mut finalized_sync_committee_branch = {
             let block_root = client
                 .get_beacon_block_root(BlockId::Slot(
@@ -250,12 +248,9 @@ mod tests {
                 .map(|n| n.to_vec())
                 .collect_vec()
         };
-
-        // Magic swap of sync committee branch
         finalized_sync_committee_branch.insert(0, c.sync_committee_branch[0].clone());
         finalized_sync_committee_branch[1] = c.sync_committee_branch[1].clone();
         c.sync_committee_branch = finalized_sync_committee_branch;
-        // Replaces the attested header with step circuits finalized header
         c.finalized_header = BeaconBlockHeader {
             slot: s.finalized_header.clone().slot,
             proposer_index: s.finalized_header.clone().proposer_index,
@@ -263,6 +258,28 @@ mod tests {
             state_root: s.finalized_header.clone().state_root,
             body_root: s.finalized_header.clone().body_root,
         };
-        let _proof = generate_committee_update_proof_sp1(&prover::ProverOps::Default, c);
+        let committee_proof_payload =
+            generate_committee_update_proof_sp1(&prover::ProverOps::Plonk, c);
+        let committee_outputs: WrappedOutput =
+            WrappedOutput::abi_decode(&committee_proof_payload.0.public_values.as_slice(), false)
+                .unwrap();
+        let client = ProverClient::new();
+        client
+            .verify(&committee_proof_payload.0, &committee_proof_payload.1)
+            .expect("failed to verify committee proof");
+
+        let path = Path::new("/Users/chef/.sp1/circuits/plonk/v3.0.0");
+        tokio::fs::remove_dir_all(path)
+            .await
+            .expect("Failed to remove directory");
+
+        let step_proof_payload = generate_step_proof_sp1(
+            &prover::ProverOps::Plonk,
+            committee_outputs.commitment.to_vec().try_into().unwrap(),
+            s,
+        );
+        client
+            .verify(&step_proof_payload.0, &step_proof_payload.1)
+            .expect("failed to verify step proof");
     }
 }

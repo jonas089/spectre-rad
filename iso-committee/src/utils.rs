@@ -111,12 +111,11 @@ pub fn compute_digest(input: &[u8]) -> Vec<u8> {
     hasher.finalize().to_vec()
 }
 
-pub fn commit_to_keys(keys: Vec<BigUint>, signs: Vec<u8>) -> [u8; 32] {
+pub fn commit_to_keys(keys: Vec<BigUint>) -> [u8; 32] {
     let mut input: Vec<u8> = vec![];
     for key in keys {
         input.extend_from_slice(&key.to_bytes_be());
     }
-    input.extend_from_slice(&signs);
     compute_digest(&input).try_into().unwrap()
 }
 
@@ -136,7 +135,7 @@ mod tests {
         let args: CommitteeUpdateArgs = load_circuit_args_env();
         let compressed: (Vec<num_bigint::BigUint>, Vec<u8>) =
             decode_pubkeys_x(args.pubkeys_compressed.clone());
-        let commitment = commit_to_keys(compressed.0, compressed.1);
+        let commitment = commit_to_keys(compressed.0);
         println!("Commitment: {:?}", &commitment);
     }
 
@@ -145,7 +144,7 @@ mod tests {
         let args: CommitteeUpdateArgs = load_circuit_args_env();
         let compressed: (Vec<num_bigint::BigUint>, Vec<u8>) =
             decode_pubkeys_x(args.pubkeys_compressed.clone());
-        let commitment = commit_to_keys(compressed.0, compressed.1);
+        let commitment = commit_to_keys(compressed.0);
         println!("Commitment: {:?}", &commitment);
     }
 }

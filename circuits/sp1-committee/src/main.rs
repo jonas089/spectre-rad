@@ -12,20 +12,13 @@ use ::{
     alloy_primitives::FixedBytes, alloy_sol_types::SolValue, committee_iso::types::WrappedOutput,
 };
 sp1_zkvm::entrypoint!(main);
-
-sol! {
-    struct PublicValuesStruct{
-        bytes32 root;
-        bytes32 commitment;
-    }
-}
 pub fn main() {
     let args: CommitteeUpdateArgs = borsh::from_slice(&sp1_zkvm::io::read_vec()).unwrap();
     let key_hashs: PublicKeyHashes = hash_keys(args.pubkeys_compressed.clone());
     let committee_root_ssz: Vec<u8> = merkleize_keys(key_hashs);
     let finalized_state_root: Vec<u8> = args.finalized_header.state_root.to_vec();
     let (keys, signs) = decode_pubkeys_x(args.pubkeys_compressed);
-    let commitment = commit_to_keys(keys, signs);
+    let commitment = commit_to_keys(keys);
     verify_merkle_proof(
         args.sync_committee_branch,
         committee_root_ssz,
@@ -42,7 +35,7 @@ pub fn main() {
     #[cfg(not(feature = "wrapped"))]
     sp1_zkvm::io::commit(&CommitteeCircuitOutput::new(
         finalized_header_root.try_into().unwrap(),
-        commitment.try_into().unwrap(),
+        commitment,
     ));
     #[cfg(feature = "wrapped")]
     {

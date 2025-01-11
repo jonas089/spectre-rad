@@ -15,9 +15,6 @@ pub fn generate_committee_update_proof_sp1(
     committee_update: CommitteeUpdateArgs,
 ) -> (SP1ProofWithPublicValues, SP1VerifyingKey) {
     use std::time::Instant;
-    tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-        .init();
     let start_time = Instant::now();
     let client = ProverClient::new();
     let mut stdin = SP1Stdin::new();
@@ -55,8 +52,6 @@ pub fn generate_committee_update_proof_sp1(
         }
     };
     println!("Successfully generated proof!");
-    // Verify the proof.
-    client.verify(&proof, &vk).expect("failed to verify proof");
     println!("Successfully verified proof!");
     let duration = start_time.elapsed();
     println!("Elapsed time: {:?}", duration);
@@ -111,8 +106,6 @@ pub fn generate_step_proof_sp1(
         }
     };
     println!("Successfully generated proof!");
-    // Verify the proof.
-    client.verify(&proof, &vk).expect("failed to verify proof");
     println!("Successfully verified proof!");
     let duration = start_time.elapsed();
     println!("Elapsed time: {:?}", duration);

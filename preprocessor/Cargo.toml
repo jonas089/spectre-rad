@@ -19,10 +19,8 @@ group = "0.13"
 beacon-api-client = { git = "https://github.com/jonas089/ssz-patched-crates" }
 step-iso = { path = "../iso-step" }
 committee-iso = { path = "../iso-committee" }
-# misc
 eyre = "0.6"
 tokio = { version = "1", features = ["full"] }
-
 hex = "0.4"
 log = "0.4.14"
 itertools = "0.12.0"
@@ -31,19 +29,19 @@ serde_json = "1.0.78"
 ethereum-consensus-types = { git = "https://github.com/jonas089/ssz-patched-crates", features = [
     "serde",
 ] }
-
-# local
+borsh = { version = "1.5.3", features = ["derive"] }
+sp1-sdk = "3.4.0"
 eth-types = { path = "../eth-types" }
 reqwest = "0.11.22"
-
-# for test gen binary
+alloy-sol-types = "0.8.18"
+alloy-primitives = "0.8.18"
 ethereum-consensus = { git = "https://github.com/jonas089/ssz-patched-crates", optional = true }
 blst = { version = "0.3.11", default-features = false, features = [
     "portable",
     "no-threads",
 ], optional = true }
 
-prover = { path = "../prover" }
+prover = { path = "../prover", features = ["wrapped"] }
 
 [features]
 test-gen = ["ethereum-consensus", "blst"]
