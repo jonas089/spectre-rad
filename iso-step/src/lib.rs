@@ -86,8 +86,7 @@ fn aggregate_pubkey(args: SyncStepArgs) -> (G1Affine, Commitment) {
 pub fn verify_aggregate_signature(args: SyncStepArgs, committee_commitment: [u8; 32]) {
     const DST: &[u8] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_";
     let (aggregate_key, commitment): (G1Affine, Commitment) = aggregate_pubkey(args.clone());
-    // currently failing with the beacon e2e test for an unknown reason
-    //assert_eq!(commitment, committee_commitment);
+    assert_eq!(commitment, committee_commitment);
     let attested_header_root = merkleize_keys(vec![
         uint64_to_le_256(args.attested_header.slot.parse::<u64>().unwrap()),
         uint64_to_le_256(args.attested_header.proposer_index.parse::<u64>().unwrap()),

@@ -33,6 +33,7 @@ pub fn main() {
         &args.attested_header.state_root.to_vec(),
         105,
     );
+
     verify_aggregate_signature(args.clone(), inputs.committee_commitment);
     #[cfg(not(feature = "wrapped"))]
     {

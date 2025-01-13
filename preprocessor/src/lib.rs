@@ -167,24 +167,25 @@ where
     let rotation_args = rotation::rotation_args_from_update(update).await?;
     let sync_args =
         step::step_args_from_finality_update(finality_update, pubkeys_compressed, domain).await?;
+
     Ok((sync_args, rotation_args))
 }
 
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
-
     use super::*;
     use alloy_sol_types::SolType;
     use beacon_api_client::mainnet::Client as MainnetClient;
     use beacon_api_client::StateId;
     use committee_iso::types::{BeaconBlockHeader, WrappedOutput};
+    use committee_iso::utils::{commit_to_keys, decode_pubkeys_x};
     use eth_types::Testnet;
     use ethereum_consensus_types::signing::{compute_domain, DomainType};
     use ethereum_consensus_types::ForkData;
     use prover::{generate_committee_update_proof_sp1, generate_step_proof_sp1};
     use reqwest::Url;
     use sp1_sdk::ProverClient;
+    use std::path::Path;
     use step_iso::{compress_keys, decompress_keys};
 
     #[tokio::test(flavor = "multi_thread")]
@@ -205,7 +206,7 @@ mod tests {
             "Fetching light client update at current Slot: {} at Period: {}",
             slot, period
         );
-        let (s, mut c) = {
+        let ((s, mut c), oc) = {
             let update = get_light_client_update_at_period(&client, period)
                 .await
                 .unwrap();
@@ -217,6 +218,11 @@ mod tests {
                 .await
                 .unwrap();
             let pubkeys_compressed = bootstrap.current_sync_committee.pubkeys;
+            let oc = pubkeys_compressed
+                .iter()
+                .map(|pk| pk.to_bytes().to_vec())
+                .collect_vec();
+
             let fork_version = client
                 .get_fork(StateId::Head)
                 .await
@@ -232,9 +238,12 @@ mod tests {
                 fork_version,
             };
             let domain = compute_domain(DomainType::SyncCommittee, &fork_data).unwrap();
-            light_client_update_to_args::<Testnet>(&update, pubkeys_compressed, domain)
-                .await
-                .unwrap()
+            (
+                light_client_update_to_args::<Testnet>(&update, pubkeys_compressed, domain)
+                    .await
+                    .unwrap(),
+                oc,
+            )
         };
         let mut finalized_sync_committee_branch = {
             let block_root = client
@@ -262,12 +271,15 @@ mod tests {
             state_root: s.finalized_header.clone().state_root,
             body_root: s.finalized_header.clone().body_root,
         };
-
-        /*let committee_proof_payload =
+        assert_eq!(
+            s.pubkeys_uncompressed,
+            decompress_keys(c.pubkeys_compressed.clone())
+        );
+        let committee_proof_payload =
             generate_committee_update_proof_sp1(&prover::ProverOps::Plonk, c);
-        let committee_outputs: WrappedOutput =
-            WrappedOutput::abi_decode(&committee_proof_payload.0.public_values.as_slice(), false)
-                .unwrap();
+        /*let committee_outputs: WrappedOutput =
+        WrappedOutput::abi_decode(&committee_proof_payload.0.public_values.as_slice(), false)
+            .unwrap();*/
         let client = ProverClient::new();
         client
             .verify(&committee_proof_payload.0, &committee_proof_payload.1)
@@ -279,18 +291,14 @@ mod tests {
                 .await
                 .expect("Failed to remove directory");
         }
-
+        let commitment = commit_to_keys(decode_pubkeys_x(oc.clone()).0);
         let step_proof_payload = generate_step_proof_sp1(
             &prover::ProverOps::Plonk,
-            committee_outputs
-                .committee_commitment
-                .to_vec()
-                .try_into()
-                .unwrap(),
+            commitment.to_vec().try_into().unwrap(),
             s,
         );
         client
             .verify(&step_proof_payload.0, &step_proof_payload.1)
-            .expect("failed to verify step proof");*/
+            .expect("failed to verify step proof");
     }
 }
