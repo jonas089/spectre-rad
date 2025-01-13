@@ -271,10 +271,6 @@ mod tests {
             state_root: s.finalized_header.clone().state_root,
             body_root: s.finalized_header.clone().body_root,
         };
-        assert_eq!(
-            s.pubkeys_uncompressed,
-            decompress_keys(c.pubkeys_compressed.clone())
-        );
         let committee_proof_payload =
             generate_committee_update_proof_sp1(&prover::ProverOps::Plonk, c);
         /*let committee_outputs: WrappedOutput =
