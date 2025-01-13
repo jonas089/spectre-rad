@@ -34,14 +34,14 @@ pub fn main() {
     ]);
     #[cfg(not(feature = "wrapped"))]
     sp1_zkvm::io::commit(&CommitteeCircuitOutput::new(
+        commitment.to_vec(),
         finalized_header_root.try_into().unwrap(),
-        commitment,
     ));
     #[cfg(feature = "wrapped")]
     {
         let bytes = WrappedOutput::abi_encode(&WrappedOutput {
-            root: FixedBytes::<32>::from_slice(&finalized_header_root),
-            commitment: FixedBytes::<32>::from_slice(&commitment),
+            committee_commitment: FixedBytes::<32>::from_slice(&commitment),
+            finalized_header_root: FixedBytes::<32>::from_slice(&finalized_header_root),
         });
 
         sp1_zkvm::io::commit_slice(&bytes);

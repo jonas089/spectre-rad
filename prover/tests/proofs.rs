@@ -235,10 +235,13 @@ mod test_circuits {
         ops: &ProverOps,
     ) {
         let bytes = proof.public_values.as_slice();
-        let WrappedOutput { root, commitment } = WrappedOutput::abi_decode(bytes, false).unwrap();
+        let WrappedOutput {
+            finalized_header_root,
+            committee_commitment,
+        } = WrappedOutput::abi_decode(bytes, false).unwrap();
         let fixture = ProofFixture {
-            root: format!("0x{}", hex::encode(root)),
-            commitment: format!("0x{}", hex::encode(commitment)),
+            root: format!("0x{}", hex::encode(finalized_header_root)),
+            commitment: format!("0x{}", hex::encode(committee_commitment)),
             vkey: vk.bytes32().to_string(),
             public_values: format!("0x{}", hex::encode(bytes)),
             proof: format!("0x{}", hex::encode(proof.bytes())),

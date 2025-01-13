@@ -17,6 +17,35 @@ use types::SyncStepArgs;
 pub mod types;
 pub mod utils;
 
+pub fn compress_keys(keys: Vec<Vec<u8>>) -> Vec<Vec<u8>> {
+    let pubkey_affines: Vec<G1Affine> = keys
+        .as_slice()
+        .iter()
+        .map(|bytes| {
+            G1Affine::from_uncompressed_unchecked(&bytes.as_slice().try_into().unwrap()).unwrap()
+        })
+        .collect();
+
+    pubkey_affines
+        .iter()
+        .map(|uncompressed| uncompressed.to_compressed().to_vec())
+        .collect()
+}
+
+pub fn decompress_keys(keys: Vec<Vec<u8>>) -> Vec<Vec<u8>> {
+    let pubkey_affines: Vec<G1Affine> = keys
+        .as_slice()
+        .iter()
+        .map(|bytes| {
+            G1Affine::from_compressed_unchecked(&bytes.as_slice().try_into().unwrap()).unwrap()
+        })
+        .collect();
+    pubkey_affines
+        .iter()
+        .map(|uncompressed| uncompressed.to_uncompressed().to_vec())
+        .collect()
+}
+
 fn aggregate_pubkey(args: SyncStepArgs) -> (G1Affine, Commitment) {
     let pubkey_affines: Vec<G1Affine> = args
         .pubkeys_uncompressed
@@ -57,6 +86,7 @@ fn aggregate_pubkey(args: SyncStepArgs) -> (G1Affine, Commitment) {
 pub fn verify_aggregate_signature(args: SyncStepArgs, committee_commitment: [u8; 32]) {
     const DST: &[u8] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_";
     let (aggregate_key, commitment): (G1Affine, Commitment) = aggregate_pubkey(args.clone());
+    // currently failing with the beacon e2e test for an unknown reason
     //assert_eq!(commitment, committee_commitment);
     let attested_header_root = merkleize_keys(vec![
         uint64_to_le_256(args.attested_header.slot.parse::<u64>().unwrap()),
