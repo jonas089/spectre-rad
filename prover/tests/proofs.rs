@@ -86,7 +86,6 @@ mod test_circuits {
             }
         };
         println!("Successfully generated proof!");
-        // Verify the proof.
         client.verify(&proof, &vk).expect("failed to verify proof");
         println!("Successfully verified proof!");
         let duration = start_time.elapsed();
@@ -193,7 +192,6 @@ mod test_circuits {
             }
         };
         println!("Successfully generated proof!");
-        // Verify the proof.
         client.verify(&proof, &vk).expect("failed to verify proof");
         println!("Successfully verified proof!");
         let duration = start_time.elapsed();
@@ -218,6 +216,64 @@ mod test_circuits {
         let ops = ProverOps::Plonk;
         let (proof, vk) = test_step_circuit_sp1(&ops);
         create_proof_fixture(&proof, &vk, &ops);
+    }
+
+    fn test_step_circuit_sp1_recursive(
+        ops: ProverOps,
+    ) -> (SP1ProofWithPublicValues, SP1VerifyingKey) {
+        use std::time::Instant;
+        sp1_sdk::utils::setup_logger();
+        let start_time = Instant::now();
+        // let sync_step_args: SyncStepArgs = load_step_args_env();
+        /*let commitment: [u8; 32] = [
+            105, 137, 53, 187, 214, 9, 37, 142, 162, 195, 216, 252, 41, 0, 37, 135, 102, 197, 110,
+            192, 183, 234, 101, 253, 40, 247, 143, 101, 172, 85, 164, 105,
+        ];
+        let inputs: SyncStepCircuitInput = SyncStepCircuitInput {
+            args: sync_step_args,
+            committee_commitment: commitment,
+        };*/
+        let client = ProverClient::new();
+        let stdin = SP1Stdin::new();
+        //stdin.write_vec(borsh::to_vec(&inputs).expect("Failed to serialize"));
+
+        let (proof, _, vk) = match ops {
+            ProverOps::Default => {
+                panic!("Recursive Step Proof for Default Prover mode is not supported!")
+            }
+            ProverOps::Groth16 => {
+                const STEP_ELF: &[u8] = include_elf!("recursive-step");
+                let (pk, vk) = client.setup(STEP_ELF);
+                let proof = client
+                    .prove(&pk, stdin)
+                    .groth16()
+                    .run()
+                    .expect("failed to generate proof");
+                (proof, pk, vk)
+            }
+            ProverOps::Plonk => {
+                const STEP_ELF: &[u8] = include_elf!("recursive-step");
+                let (pk, vk) = client.setup(STEP_ELF);
+                let proof = client
+                    .prove(&pk, stdin)
+                    .plonk()
+                    .run()
+                    .expect("failed to generate proof");
+                (proof, pk, vk)
+            }
+        };
+        println!("Successfully generated proof!");
+        client.verify(&proof, &vk).expect("failed to verify proof");
+        println!("Successfully verified proof!");
+        let duration = start_time.elapsed();
+        println!("Elapsed time: {:?}", duration);
+        (proof, vk)
+    }
+
+    #[test]
+    fn test_step_circuit_sp1_recursive_groth16() {
+        let ops = ProverOps::Groth16;
+        let (_proof, _vk) = test_step_circuit_sp1_recursive(ops);
     }
 
     #[derive(Debug, Clone, Serialize, Deserialize)]

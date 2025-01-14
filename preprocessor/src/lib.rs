@@ -174,11 +174,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloy_sol_types::SolType;
     use beacon_api_client::mainnet::Client as MainnetClient;
     use beacon_api_client::StateId;
-    use committee_iso::types::{BeaconBlockHeader, WrappedOutput};
-    use committee_iso::utils::{commit_to_keys, decode_pubkeys_x};
+    use committee_iso::types::BeaconBlockHeader;
+    use committee_iso::utils::{commit_to_keys_with_sign, decode_pubkeys_x};
     use eth_types::Testnet;
     use ethereum_consensus_types::signing::{compute_domain, DomainType};
     use ethereum_consensus_types::ForkData;
@@ -186,7 +185,6 @@ mod tests {
     use reqwest::Url;
     use sp1_sdk::ProverClient;
     use std::path::Path;
-    use step_iso::{compress_keys, decompress_keys};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn beacon_client_e2e_test_prover() {
@@ -287,7 +285,8 @@ mod tests {
                 .await
                 .expect("Failed to remove directory");
         }
-        let commitment = commit_to_keys(decode_pubkeys_x(oc.clone()).0);
+        let pubkeys_x_decoded = decode_pubkeys_x(oc.clone());
+        let commitment = commit_to_keys_with_sign(&pubkeys_x_decoded.0, &pubkeys_x_decoded.1);
         let step_proof_payload = generate_step_proof_sp1(
             &prover::ProverOps::Plonk,
             commitment.to_vec().try_into().unwrap(),

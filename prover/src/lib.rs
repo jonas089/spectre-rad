@@ -52,7 +52,6 @@ pub fn generate_committee_update_proof_sp1(
         }
     };
     println!("Successfully generated proof!");
-    println!("Successfully verified proof!");
     let duration = start_time.elapsed();
     println!("Elapsed time: {:?}", duration);
     (proof, vk)
@@ -106,7 +105,6 @@ pub fn generate_step_proof_sp1(
         }
     };
     println!("Successfully generated proof!");
-    println!("Successfully verified proof!");
     let duration = start_time.elapsed();
     println!("Elapsed time: {:?}", duration);
     (proof, vk)

@@ -111,10 +111,11 @@ pub fn compute_digest(input: &[u8]) -> Vec<u8> {
     hasher.finalize().to_vec()
 }
 
-pub fn commit_to_keys(keys: Vec<BigUint>) -> [u8; 32] {
+pub fn commit_to_keys_with_sign(keys: &[BigUint], signs: &[u8]) -> [u8; 32] {
     let mut input: Vec<u8> = vec![];
     for key in keys {
         input.extend_from_slice(&key.to_bytes_be());
+        input.extend_from_slice(signs);
     }
     compute_digest(&input).try_into().unwrap()
 }
@@ -128,14 +129,14 @@ pub fn uint64_to_le_256(value: u64) -> Vec<u8> {
 #[cfg(test)]
 mod tests {
     use super::{decode_pubkeys_x, load_circuit_args_env};
-    use crate::{types::CommitteeUpdateArgs, utils::commit_to_keys};
+    use crate::{types::CommitteeUpdateArgs, utils::commit_to_keys_with_sign};
 
     #[test]
     fn test_poseidon_commit() {
         let args: CommitteeUpdateArgs = load_circuit_args_env();
         let compressed: (Vec<num_bigint::BigUint>, Vec<u8>) =
             decode_pubkeys_x(args.pubkeys_compressed.clone());
-        let commitment = commit_to_keys(compressed.0);
+        let commitment = commit_to_keys_with_sign(&compressed.0, &compressed.1);
         println!("Commitment: {:?}", &commitment);
     }
 
@@ -144,7 +145,7 @@ mod tests {
         let args: CommitteeUpdateArgs = load_circuit_args_env();
         let compressed: (Vec<num_bigint::BigUint>, Vec<u8>) =
             decode_pubkeys_x(args.pubkeys_compressed.clone());
-        let commitment = commit_to_keys(compressed.0);
+        let commitment = commit_to_keys_with_sign(&compressed.0, &compressed.1);
         println!("Commitment: {:?}", &commitment);
     }
 }

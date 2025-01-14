@@ -1,15 +1,15 @@
 #![no_main]
-use alloy_sol_types::sol;
 use committee_iso::{
     types::{CommitteeCircuitOutput, CommitteeUpdateArgs, PublicKeyHashes},
     utils::{
-        commit_to_keys, decode_pubkeys_x, hash_keys, merkleize_keys, uint64_to_le_256,
+        commit_to_keys_with_sign, decode_pubkeys_x, hash_keys, merkleize_keys, uint64_to_le_256,
         verify_merkle_proof,
     },
 };
 #[cfg(feature = "wrapped")]
 use ::{
-    alloy_primitives::FixedBytes, alloy_sol_types::SolValue, committee_iso::types::WrappedOutput,
+    alloy_primitives::FixedBytes, alloy_sol_types::sol, alloy_sol_types::SolValue,
+    committee_iso::types::WrappedOutput,
 };
 sp1_zkvm::entrypoint!(main);
 pub fn main() {
@@ -18,7 +18,7 @@ pub fn main() {
     let committee_root_ssz: Vec<u8> = merkleize_keys(key_hashs);
     let finalized_state_root: Vec<u8> = args.finalized_header.state_root.to_vec();
     let (keys, signs) = decode_pubkeys_x(args.pubkeys_compressed);
-    let commitment = commit_to_keys(keys);
+    let commitment = commit_to_keys_with_sign(&keys, &signs);
     verify_merkle_proof(
         args.sync_committee_branch,
         committee_root_ssz,

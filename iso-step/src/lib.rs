@@ -9,7 +9,7 @@ use bls12_381_sp1::{
     pairing, G1Affine, G1Projective, G2Affine, G2Projective,
 };
 use committee_iso::utils::{
-    add_left_right, commit_to_keys, compute_digest, decode_pubkeys_x, merkleize_keys,
+    add_left_right, commit_to_keys_with_sign, compute_digest, decode_pubkeys_x, merkleize_keys,
     uint64_to_le_256, Sha256,
 };
 use types::Commitment;
@@ -62,7 +62,8 @@ fn aggregate_pubkey(args: SyncStepArgs) -> (G1Affine, Commitment) {
         .collect();
 
     let pubkeys_decoded = decode_pubkeys_x(pubkeys_compressed);
-    let pubkey_commitment: Commitment = commit_to_keys(pubkeys_decoded.0);
+    let pubkey_commitment: Commitment =
+        commit_to_keys_with_sign(&pubkeys_decoded.0, &pubkeys_decoded.1);
 
     let mut generator = G1Projective::identity();
     let participation_bits = args.pariticipation_bits;
