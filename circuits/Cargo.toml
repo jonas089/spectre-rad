@@ -1,3 +1,5 @@
 [workspace]
-members = ["sp1-step", "sp1-committee", "recursive-step"]
-resolver = "2"
+members = ["sp1-committee", "sp1-step", "sp1-recursive-step"]
+
+[workspace.dependencies]
+sp1-zkvm = "3.4.0"

@@ -52,3 +52,9 @@ sol! {
         bytes32 finalized_header_root;
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
+pub struct RecursiveInputs {
+    pub public_values: Vec<u8>,
+    pub vk: [u32; 8],
+}

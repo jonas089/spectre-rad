@@ -41,10 +41,10 @@ pub struct CommitteeCircuitOutput {
 }
 
 impl CommitteeCircuitOutput {
-    pub fn new(finalized_header_root: Vec<u8>, committee_commitment: [u8; 32]) -> Self {
+    pub fn new(committee_commitment: Vec<u8>, finalized_header_root: [u8; 32]) -> Self {
         Self {
             committee_commitment: committee_commitment.to_vec(),
-            finalized_header_root,
+            finalized_header_root: finalized_header_root.to_vec(),
         }
     }
 }

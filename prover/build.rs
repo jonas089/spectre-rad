@@ -9,5 +9,5 @@ fn main() {
     }
     build_program_with_args("../circuits/sp1-step", args.clone());
     build_program_with_args("../circuits/sp1-committee", args.clone());
-    build_program_with_args("../circuits/recursive-step", Default::default());
+    build_program_with_args("../circuits/sp1-recursive-step", Default::default());
 }

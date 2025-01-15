@@ -39,7 +39,7 @@ beacon-api-client = { git = "https://github.com/jonas089/ssz-patched-crates" }
 
 
 [build-dependencies]
-sp1-helper = "3.4.0"
+sp1-helper = { workspace = true }
 
 [features]
 metal = ["risc0-zkvm/metal"]

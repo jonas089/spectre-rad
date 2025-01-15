@@ -30,7 +30,7 @@ ethereum-consensus-types = { git = "https://github.com/jonas089/ssz-patched-crat
     "serde",
 ] }
 borsh = { version = "1.5.3", features = ["derive"] }
-sp1-sdk = "3.4.0"
+sp1-sdk = { workspace = true }
 eth-types = { path = "../eth-types" }
 reqwest = "0.11.22"
 alloy-sol-types = "0.8.18"

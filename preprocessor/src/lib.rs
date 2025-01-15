@@ -220,7 +220,6 @@ mod tests {
                 .iter()
                 .map(|pk| pk.to_bytes().to_vec())
                 .collect_vec();
-
             let fork_version = client
                 .get_fork(StateId::Head)
                 .await
