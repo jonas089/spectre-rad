@@ -281,7 +281,7 @@ mod test_circuits {
 
     fn test_step_circuit_sp1_recursive(
         ops: &ProverOps,
-        inputs: RecursiveInputs,
+        inputs: Vec<RecursiveInputs>,
         proof: SP1ProofWithPublicValues,
         vk: SP1VerifyingKey,
     ) -> (SP1ProofWithPublicValues, SP1VerifyingKey) {
@@ -301,7 +301,7 @@ mod test_circuits {
                 panic!("Recursive Step Proof for Default Prover mode is not supported!")
             }
             ProverOps::Groth16 => {
-                const RECURSIVE_ELF: &[u8] = include_elf!("sp1-recursive-step");
+                const RECURSIVE_ELF: &[u8] = include_elf!("sp1-aggregate");
                 let (pk, vk) = client.setup(RECURSIVE_ELF);
                 let proof = client
                     .prove(&pk, stdin)
@@ -311,7 +311,7 @@ mod test_circuits {
                 (proof, pk, vk)
             }
             ProverOps::Plonk => {
-                const RECURSIVE_ELF: &[u8] = include_elf!("sp1-recursive-step");
+                const RECURSIVE_ELF: &[u8] = include_elf!("sp1-aggregate");
                 let (pk, vk) = client.setup(RECURSIVE_ELF);
                 let proof = client
                     .prove(&pk, stdin)
@@ -331,7 +331,7 @@ mod test_circuits {
 
     #[test]
     // todo: aggregate step and committee proof for commitee update case
-    fn test_step_circuit_sp1_recursive_plonk() {
+    fn test_step_circuit_sp1_compressed_plonk() {
         let (proof, vk) =
             test_step_circuit_sp1(&ProverOps::Default, ProofCompressionBool::Compressed);
         let public_values = proof.public_values.to_vec();
@@ -340,14 +340,6 @@ mod test_circuits {
             vk: vk.hash_u32(),
         };
         let (_proof, _vk) = test_step_circuit_sp1_recursive(&ProverOps::Plonk, inputs, proof, vk);
-    }
-
-    #[test]
-    // superior to recursive proofs
-    // fixed size proof input to the wrapper!
-    fn test_step_circuit_sp1_compressed_plonk() {
-        let (_proof, _vk) =
-            test_step_circuit_sp1(&ProverOps::Plonk, ProofCompressionBool::Compressed);
     }
 
     #[derive(Debug, Clone, Serialize, Deserialize)]

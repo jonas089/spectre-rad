@@ -6,7 +6,7 @@ members = [
     "iso-step",
     "circuits/sp1-step",
     "circuits/sp1-committee",
-    "circuits/sp1-recursive-step",
+    "circuits/sp1-aggregate",
     "preprocessor",
     "eth-types",
 ]

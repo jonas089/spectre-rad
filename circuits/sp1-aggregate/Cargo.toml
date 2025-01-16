@@ -1,6 +1,6 @@
 [package]
 version = "0.1.0"
-name = "sp1-recursive-step"
+name = "sp1-aggregate"
 edition = "2021"
 
 [dependencies]

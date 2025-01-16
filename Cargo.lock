@@ -7402,6 +7402,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp1-aggregate"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives 0.8.18",
+ "alloy-sol-types 0.8.18",
+ "bincode",
+ "bls12_381 0.8.0",
+ "borsh",
+ "committee-iso",
+ "itertools 0.13.0",
+ "serde",
+ "serde_json",
+ "sha2 0.10.8 (git+https://github.com/sp1-patches/RustCrypto-hashes?branch=patch-sha2-v0.10.8)",
+ "sp1-zkvm",
+ "step-iso",
+]
+
+[[package]]
 name = "sp1-build"
 version = "3.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7765,24 +7783,6 @@ dependencies = [
  "sp1-recursion-compiler",
  "sp1-stark",
  "tempfile",
-]
-
-[[package]]
-name = "sp1-recursive-step"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives 0.8.18",
- "alloy-sol-types 0.8.18",
- "bincode",
- "bls12_381 0.8.0",
- "borsh",
- "committee-iso",
- "itertools 0.13.0",
- "serde",
- "serde_json",
- "sha2 0.10.8 (git+https://github.com/sp1-patches/RustCrypto-hashes?branch=patch-sha2-v0.10.8)",
- "sp1-zkvm",
- "step-iso",
 ]
 
 [[package]]

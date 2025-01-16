@@ -43,12 +43,14 @@ pub struct SyncStepCircuitInput {
 #[derive(Debug, Clone, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub struct SyncStepCircuitOutput {
     pub slot: u32,
+    pub commitment: [u8; 32],
     pub finalized_header_root: [u8; 32],
 }
 
 sol! {
     struct WrappedOutput{
         uint32 slot;
+        bytes32 commitment;
         bytes32 finalized_header_root;
     }
 }

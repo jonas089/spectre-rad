@@ -39,6 +39,7 @@ pub fn main() {
     {
         let output: SyncStepCircuitOutput = SyncStepCircuitOutput {
             slot: u32::from_str_radix(&args.finalized_header.slot, 10).unwrap(),
+            commitment: inputs.committee_commitment.try_into().unwrap(),
             finalized_header_root: finalized_header_root.try_into().unwrap(),
         };
         sp1_zkvm::io::commit(&output);
@@ -47,6 +48,7 @@ pub fn main() {
     {
         let bytes = WrappedOutput::abi_encode(&WrappedOutput {
             slot: u32::from_str_radix(&args.finalized_header.slot, 10).unwrap(),
+            commitment: FixedBytes::<32>::from_slice(&inputs.committee_commitment),
             finalized_header_root: FixedBytes::<32>::from_slice(&finalized_header_root),
         });
         sp1_zkvm::io::commit_slice(&bytes);
