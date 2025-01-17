@@ -14,9 +14,6 @@ On an `A100` server from lambda labs, this zk light client can verify a committe
 
 `Risc0` does not have a precompile for `bls12_381` but to my surprise it generally seems to be `faster than SP1` with respect to both hashing and `ECC` arithmetic. I was reassured that `Risc0` will receive a precompile for `bls12_381` SOON ⏱.
 
-Benchmarks for both `Risc0` and `SP1` will be added to this README SOON ⏳!
-
-
 > [!NOTE]
 > The original Halo2 implementation of Spectre is located at `Chainsafe`.
 > This implementation of Spectre leverages ZKVMs like Risc0 for increased performance and groth16 support.
@@ -50,15 +47,23 @@ Benchmarking the Step and Committee Circuits on different machines in SP1 and Ri
 | ------------- | ------------- | ------------- |
 | A100 (40GB) Lambda Labs, 30 core CPU | 29.50s | 40.51s |
 
+> [!WARNING]
+> This benchmark is out of date.
+
+
 ### Step Circuit
 | Device | Risc0 (sha2 precompile) Elapsed | SP1 (sha2, bls12 precompile) Elapsed |
 | ------------- | ------------- | ------------- | 
 | A100 (40GB) Lambda Labs, 30 core CPU | 68.28s | 418.87s |
 
+> [!WARNING]
+> This benchmark is out of date.
+
 # Circuit Inputs and Outputs
 In ZKVMs we refer to public outputs as information committed to the `journal`. Inputs can either be committed or kept a secret.
 
-### The Beacon Header
+## The Beacon Header
+
 |  Input  | Type |
 | ------------- | ------------- |
 | slot  | int  |
@@ -67,19 +72,24 @@ In ZKVMs we refer to public outputs as information committed to the `journal`. I
 | state_root | Vec<u8> |
 | body_root | Vec<u8> |
 
-### 1. CommitteUpdateCircuit
+## 1. CommitteUpdate-Circuit
+
+### 1.1. Inputs
 |  Input  | Type |
 | ------------- | ------------- |
 | Public Keys Compressed  | [u8;49] |
 | Finalized Header  | BeaconBlockHeader  |
 | Sync Committee Branch | Vec<Vec<u8>> |
 
+### 1.2. Outputs
 | Output | Type |
 | ------------- | ------------- |
-| Finalized Block (Header) Root  | [u8;32] |
 | Key Commitment  | [u8;32] |
+| Finalized Block (Header) Root  | [u8;32] |
 
-### 2. StepCircuit
+## 2. Step-Circuit
+
+### 2.1. Inputs
 | Input | Type |
 | ------------- | ------------- |
 | Aggregate Signature  | [u8;32] |
@@ -91,16 +101,41 @@ In ZKVMs we refer to public outputs as information committed to the `journal`. I
 | Execution Payload Branch | Vec<Vec<u8>> |
 | domain | [u8;32] |
 
+### 2.2. Outputs
 | Output | Type |
 | ------------- | ------------- |
-| Finalized Block (Header) Root | [u8;32] |
+| Slot Number | u32 |
 | Key Commitment  | [u8;32] |
+| Finalized Block (Header) Root | [u8;32] |
+
+
+## 3. Aggregation-Circuit
+
+### 3.1. Inputs
+
+### 3.2. Outputs
+| Output | Type  |
+| ------------- | ------------- |
+| Slot Number | u32 |
+| Commitment | bytes32 |
+| Finalized Header Root | bytes32 |
+| Step Circuit VK | bytes32 |
+| Commmittee Circuit VK | bytes32 |
+| Next Commitment | bytes32 |
 
 > [!NOTE]
+> These are wrapped (Ethereum/Sol) types.
+
+
+> [!NOTE] Summary
 > If the merkle proofs are `valid`,
 > and the data was `signed` by the committee,
 > and the root is `unique`,
-> then the block is `trusted`.
+> then the step is `valid`.
+> If the merkle proofs are `valid`,
+> and the `roots match` in the aggregate proof
+> and the proofs are `valid`,
+> then the committee update is `valid`
 
 
 ## Generate (&Verify) a proof for the Committee Circuit in Risc0
