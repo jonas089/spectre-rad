@@ -7,11 +7,6 @@ edition = "2021"
 name = "preprocessor"
 path = "src/lib.rs"
 
-[[bin]]
-name = "unit-test-gen"
-path = "src/unit_test_gen.rs"
-required-features = ["test-gen"]
-
 
 [dependencies]
 ssz_rs = { git = "https://github.com/jonas089/ssz-patched-crates" }
@@ -40,8 +35,6 @@ blst = { version = "0.3.11", default-features = false, features = [
     "portable",
     "no-threads",
 ], optional = true }
-
-prover = { path = "../prover", features = ["wrapped"] }
 
 [features]
 test-gen = ["ethereum-consensus", "blst"]

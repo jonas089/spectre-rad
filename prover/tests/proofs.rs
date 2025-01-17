@@ -1,30 +1,21 @@
 #[cfg(test)]
 mod test_circuits {
-    use aggregate_iso::types::RecursiveInputs;
     use alloy_sol_types::SolType;
     use committee_circuit::{RZ_COMMITTEE_ELF, RZ_COMMITTEE_ID};
     use committee_iso::{
         types::{CommitteeCircuitOutput, CommitteeUpdateArgs, WrappedOutput},
         utils::load_circuit_args_env as load_committee_args_env,
     };
-    use prover::ProverOps;
+    use prover::{generate_committee_update_proof_sp1, generate_step_proof_sp1, ProverOps};
     use risc0_zkvm::{default_prover, ExecutorEnv};
     use serde::{Deserialize, Serialize};
-    use sp1_sdk::{
-        include_elf, HashableKey, ProverClient, SP1Proof, SP1ProofWithPublicValues, SP1Stdin,
-        SP1VerifyingKey,
-    };
+    use sp1_sdk::{HashableKey, SP1ProofWithPublicValues, SP1VerifyingKey};
     use std::path::PathBuf;
     use step_circuit::{RZ_STEP_ELF, RZ_STEP_ID};
     use step_iso::{
         types::{SyncStepArgs, SyncStepCircuitInput},
         utils::load_circuit_args_env as load_step_args_env,
     };
-
-    enum ProofCompressionBool {
-        Compressed,
-        Uncompressed,
-    }
 
     // Risc0 Committee Circuit
     #[test]
@@ -50,83 +41,14 @@ mod test_circuits {
         println!("Elapsed time: {:?}", duration);
     }
 
-    fn test_committee_circuit_sp1(
-        ops: &ProverOps,
-        compressed: ProofCompressionBool,
-    ) -> (SP1ProofWithPublicValues, SP1VerifyingKey) {
-        use std::time::Instant;
-        let start_time = Instant::now();
-        let committee_update: CommitteeUpdateArgs = load_committee_args_env();
-        let client = ProverClient::new();
-        let mut stdin = SP1Stdin::new();
-        stdin.write_vec(borsh::to_vec(&committee_update).expect("Failed to serialize"));
-
-        let (proof, _, vk) = match ops {
-            ProverOps::Default => {
-                const COMMITTEE_ELF: &[u8] = include_elf!("sp1-committee");
-                let (pk, vk) = client.setup(COMMITTEE_ELF);
-                let proof = match compressed {
-                    ProofCompressionBool::Compressed => client
-                        .prove(&pk, stdin)
-                        .compressed()
-                        .run()
-                        .expect("failed to generate proof"),
-                    ProofCompressionBool::Uncompressed => client
-                        .prove(&pk, stdin)
-                        .run()
-                        .expect("failed to generate proof"),
-                };
-                (proof, pk, vk)
-            }
-            ProverOps::Groth16 => {
-                const COMMITTEE_ELF: &[u8] = include_elf!("sp1-committee");
-                let (pk, vk) = client.setup(COMMITTEE_ELF);
-                let proof = match compressed {
-                    ProofCompressionBool::Compressed => client
-                        .prove(&pk, stdin)
-                        .groth16()
-                        .compressed()
-                        .run()
-                        .expect("failed to generate proof"),
-                    ProofCompressionBool::Uncompressed => client
-                        .prove(&pk, stdin)
-                        .groth16()
-                        .run()
-                        .expect("failed to generate proof"),
-                };
-                (proof, pk, vk)
-            }
-            ProverOps::Plonk => {
-                const COMMITTEE_ELF: &[u8] = include_elf!("sp1-committee");
-                let (pk, vk) = client.setup(COMMITTEE_ELF);
-                let proof = match compressed {
-                    ProofCompressionBool::Compressed => client
-                        .prove(&pk, stdin)
-                        .compressed()
-                        .plonk()
-                        .run()
-                        .expect("failed to generate proof"),
-                    ProofCompressionBool::Uncompressed => client
-                        .prove(&pk, stdin)
-                        .plonk()
-                        .run()
-                        .expect("failed to generate proof"),
-                };
-                (proof, pk, vk)
-            }
-        };
-        println!("Successfully generated proof!");
-        client.verify(&proof, &vk).expect("failed to verify proof");
-        println!("Successfully verified proof!");
-        let duration = start_time.elapsed();
-        println!("Elapsed time: {:?}", duration);
-        (proof, vk)
-    }
-
     #[test]
     fn test_committee_circuit_default_sp1() {
-        let (proof, _) =
-            test_committee_circuit_sp1(&ProverOps::Default, ProofCompressionBool::Uncompressed);
+        let committee_update: CommitteeUpdateArgs = load_committee_args_env();
+        let (proof, _) = generate_committee_update_proof_sp1(
+            &ProverOps::Default,
+            committee_update,
+            &prover::ProofCompressionBool::Uncompressed,
+        );
         let output: CommitteeCircuitOutput =
             borsh::from_slice(&proof.public_values.as_slice()).unwrap();
         println!("Output: {:?}", &output);
@@ -135,15 +57,25 @@ mod test_circuits {
     // SP1 Committee Circuit Wrapped
     #[test]
     fn test_committee_circuit_groth16_sp1() {
+        let committee_update: CommitteeUpdateArgs = load_committee_args_env();
         let ops = ProverOps::Groth16;
-        let (proof, vk) = test_committee_circuit_sp1(&ops, ProofCompressionBool::Uncompressed);
+        let (proof, vk) = generate_committee_update_proof_sp1(
+            &ops,
+            committee_update,
+            &prover::ProofCompressionBool::Uncompressed,
+        );
         create_proof_fixture(&proof, &vk, &ops);
     }
 
     #[test]
     fn test_committee_circuit_plonk_sp1() {
+        let committee_update: CommitteeUpdateArgs = load_committee_args_env();
         let ops = ProverOps::Plonk;
-        let (proof, vk) = test_committee_circuit_sp1(&ops, ProofCompressionBool::Uncompressed);
+        let (proof, vk) = generate_committee_update_proof_sp1(
+            &ops,
+            committee_update,
+            &prover::ProofCompressionBool::Uncompressed,
+        );
         create_proof_fixture(&proof, &vk, &ops);
     }
 
@@ -173,188 +105,53 @@ mod test_circuits {
         println!("Elapsed time: {:?}", duration);
     }
 
-    // SP1 Step Circuit
-    fn test_step_circuit_sp1(
-        ops: &ProverOps,
-        compressed: ProofCompressionBool,
-    ) -> (SP1ProofWithPublicValues, SP1VerifyingKey) {
-        use std::time::Instant;
-        sp1_sdk::utils::setup_logger();
-        let start_time = Instant::now();
+    #[test]
+    fn test_step_circuit_default_sp1() {
         let sync_step_args: SyncStepArgs = load_step_args_env();
         let commitment: [u8; 32] = [
             106, 92, 62, 66, 60, 86, 8, 54, 215, 185, 238, 54, 75, 39, 221, 15, 81, 229, 23, 145,
             198, 242, 244, 199, 60, 103, 60, 206, 116, 216, 86, 227,
         ];
-        let inputs: SyncStepCircuitInput = SyncStepCircuitInput {
-            args: sync_step_args,
+        generate_step_proof_sp1(
+            &ProverOps::Default,
             commitment,
-        };
-        let client = ProverClient::new();
-        let mut stdin = SP1Stdin::new();
-        stdin.write_vec(borsh::to_vec(&inputs).expect("Failed to serialize"));
-
-        let (proof, _, vk) = match ops {
-            ProverOps::Default => {
-                const STEP_ELF: &[u8] = include_elf!("sp1-step");
-                let (pk, vk) = client.setup(STEP_ELF);
-                let proof = match compressed {
-                    ProofCompressionBool::Compressed => client
-                        .prove(&pk, stdin)
-                        .compressed()
-                        .run()
-                        .expect("failed to generate proof"),
-                    ProofCompressionBool::Uncompressed => client
-                        .prove(&pk, stdin)
-                        .run()
-                        .expect("failed to generate proof"),
-                };
-                (proof, pk, vk)
-            }
-            ProverOps::Groth16 => {
-                const STEP_ELF: &[u8] = include_elf!("sp1-step");
-                let (pk, vk) = client.setup(STEP_ELF);
-                let proof = match compressed {
-                    ProofCompressionBool::Compressed => client
-                        .prove(&pk, stdin)
-                        .groth16()
-                        .compressed()
-                        .run()
-                        .expect("failed to generate proof"),
-                    ProofCompressionBool::Uncompressed => client
-                        .prove(&pk, stdin)
-                        .groth16()
-                        .run()
-                        .expect("failed to generate proof"),
-                };
-                (proof, pk, vk)
-            }
-            ProverOps::Plonk => {
-                const STEP_ELF: &[u8] = include_elf!("sp1-step");
-                let (pk, vk) = client.setup(STEP_ELF);
-                let proof = match compressed {
-                    ProofCompressionBool::Compressed => client
-                        .prove(&pk, stdin)
-                        .compressed()
-                        .plonk()
-                        .run()
-                        .expect("failed to generate proof"),
-                    ProofCompressionBool::Uncompressed => client
-                        .prove(&pk, stdin)
-                        .plonk()
-                        .run()
-                        .expect("failed to generate proof"),
-                };
-                (proof, pk, vk)
-            }
-        };
-        println!("Successfully generated proof!");
-        client.verify(&proof, &vk).expect("failed to verify proof");
-        println!("Successfully verified proof!");
-        let duration = start_time.elapsed();
-        println!("Elapsed time: {:?}", duration);
-        (proof, vk)
-    }
-
-    #[test]
-    fn test_step_circuit_default_sp1() {
-        test_step_circuit_sp1(&ProverOps::Default, ProofCompressionBool::Uncompressed);
+            sync_step_args,
+            &prover::ProofCompressionBool::Uncompressed,
+        );
     }
 
     #[test]
     fn test_step_circuit_groth16_sp1() {
+        let sync_step_args: SyncStepArgs = load_step_args_env();
         let ops = ProverOps::Groth16;
-        let (proof, vk) = test_step_circuit_sp1(&ops, ProofCompressionBool::Uncompressed);
+        let commitment: [u8; 32] = [
+            106, 92, 62, 66, 60, 86, 8, 54, 215, 185, 238, 54, 75, 39, 221, 15, 81, 229, 23, 145,
+            198, 242, 244, 199, 60, 103, 60, 206, 116, 216, 86, 227,
+        ];
+        let (proof, vk) = generate_step_proof_sp1(
+            &ops,
+            commitment,
+            sync_step_args,
+            &prover::ProofCompressionBool::Uncompressed,
+        );
         create_proof_fixture(&proof, &vk, &ops);
     }
 
     #[test]
     fn test_step_circuit_plonk_sp1() {
+        let sync_step_args: SyncStepArgs = load_step_args_env();
         let ops = ProverOps::Plonk;
-        let (proof, vk) = test_step_circuit_sp1(&ops, ProofCompressionBool::Uncompressed);
-        create_proof_fixture(&proof, &vk, &ops);
-    }
-
-    fn test_step_circuit_sp1_recursive(
-        ops: &ProverOps,
-        inputs: Vec<RecursiveInputs>,
-        proofs: Vec<SP1ProofWithPublicValues>,
-        vks: Vec<SP1VerifyingKey>,
-    ) -> (SP1ProofWithPublicValues, SP1VerifyingKey) {
-        use std::time::Instant;
-        sp1_sdk::utils::setup_logger();
-        let start_time = Instant::now();
-        let client = ProverClient::new();
-        let mut stdin = SP1Stdin::new();
-        stdin.write_vec(borsh::to_vec(&inputs).expect("Failed to serialize"));
-        // write first proof - committee
-        let SP1Proof::Compressed(proof) = proofs.first().unwrap().proof.clone() else {
-            panic!("Uncompressed proof unsupported: Committee!")
-        };
-        stdin.write_proof(*proof, vks.first().unwrap().vk.clone());
-        // write second proof - committee
-        let SP1Proof::Compressed(proof) = proofs.get(1).unwrap().proof.clone() else {
-            panic!("Uncompressed proof unsupported: Step!")
-        };
-        stdin.write_proof(*proof, vks.get(1).unwrap().vk.clone());
-
-        let (proof, _, vk) = match ops {
-            ProverOps::Default => {
-                panic!("Recursive Step Proof for Default Prover mode is not supported!")
-            }
-            ProverOps::Groth16 => {
-                const RECURSIVE_ELF: &[u8] = include_elf!("sp1-aggregate");
-                let (pk, vk) = client.setup(RECURSIVE_ELF);
-                let proof = client
-                    .prove(&pk, stdin)
-                    .groth16()
-                    .run()
-                    .expect("failed to generate proof");
-                (proof, pk, vk)
-            }
-            ProverOps::Plonk => {
-                const RECURSIVE_ELF: &[u8] = include_elf!("sp1-aggregate");
-                let (pk, vk) = client.setup(RECURSIVE_ELF);
-                let proof = client
-                    .prove(&pk, stdin)
-                    .plonk()
-                    .run()
-                    .expect("failed to generate proof");
-                (proof, pk, vk)
-            }
-        };
-        println!("Successfully generated proof!");
-        client.verify(&proof, &vk).expect("failed to verify proof");
-        println!("Successfully verified proof!");
-        let duration = start_time.elapsed();
-        println!("Elapsed time: {:?}", duration);
-        (proof, vk)
-    }
-
-    #[test]
-    // aggregate step and committee proof into a single wrapped proof
-    // todo: move to preprocessor as integration test!
-    fn test_step_circuit_sp1_compressed_plonk() {
-        let (committee_proof, committee_vk) =
-            test_committee_circuit_sp1(&ProverOps::Default, ProofCompressionBool::Compressed);
-        let committee_public_values = committee_proof.public_values.to_vec();
-        let committee_inputs = RecursiveInputs {
-            public_values: committee_public_values,
-            vk: committee_vk.hash_u32(),
-        };
-        let (step_proof, step_vk) =
-            test_step_circuit_sp1(&ProverOps::Default, ProofCompressionBool::Compressed);
-        let step_public_values = step_proof.public_values.to_vec();
-        let step_inputs = RecursiveInputs {
-            public_values: step_public_values,
-            vk: step_vk.hash_u32(),
-        };
-        let (_proof, _vk) = test_step_circuit_sp1_recursive(
-            &ProverOps::Plonk,
-            vec![committee_inputs, step_inputs],
-            vec![committee_proof, step_proof],
-            vec![committee_vk, step_vk],
+        let commitment: [u8; 32] = [
+            106, 92, 62, 66, 60, 86, 8, 54, 215, 185, 238, 54, 75, 39, 221, 15, 81, 229, 23, 145,
+            198, 242, 244, 199, 60, 103, 60, 206, 116, 216, 86, 227,
+        ];
+        let (proof, vk) = generate_step_proof_sp1(
+            &ops,
+            commitment,
+            sync_step_args,
+            &prover::ProofCompressionBool::Uncompressed,
         );
+        create_proof_fixture(&proof, &vk, &ops);
     }
 
     #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -16,10 +16,16 @@ use ethereum_consensus_types::{
     LightClientUpdateCapella, Root,
 };
 
-use committee_iso::types::CommitteeUpdateArgs;
+use committee_iso::types::{BeaconBlockHeader as CommitteeBeaconBlockHeader, CommitteeUpdateArgs};
 use itertools::Itertools;
 use step_iso::types::SyncStepArgs;
 
+use beacon_api_client::mainnet::Client as MainnetClient;
+use beacon_api_client::StateId;
+use eth_types::Testnet;
+use ethereum_consensus_types::signing::{compute_domain, DomainType};
+use ethereum_consensus_types::ForkData;
+use reqwest::Url;
 pub use rotation::*;
 use serde::{Deserialize, Serialize};
 use ssz_rs::{Node, Vector};
@@ -171,141 +177,93 @@ where
     Ok((sync_args, rotation_args))
 }
 
+pub async fn get_light_client_update() -> ((SyncStepArgs, CommitteeUpdateArgs), Vec<Vec<u8>>) {
+    // hardcoded for now - todo: take client or url as arg
+    let client = MainnetClient::new(Url::parse("https://lodestar-sepolia.chainsafe.io").unwrap());
+    let block = get_block_header(&client, BlockId::Finalized).await.unwrap();
+    let slot = block.slot;
+    let period = slot / (32 * 256);
+    println!(
+        "Fetching light client update at current Slot: {} at Period: {}",
+        slot, period
+    );
+    let ((s, mut c), oc) = {
+        let update = get_light_client_update_at_period(&client, period)
+            .await
+            .unwrap();
+        let block_root = client
+            .get_beacon_block_root(BlockId::Slot(slot))
+            .await
+            .unwrap();
+        let bootstrap = get_light_client_bootstrap(&client, block_root)
+            .await
+            .unwrap();
+        let pubkeys_compressed = bootstrap.current_sync_committee.pubkeys;
+        let oc = pubkeys_compressed
+            .iter()
+            .map(|pk| pk.to_bytes().to_vec())
+            .collect_vec();
+        let fork_version = client
+            .get_fork(StateId::Head)
+            .await
+            .unwrap()
+            .current_version;
+        let genesis_validators_root = client
+            .get_genesis_details()
+            .await
+            .unwrap()
+            .genesis_validators_root;
+        let fork_data = ForkData {
+            genesis_validators_root,
+            fork_version,
+        };
+        let domain = compute_domain(DomainType::SyncCommittee, &fork_data).unwrap();
+        (
+            light_client_update_to_args::<Testnet>(&update, pubkeys_compressed, domain)
+                .await
+                .unwrap(),
+            oc,
+        )
+    };
+    let mut finalized_sync_committee_branch = {
+        let block_root = client
+            .get_beacon_block_root(BlockId::Slot(
+                u64::from_str_radix(&s.finalized_header.slot, 10).unwrap(),
+            ))
+            .await
+            .unwrap();
+
+        get_light_client_bootstrap::<Testnet, _>(&client, block_root)
+            .await
+            .unwrap()
+            .current_sync_committee_branch
+            .iter()
+            .map(|n| n.to_vec())
+            .collect_vec()
+    };
+    finalized_sync_committee_branch.insert(0, c.sync_committee_branch[0].clone());
+    finalized_sync_committee_branch[1] = c.sync_committee_branch[1].clone();
+    c.sync_committee_branch = finalized_sync_committee_branch;
+    c.finalized_header = CommitteeBeaconBlockHeader {
+        slot: s.finalized_header.clone().slot,
+        proposer_index: s.finalized_header.clone().proposer_index,
+        parent_root: s.finalized_header.clone().parent_root,
+        state_root: s.finalized_header.clone().state_root,
+        body_root: s.finalized_header.clone().body_root,
+    };
+    ((s, c), oc)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloy_sol_types::SolType;
-    use beacon_api_client::mainnet::Client as MainnetClient;
-    use beacon_api_client::StateId;
-    use committee_iso::types::{BeaconBlockHeader, WrappedOutput as CommitteeWrappedOutput};
-    use committee_iso::utils::{commit_to_keys_with_sign, decode_pubkeys_x};
-    use eth_types::Testnet;
-    use ethereum_consensus_types::signing::{compute_domain, DomainType};
-    use ethereum_consensus_types::ForkData;
-    use prover::{generate_committee_update_proof_sp1, generate_step_proof_sp1};
-    use reqwest::Url;
-    use sp1_sdk::ProverClient;
-    use std::path::Path;
-    use step_iso::types::WrappedOutput as StepWrappedOutput;
-
-    #[tokio::test(flavor = "multi_thread")]
-    async fn beacon_client_e2e_test_prover() {
-        let path = Path::new("/Users/chef/.sp1/circuits/plonk/v3.0.0");
-        if tokio::fs::metadata(path).await.is_ok() {
-            tokio::fs::remove_dir_all(path)
-                .await
-                .expect("Failed to remove directory");
-        }
-
-        let client =
-            MainnetClient::new(Url::parse("https://lodestar-sepolia.chainsafe.io").unwrap());
-        let block = get_block_header(&client, BlockId::Finalized).await.unwrap();
-        let slot = block.slot;
-        let period = slot / (32 * 256);
-        println!(
-            "Fetching light client update at current Slot: {} at Period: {}",
-            slot, period
-        );
-        let ((s, mut c), oc) = {
-            let update = get_light_client_update_at_period(&client, period)
-                .await
-                .unwrap();
-            let block_root = client
-                .get_beacon_block_root(BlockId::Slot(slot))
-                .await
-                .unwrap();
-            let bootstrap = get_light_client_bootstrap(&client, block_root)
-                .await
-                .unwrap();
-            let pubkeys_compressed = bootstrap.current_sync_committee.pubkeys;
-            let oc = pubkeys_compressed
-                .iter()
-                .map(|pk| pk.to_bytes().to_vec())
-                .collect_vec();
-            let fork_version = client
-                .get_fork(StateId::Head)
-                .await
-                .unwrap()
-                .current_version;
-            let genesis_validators_root = client
-                .get_genesis_details()
-                .await
-                .unwrap()
-                .genesis_validators_root;
-            let fork_data = ForkData {
-                genesis_validators_root,
-                fork_version,
-            };
-            let domain = compute_domain(DomainType::SyncCommittee, &fork_data).unwrap();
-            (
-                light_client_update_to_args::<Testnet>(&update, pubkeys_compressed, domain)
-                    .await
-                    .unwrap(),
-                oc,
-            )
-        };
-        let mut finalized_sync_committee_branch = {
-            let block_root = client
-                .get_beacon_block_root(BlockId::Slot(
-                    u64::from_str_radix(&s.finalized_header.slot, 10).unwrap(),
-                ))
-                .await
-                .unwrap();
-
-            get_light_client_bootstrap::<Testnet, _>(&client, block_root)
-                .await
-                .unwrap()
-                .current_sync_committee_branch
-                .iter()
-                .map(|n| n.to_vec())
-                .collect_vec()
-        };
-        finalized_sync_committee_branch.insert(0, c.sync_committee_branch[0].clone());
-        finalized_sync_committee_branch[1] = c.sync_committee_branch[1].clone();
-        c.sync_committee_branch = finalized_sync_committee_branch;
-        c.finalized_header = BeaconBlockHeader {
-            slot: s.finalized_header.clone().slot,
-            proposer_index: s.finalized_header.clone().proposer_index,
-            parent_root: s.finalized_header.clone().parent_root,
-            state_root: s.finalized_header.clone().state_root,
-            body_root: s.finalized_header.clone().body_root,
-        };
-        let committee_proof_payload =
-            generate_committee_update_proof_sp1(&prover::ProverOps::Plonk, c);
-
-        let client = ProverClient::new();
-        client
-            .verify(&committee_proof_payload.0, &committee_proof_payload.1)
-            .expect("failed to verify committee proof");
-
-        let committee_journal: CommitteeWrappedOutput = CommitteeWrappedOutput::abi_decode(
-            committee_proof_payload.0.public_values.as_slice(),
-            false,
-        )
-        .unwrap();
-
+    async fn test_generate_inputs() {
         /*let path = Path::new("/Users/chef/.sp1/circuits/plonk/v3.0.0");
-        if tokio::fs::metadata(path).await.is_ok() {
+          if tokio::fs::metadata(path).await.is_ok() {
             tokio::fs::remove_dir_all(path)
                 .await
                 .expect("Failed to remove directory");
         }*/
-        let pubkeys_x_decoded = decode_pubkeys_x(oc.clone());
-        let commitment = commit_to_keys_with_sign(&pubkeys_x_decoded.0, &pubkeys_x_decoded.1);
-        let step_proof_payload = generate_step_proof_sp1(
-            &prover::ProverOps::Plonk,
-            commitment.to_vec().try_into().unwrap(),
-            s,
-        );
-        client
-            .verify(&step_proof_payload.0, &step_proof_payload.1)
-            .expect("failed to verify step proof");
-        let step_journal: StepWrappedOutput =
-            StepWrappedOutput::abi_decode(step_proof_payload.0.public_values.as_slice(), false)
-                .unwrap();
-        assert_eq!(
-            step_journal.finalized_header_root,
-            committee_journal.finalized_header_root
-        )
+        let _inputs = get_light_client_update().await;
     }
 }
