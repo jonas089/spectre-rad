@@ -33,23 +33,29 @@ pub fn main() {
         step_journal.finalized_header_root
     );
 
+    let step_vk_bytes = step_inputs
+        .vk
+        .iter()
+        .flat_map(|&x| x.to_le_bytes())
+        .collect::<Vec<u8>>();
+
+    let step_vk = FixedBytes::<32>::from_slice(&step_vk_bytes);
+
+    let committee_vk_bytes = committee_inputs
+        .vk
+        .iter()
+        .flat_map(|&x| x.to_le_bytes())
+        .collect::<Vec<u8>>();
+
+    let committee_vk = FixedBytes::<32>::from_slice(&committee_vk_bytes);
+
     let output = WrappedOutput::abi_encode(&WrappedOutput {
         slot: step_journal.slot,
         // this should be the current sync committee commitment stored under the contract
         commitment: FixedBytes::<32>::from_slice(&step_journal.commitment),
         finalized_header_root: FixedBytes::<32>::from_slice(&step_journal.finalized_header_root),
-        step_vk: FixedBytes::<32>::from_slice(&unsafe {
-            std::slice::from_raw_parts(
-                step_inputs.vk.as_ptr() as *const u8,
-                step_inputs.vk.len() * std::mem::size_of::<u32>(),
-            )
-        }),
-        committee_vk: FixedBytes::<32>::from_slice(&unsafe {
-            std::slice::from_raw_parts(
-                committee_inputs.vk.as_ptr() as *const u8,
-                committee_inputs.vk.len() * std::mem::size_of::<u32>(),
-            )
-        }),
+        step_vk,
+        committee_vk,
         // this should be the next sync committee, the output of this update
         next_commitment: FixedBytes::<32>::from_slice(&committee_journal.commitment),
     });
