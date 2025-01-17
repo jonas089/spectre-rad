@@ -6,11 +6,23 @@ members = [
     "iso-step",
     "circuits/sp1-step",
     "circuits/sp1-committee",
+    "circuits/sp1-aggregate",
+    "preprocessor",
+    "eth-types",
+    "iso-aggregate",
 ]
+
+default-members = ["prover"]
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]
 opt-level = 3
+
+[workspace.dependencies]
+sp1-helper = "3.4.0"
+sp1-sdk = "3.4.0"
+sp1-derive = "3.4.0"
+sp1-zkvm = "3.4.0"
 
 [profile.release]
 debug = 1

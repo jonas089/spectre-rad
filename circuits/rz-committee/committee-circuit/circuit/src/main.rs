@@ -1,7 +1,7 @@
 use committee_iso::{
     types::{CommitteeCircuitOutput, CommitteeUpdateArgs, PublicKeyHashes},
     utils::{
-        commit_to_keys, decode_pubkeys_x, hash_keys, merkleize_keys, uint64_to_le_256,
+        commit_to_keys_with_sign, decode_pubkeys_x, hash_keys, merkleize_keys, uint64_to_le_256,
         verify_merkle_proof,
     },
 };
@@ -16,7 +16,7 @@ fn main() {
     let committee_root_ssz: Vec<u8> = merkleize_keys(key_hashs);
     let finalized_state_root: Vec<u8> = args.finalized_header.state_root.to_vec();
     let (keys, signs) = decode_pubkeys_x(args.pubkeys_compressed);
-    let commitment = commit_to_keys(keys, signs);
+    let commitment = commit_to_keys_with_sign(&keys, &signs);
 
     verify_merkle_proof(
         args.sync_committee_branch,
@@ -34,7 +34,7 @@ fn main() {
     ]);
 
     env::commit(&CommitteeCircuitOutput::new(
-        finalized_header_root.try_into().unwrap(),
         commitment.try_into().unwrap(),
+        finalized_header_root.try_into().unwrap(),
     ));
 }

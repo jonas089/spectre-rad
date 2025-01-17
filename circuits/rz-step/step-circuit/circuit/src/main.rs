@@ -33,9 +33,11 @@ fn main() {
         105,
     );
 
-    verify_aggregate_signature(args.clone(), inputs.committee_commitment);
+    verify_aggregate_signature(args.clone(), inputs.commitment);
     let output = SyncStepCircuitOutput {
-        finalized_block_root: finalized_header_root.try_into().unwrap(),
+        slot: u32::from_str_radix(&args.finalized_header.slot, 10).unwrap(),
+        commitment: inputs.commitment,
+        finalized_header_root: finalized_header_root.try_into().unwrap(),
     };
     env::commit(&output);
 }

@@ -20,7 +20,7 @@ bls12_381 = { git = "https://github.com/zkcrypto/bls12_381", rev = "9ea427c0eb1a
 bls12_381_sp1 = { package = "bls12_381", path = "../bls12_381", optional = true, features = [
     "experimental",
 ] }
-sp1-derive = "3.4.0"
+sp1-derive = { workspace = true }
 alloy-sol-types = "0.8.18"
 
 

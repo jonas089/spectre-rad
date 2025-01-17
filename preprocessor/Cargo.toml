@@ -1,0 +1,40 @@
+[package]
+name = "preprocessor"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "preprocessor"
+path = "src/lib.rs"
+
+
+[dependencies]
+ssz_rs = { git = "https://github.com/jonas089/ssz-patched-crates" }
+group = "0.13"
+beacon-api-client = { git = "https://github.com/jonas089/ssz-patched-crates" }
+step-iso = { path = "../iso-step" }
+committee-iso = { path = "../iso-committee" }
+eyre = "0.6"
+tokio = { version = "1", features = ["full"] }
+hex = "0.4"
+log = "0.4.14"
+itertools = "0.12.0"
+serde = { version = "1.0.130", features = ["derive"] }
+serde_json = "1.0.78"
+ethereum-consensus-types = { git = "https://github.com/jonas089/ssz-patched-crates", features = [
+    "serde",
+] }
+borsh = { version = "1.5.3", features = ["derive"] }
+sp1-sdk = { workspace = true }
+eth-types = { path = "../eth-types" }
+reqwest = "0.11.22"
+alloy-sol-types = "0.8.18"
+alloy-primitives = "0.8.18"
+ethereum-consensus = { git = "https://github.com/jonas089/ssz-patched-crates", optional = true }
+blst = { version = "0.3.11", default-features = false, features = [
+    "portable",
+    "no-threads",
+], optional = true }
+
+[features]
+test-gen = ["ethereum-consensus", "blst"]

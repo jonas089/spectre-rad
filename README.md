@@ -2,6 +2,9 @@
 
 On an `A100` server from lambda labs, this zk light client can verify a committee update and step in `~97 seconds`.
 
+> [!WARNING]
+> The Risc0 circuits are currently on hold, please proceed with the SP1 circuits for safety & performance reasons!
+
 ## Summary of current state - bottlenecks
 
 > [!NOTE]

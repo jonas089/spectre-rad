@@ -9,13 +9,42 @@ use bls12_381_sp1::{
     pairing, G1Affine, G1Projective, G2Affine, G2Projective,
 };
 use committee_iso::utils::{
-    add_left_right, commit_to_keys, compute_digest, decode_pubkeys_x, merkleize_keys,
+    add_left_right, commit_to_keys_with_sign, compute_digest, decode_pubkeys_x, merkleize_keys,
     uint64_to_le_256, Sha256,
 };
 use types::Commitment;
 use types::SyncStepArgs;
 pub mod types;
 pub mod utils;
+
+pub fn compress_keys(keys: Vec<Vec<u8>>) -> Vec<Vec<u8>> {
+    let pubkey_affines: Vec<G1Affine> = keys
+        .as_slice()
+        .iter()
+        .map(|bytes| {
+            G1Affine::from_uncompressed_unchecked(&bytes.as_slice().try_into().unwrap()).unwrap()
+        })
+        .collect();
+
+    pubkey_affines
+        .iter()
+        .map(|uncompressed| uncompressed.to_compressed().to_vec())
+        .collect()
+}
+
+pub fn decompress_keys(keys: Vec<Vec<u8>>) -> Vec<Vec<u8>> {
+    let pubkey_affines: Vec<G1Affine> = keys
+        .as_slice()
+        .iter()
+        .map(|bytes| {
+            G1Affine::from_compressed_unchecked(&bytes.as_slice().try_into().unwrap()).unwrap()
+        })
+        .collect();
+    pubkey_affines
+        .iter()
+        .map(|uncompressed| uncompressed.to_uncompressed().to_vec())
+        .collect()
+}
 
 fn aggregate_pubkey(args: SyncStepArgs) -> (G1Affine, Commitment) {
     let pubkey_affines: Vec<G1Affine> = args
@@ -33,7 +62,8 @@ fn aggregate_pubkey(args: SyncStepArgs) -> (G1Affine, Commitment) {
         .collect();
 
     let pubkeys_decoded = decode_pubkeys_x(pubkeys_compressed);
-    let pubkey_commitment: Commitment = commit_to_keys(pubkeys_decoded.0, pubkeys_decoded.1);
+    let pubkey_commitment: Commitment =
+        commit_to_keys_with_sign(&pubkeys_decoded.0, &pubkeys_decoded.1);
 
     let mut generator = G1Projective::identity();
     let participation_bits = args.pariticipation_bits;
@@ -44,10 +74,8 @@ fn aggregate_pubkey(args: SyncStepArgs) -> (G1Affine, Commitment) {
         }
         // double if equal, add if unequal
         if generator == affine_projective {
-            // double
             generator = generator.double().into();
         } else {
-            // add
             generator = (generator + G1Projective::from(affine)).into();
         }
     }
