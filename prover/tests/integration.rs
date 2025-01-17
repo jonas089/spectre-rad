@@ -8,6 +8,7 @@ mod tests {
     };
     use sp1_sdk::HashableKey;
     use std::path::Path;
+    use step_iso::types::SyncStepCircuitOutput;
 
     #[tokio::test(flavor = "multi_thread")]
     async fn test_committee_update_beacon_cli_e2e() {
@@ -17,9 +18,7 @@ mod tests {
                 .await
                 .expect("Failed to remove directory");
         }
-
         let ((s, c), oc) = get_light_client_update().await;
-
         let (committee_proof, committee_vk) = generate_committee_update_proof_sp1(
             &prover::ProverOps::Default,
             c,
@@ -41,6 +40,9 @@ mod tests {
             &prover::ProofCompressionBool::Compressed,
         );
         let step_public_values = step_proof.public_values.to_vec();
+        let _step_public_values_decoded: SyncStepCircuitOutput =
+            borsh::from_slice(&step_public_values).expect("Failed to decode public values!");
+
         let step_inputs = RecursiveInputs {
             public_values: step_public_values,
             vk: step_vk.hash_u32(),
