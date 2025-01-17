@@ -223,10 +223,4 @@ the `sync steps` and aim to expose the most recent trusted Ethereum root.
 
 # Integrations - third party proof verification infrastructure
 
-Integrations can be found in `prover/integrations/*`. The first integration `POC` for the Aligned Builders Hackathon can be found in `prover/integrations/*`.
-Note that this will only work for the `Risc0` version(s) supported by Aligned. I will keep an eye on them and update the integration once support for `1.1.x` has arrived.
-In the meantime performance optimizations in `1.1.x` are a priority.
-
-## Aligned Layer
-
-Read more [here](https://github.com/jonas089/spectre-rad/tree/breaking/prover/src/integrations/aligned).
+Work in progress ⚙️⚙️
