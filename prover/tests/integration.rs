@@ -8,10 +8,22 @@ mod tests {
     };
     use sp1_sdk::HashableKey;
     use std::path::Path;
+    use std::process::Command;
     use step_iso::types::SyncStepCircuitOutput;
 
     #[tokio::test(flavor = "multi_thread")]
     async fn test_committee_update_beacon_cli_e2e() {
+        let prune_out = Command::new("docker")
+            .arg("system")
+            .arg("prune")
+            .arg("-a")
+            .arg("-f")
+            .output()
+            .expect("Failed to prune");
+        println!(
+            "Docker prune out: {}",
+            &String::from_utf8(prune_out.stdout).unwrap()
+        );
         let path = Path::new("/Users/chef/.sp1/circuits/plonk/v3.0.0");
         if tokio::fs::metadata(path).await.is_ok() {
             tokio::fs::remove_dir_all(path)

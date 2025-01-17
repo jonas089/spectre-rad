@@ -257,13 +257,8 @@ pub async fn get_light_client_update() -> ((SyncStepArgs, CommitteeUpdateArgs), 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[tokio::test]
     async fn test_generate_inputs() {
-        /*let path = Path::new("/Users/chef/.sp1/circuits/plonk/v3.0.0");
-          if tokio::fs::metadata(path).await.is_ok() {
-            tokio::fs::remove_dir_all(path)
-                .await
-                .expect("Failed to remove directory");
-        }*/
         let _inputs = get_light_client_update().await;
     }
 }
