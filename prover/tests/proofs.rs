@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod test_circuits {
+    use aggregate_iso::types::RecursiveInputs;
     use alloy_sol_types::SolType;
     use committee_circuit::{RZ_COMMITTEE_ELF, RZ_COMMITTEE_ID};
     use committee_iso::{
@@ -16,7 +17,7 @@ mod test_circuits {
     use std::path::PathBuf;
     use step_circuit::{RZ_STEP_ELF, RZ_STEP_ID};
     use step_iso::{
-        types::{RecursiveInputs, SyncStepArgs, SyncStepCircuitInput},
+        types::{SyncStepArgs, SyncStepCircuitInput},
         utils::load_circuit_args_env as load_step_args_env,
     };
 
@@ -54,9 +55,6 @@ mod test_circuits {
         compressed: ProofCompressionBool,
     ) -> (SP1ProofWithPublicValues, SP1VerifyingKey) {
         use std::time::Instant;
-        tracing_subscriber::fmt()
-            .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-            .init();
         let start_time = Instant::now();
         let committee_update: CommitteeUpdateArgs = load_committee_args_env();
         let client = ProverClient::new();
@@ -127,9 +125,10 @@ mod test_circuits {
 
     #[test]
     fn test_committee_circuit_default_sp1() {
-        let (mut proof, _) =
+        let (proof, _) =
             test_committee_circuit_sp1(&ProverOps::Default, ProofCompressionBool::Uncompressed);
-        let output: CommitteeCircuitOutput = proof.public_values.read::<CommitteeCircuitOutput>();
+        let output: CommitteeCircuitOutput =
+            borsh::from_slice(&proof.public_values.as_slice()).unwrap();
         println!("Output: {:?}", &output);
     }
 
@@ -152,9 +151,6 @@ mod test_circuits {
     #[test]
     fn test_step_circuit_risc0() {
         use std::time::Instant;
-        tracing_subscriber::fmt()
-            .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-            .init();
         let start_time = Instant::now();
         let sync_step_args: SyncStepArgs = load_step_args_env();
         let commitment: [u8; 32] = [
@@ -163,7 +159,7 @@ mod test_circuits {
         ];
         let inputs: SyncStepCircuitInput = SyncStepCircuitInput {
             args: sync_step_args,
-            committee_commitment: commitment,
+            commitment,
         };
         let env = ExecutorEnv::builder()
             .write_slice(&borsh::to_vec(&inputs).unwrap())
@@ -192,7 +188,7 @@ mod test_circuits {
         ];
         let inputs: SyncStepCircuitInput = SyncStepCircuitInput {
             args: sync_step_args,
-            committee_commitment: commitment,
+            commitment,
         };
         let client = ProverClient::new();
         let mut stdin = SP1Stdin::new();
@@ -282,8 +278,8 @@ mod test_circuits {
     fn test_step_circuit_sp1_recursive(
         ops: &ProverOps,
         inputs: Vec<RecursiveInputs>,
-        proof: SP1ProofWithPublicValues,
-        vk: SP1VerifyingKey,
+        proofs: Vec<SP1ProofWithPublicValues>,
+        vks: Vec<SP1VerifyingKey>,
     ) -> (SP1ProofWithPublicValues, SP1VerifyingKey) {
         use std::time::Instant;
         sp1_sdk::utils::setup_logger();
@@ -291,10 +287,16 @@ mod test_circuits {
         let client = ProverClient::new();
         let mut stdin = SP1Stdin::new();
         stdin.write_vec(borsh::to_vec(&inputs).expect("Failed to serialize"));
-        let SP1Proof::Compressed(proof) = proof.proof else {
-            panic!("Uncompressed proof unsupported!")
+        // write first proof - committee
+        let SP1Proof::Compressed(proof) = proofs.first().unwrap().proof.clone() else {
+            panic!("Uncompressed proof unsupported: Committee!")
         };
-        stdin.write_proof(*proof, vk.vk);
+        stdin.write_proof(*proof, vks.first().unwrap().vk.clone());
+        // write second proof - committee
+        let SP1Proof::Compressed(proof) = proofs.get(1).unwrap().proof.clone() else {
+            panic!("Uncompressed proof unsupported: Step!")
+        };
+        stdin.write_proof(*proof, vks.get(1).unwrap().vk.clone());
 
         let (proof, _, vk) = match ops {
             ProverOps::Default => {
@@ -330,16 +332,29 @@ mod test_circuits {
     }
 
     #[test]
-    // todo: aggregate step and committee proof for commitee update case
+    // aggregate step and committee proof into a single wrapped proof
+    // todo: move to preprocessor as integration test!
     fn test_step_circuit_sp1_compressed_plonk() {
-        let (proof, vk) =
-            test_step_circuit_sp1(&ProverOps::Default, ProofCompressionBool::Compressed);
-        let public_values = proof.public_values.to_vec();
-        let inputs = RecursiveInputs {
-            public_values,
-            vk: vk.hash_u32(),
+        let (committee_proof, committee_vk) =
+            test_committee_circuit_sp1(&ProverOps::Default, ProofCompressionBool::Compressed);
+        let committee_public_values = committee_proof.public_values.to_vec();
+        let committee_inputs = RecursiveInputs {
+            public_values: committee_public_values,
+            vk: committee_vk.hash_u32(),
         };
-        let (_proof, _vk) = test_step_circuit_sp1_recursive(&ProverOps::Plonk, inputs, proof, vk);
+        let (step_proof, step_vk) =
+            test_step_circuit_sp1(&ProverOps::Default, ProofCompressionBool::Compressed);
+        let step_public_values = step_proof.public_values.to_vec();
+        let step_inputs = RecursiveInputs {
+            public_values: step_public_values,
+            vk: step_vk.hash_u32(),
+        };
+        let (_proof, _vk) = test_step_circuit_sp1_recursive(
+            &ProverOps::Plonk,
+            vec![committee_inputs, step_inputs],
+            vec![committee_proof, step_proof],
+            vec![committee_vk, step_vk],
+        );
     }
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -359,11 +374,11 @@ mod test_circuits {
         let bytes = proof.public_values.as_slice();
         let WrappedOutput {
             finalized_header_root,
-            committee_commitment,
+            commitment,
         } = WrappedOutput::abi_decode(bytes, false).unwrap();
         let fixture = ProofFixture {
             root: format!("0x{}", hex::encode(finalized_header_root)),
-            commitment: format!("0x{}", hex::encode(committee_commitment)),
+            commitment: format!("0x{}", hex::encode(commitment)),
             vkey: vk.bytes32().to_string(),
             public_values: format!("0x{}", hex::encode(bytes)),
             proof: format!("0x{}", hex::encode(proof.bytes())),

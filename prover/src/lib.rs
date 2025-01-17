@@ -59,7 +59,7 @@ pub fn generate_committee_update_proof_sp1(
 
 pub fn generate_step_proof_sp1(
     ops: &ProverOps,
-    committee_commitment: [u8; 32],
+    commitment: [u8; 32],
     sync_step_args: SyncStepArgs,
 ) -> (SP1ProofWithPublicValues, SP1VerifyingKey) {
     use std::time::Instant;
@@ -67,7 +67,7 @@ pub fn generate_step_proof_sp1(
     let start_time = Instant::now();
     let inputs: SyncStepCircuitInput = SyncStepCircuitInput {
         args: sync_step_args,
-        committee_commitment,
+        commitment,
     };
     let client = ProverClient::new();
     let mut stdin = SP1Stdin::new();

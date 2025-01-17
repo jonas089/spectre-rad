@@ -37,7 +37,7 @@ pub struct SyncStepArgs {
 #[derive(Debug, Clone, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub struct SyncStepCircuitInput {
     pub args: SyncStepArgs,
-    pub committee_commitment: [u8; 32],
+    pub commitment: [u8; 32],
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
@@ -53,10 +53,4 @@ sol! {
         bytes32 commitment;
         bytes32 finalized_header_root;
     }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
-pub struct RecursiveInputs {
-    pub public_values: Vec<u8>,
-    pub vk: [u32; 8],
 }

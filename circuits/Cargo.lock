@@ -3,6 +3,16 @@
 version = 4
 
 [[package]]
+name = "aggregate-iso"
+version = "0.1.0"
+dependencies = [
+ "alloy-sol-types",
+ "borsh",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ahash"
 version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1626,6 +1636,7 @@ dependencies = [
 name = "sp1-aggregate"
 version = "0.1.0"
 dependencies = [
+ "aggregate-iso",
  "alloy-primitives 0.8.19",
  "alloy-sol-types",
  "bincode",

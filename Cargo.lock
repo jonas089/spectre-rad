@@ -65,6 +65,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "aggregate-iso"
+version = "0.1.0"
+dependencies = [
+ "alloy-sol-types 0.8.18",
+ "borsh",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ahash"
 version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5840,6 +5850,7 @@ dependencies = [
 name = "prover"
 version = "0.1.0"
 dependencies = [
+ "aggregate-iso",
  "aligned-sdk",
  "alloy-sol-types 0.8.18",
  "beacon-api-client",
@@ -7405,6 +7416,7 @@ dependencies = [
 name = "sp1-aggregate"
 version = "0.1.0"
 dependencies = [
+ "aggregate-iso",
  "alloy-primitives 0.8.18",
  "alloy-sol-types 0.8.18",
  "bincode",

@@ -8,10 +8,10 @@ use committee_iso::{
 };
 #[cfg(feature = "wrapped")]
 use ::{
-    alloy_primitives::FixedBytes, alloy_sol_types::sol, alloy_sol_types::SolValue,
-    committee_iso::types::WrappedOutput,
+    alloy_primitives::FixedBytes, alloy_sol_types::SolType, committee_iso::types::WrappedOutput,
 };
 sp1_zkvm::entrypoint!(main);
+
 pub fn main() {
     let args: CommitteeUpdateArgs = borsh::from_slice(&sp1_zkvm::io::read_vec()).unwrap();
     let key_hashs: PublicKeyHashes = hash_keys(args.pubkeys_compressed.clone());
@@ -33,14 +33,17 @@ pub fn main() {
         args.finalized_header.body_root.to_vec(),
     ]);
     #[cfg(not(feature = "wrapped"))]
-    sp1_zkvm::io::commit(&CommitteeCircuitOutput::new(
-        commitment.to_vec(),
-        finalized_header_root.try_into().unwrap(),
-    ));
+    sp1_zkvm::io::commit_slice(
+        &borsh::to_vec(&CommitteeCircuitOutput::new(
+            commitment,
+            finalized_header_root.try_into().unwrap(),
+        ))
+        .unwrap(),
+    );
     #[cfg(feature = "wrapped")]
     {
         let bytes = WrappedOutput::abi_encode(&WrappedOutput {
-            committee_commitment: FixedBytes::<32>::from_slice(&commitment),
+            commitment: FixedBytes::<32>::from_slice(&commitment),
             finalized_header_root: FixedBytes::<32>::from_slice(&finalized_header_root),
         });
 

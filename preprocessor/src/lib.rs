@@ -174,9 +174,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloy_sol_types::SolType;
     use beacon_api_client::mainnet::Client as MainnetClient;
     use beacon_api_client::StateId;
-    use committee_iso::types::BeaconBlockHeader;
+    use committee_iso::types::{BeaconBlockHeader, WrappedOutput as CommitteeWrappedOutput};
     use committee_iso::utils::{commit_to_keys_with_sign, decode_pubkeys_x};
     use eth_types::Testnet;
     use ethereum_consensus_types::signing::{compute_domain, DomainType};
@@ -185,6 +186,7 @@ mod tests {
     use reqwest::Url;
     use sp1_sdk::ProverClient;
     use std::path::Path;
+    use step_iso::types::WrappedOutput as StepWrappedOutput;
 
     #[tokio::test(flavor = "multi_thread")]
     async fn beacon_client_e2e_test_prover() {
@@ -270,20 +272,24 @@ mod tests {
         };
         let committee_proof_payload =
             generate_committee_update_proof_sp1(&prover::ProverOps::Plonk, c);
-        /*let committee_outputs: WrappedOutput =
-        WrappedOutput::abi_decode(&committee_proof_payload.0.public_values.as_slice(), false)
-            .unwrap();*/
+
         let client = ProverClient::new();
         client
             .verify(&committee_proof_payload.0, &committee_proof_payload.1)
             .expect("failed to verify committee proof");
 
-        let path = Path::new("/Users/chef/.sp1/circuits/plonk/v3.0.0");
+        let committee_journal: CommitteeWrappedOutput = CommitteeWrappedOutput::abi_decode(
+            committee_proof_payload.0.public_values.as_slice(),
+            false,
+        )
+        .unwrap();
+
+        /*let path = Path::new("/Users/chef/.sp1/circuits/plonk/v3.0.0");
         if tokio::fs::metadata(path).await.is_ok() {
             tokio::fs::remove_dir_all(path)
                 .await
                 .expect("Failed to remove directory");
-        }
+        }*/
         let pubkeys_x_decoded = decode_pubkeys_x(oc.clone());
         let commitment = commit_to_keys_with_sign(&pubkeys_x_decoded.0, &pubkeys_x_decoded.1);
         let step_proof_payload = generate_step_proof_sp1(
@@ -294,5 +300,12 @@ mod tests {
         client
             .verify(&step_proof_payload.0, &step_proof_payload.1)
             .expect("failed to verify step proof");
+        let step_journal: StepWrappedOutput =
+            StepWrappedOutput::abi_decode(step_proof_payload.0.public_values.as_slice(), false)
+                .unwrap();
+        assert_eq!(
+            step_journal.finalized_header_root,
+            committee_journal.finalized_header_root
+        )
     }
 }

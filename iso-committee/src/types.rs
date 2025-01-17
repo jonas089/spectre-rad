@@ -36,15 +36,15 @@ pub struct CommitteeUpdateArgs {
 
 #[derive(Debug, Clone, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub struct CommitteeCircuitOutput {
-    pub committee_commitment: Vec<u8>,
-    pub finalized_header_root: Vec<u8>,
+    pub commitment: [u8; 32],
+    pub finalized_header_root: [u8; 32],
 }
 
 impl CommitteeCircuitOutput {
-    pub fn new(committee_commitment: Vec<u8>, finalized_header_root: [u8; 32]) -> Self {
+    pub fn new(commitment: [u8; 32], finalized_header_root: [u8; 32]) -> Self {
         Self {
-            committee_commitment: committee_commitment.to_vec(),
-            finalized_header_root: finalized_header_root.to_vec(),
+            commitment,
+            finalized_header_root,
         }
     }
 }
@@ -63,7 +63,7 @@ lazy_static! {
 
 sol! {
     struct WrappedOutput{
-        bytes32 committee_commitment;
+        bytes32 commitment;
         bytes32 finalized_header_root;
     }
 }
