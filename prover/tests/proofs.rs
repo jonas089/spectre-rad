@@ -9,10 +9,7 @@ mod test_circuits {
     use serde::{Deserialize, Serialize};
     use sp1_sdk::{HashableKey, SP1ProofWithPublicValues, SP1VerifyingKey};
     use std::path::PathBuf;
-    use step_iso::{
-        types::{SyncStepArgs, SyncStepCircuitInput},
-        utils::load_circuit_args_env as load_step_args_env,
-    };
+    use step_iso::{types::SyncStepArgs, utils::load_circuit_args_env as load_step_args_env};
 
     #[test]
     fn test_committee_circuit_default_sp1() {

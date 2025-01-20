@@ -4,10 +4,8 @@ use crate::{
 };
 use itertools::Itertools;
 use num_bigint::BigUint;
-#[cfg(all(not(feature = "risc0"), not(feature = "sp1")))]
+#[cfg(not(feature = "sp1"))]
 pub use sha2::{Digest, Sha256};
-#[cfg(feature = "risc0")]
-pub use sha2_risc0::{Digest, Sha256};
 #[cfg(feature = "sp1")]
 pub use sha2_sp1::{Digest, Sha256};
 use std::{env, fs};
