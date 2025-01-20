@@ -1,7 +1,6 @@
 #[cfg(test)]
 mod test_circuits {
     use alloy_sol_types::SolType;
-    use committee_circuit::{RZ_COMMITTEE_ELF, RZ_COMMITTEE_ID};
     use committee_iso::{
         types::{CommitteeCircuitOutput, CommitteeUpdateArgs, WrappedOutput},
         utils::load_circuit_args_env as load_committee_args_env,
@@ -10,7 +9,6 @@ mod test_circuits {
     use serde::{Deserialize, Serialize};
     use sp1_sdk::{HashableKey, SP1ProofWithPublicValues, SP1VerifyingKey};
     use std::path::PathBuf;
-    use step_circuit::{RZ_STEP_ELF, RZ_STEP_ID};
     use step_iso::{
         types::{SyncStepArgs, SyncStepCircuitInput},
         utils::load_circuit_args_env as load_step_args_env,

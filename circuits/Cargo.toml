@@ -1,4 +1,5 @@
 [workspace]
+resolver = "2"
 members = ["sp1-committee", "sp1-step", "sp1-aggregate"]
 
 [workspace.dependencies]
