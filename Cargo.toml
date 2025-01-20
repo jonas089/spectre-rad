@@ -11,7 +11,6 @@ members = [
     "eth-types",
     "iso-aggregate",
 ]
-
 default-members = ["prover"]
 
 # Always optimize; building and running the guest takes much longer without optimization.

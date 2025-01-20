@@ -20,5 +20,4 @@ sha2_sp1 = { package = "sha2", git = "https://github.com/sp1-patches/RustCrypto-
 alloy-sol-types = "0.8.18"
 
 [features]
-risc0 = ["sha2_risc0"]
 sp1 = ["sha2_sp1"]

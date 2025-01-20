@@ -7,7 +7,6 @@ mod test_circuits {
         utils::load_circuit_args_env as load_committee_args_env,
     };
     use prover::{generate_committee_update_proof_sp1, generate_step_proof_sp1, ProverOps};
-    use risc0_zkvm::{default_prover, ExecutorEnv};
     use serde::{Deserialize, Serialize};
     use sp1_sdk::{HashableKey, SP1ProofWithPublicValues, SP1VerifyingKey};
     use std::path::PathBuf;
@@ -16,30 +15,6 @@ mod test_circuits {
         types::{SyncStepArgs, SyncStepCircuitInput},
         utils::load_circuit_args_env as load_step_args_env,
     };
-
-    // Risc0 Committee Circuit
-    #[test]
-    fn test_committee_circuit_risc0() {
-        use std::time::Instant;
-        tracing_subscriber::fmt()
-            .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-            .init();
-        let start_time = Instant::now();
-        let committee_update: CommitteeUpdateArgs = load_committee_args_env();
-        let env = ExecutorEnv::builder()
-            .write_slice(&borsh::to_vec(&committee_update).unwrap())
-            .build()
-            .unwrap();
-
-        let prover = default_prover();
-        let prove_info = prover.prove(env, RZ_COMMITTEE_ELF).unwrap();
-        let receipt = prove_info.receipt;
-        let output: CommitteeCircuitOutput = receipt.journal.decode().unwrap();
-        receipt.verify(RZ_COMMITTEE_ID).unwrap();
-        println!("Public output: {:?}", &output);
-        let duration = start_time.elapsed();
-        println!("Elapsed time: {:?}", duration);
-    }
 
     #[test]
     fn test_committee_circuit_default_sp1() {
@@ -77,32 +52,6 @@ mod test_circuits {
             &prover::ProofCompressionBool::Uncompressed,
         );
         create_proof_fixture(&proof, &vk, &ops);
-    }
-
-    // Risc0 Step Circuit
-    #[test]
-    fn test_step_circuit_risc0() {
-        use std::time::Instant;
-        let start_time = Instant::now();
-        let sync_step_args: SyncStepArgs = load_step_args_env();
-        let commitment: [u8; 32] = [
-            106, 92, 62, 66, 60, 86, 8, 54, 215, 185, 238, 54, 75, 39, 221, 15, 81, 229, 23, 145,
-            198, 242, 244, 199, 60, 103, 60, 206, 116, 216, 86, 227,
-        ];
-        let inputs: SyncStepCircuitInput = SyncStepCircuitInput {
-            args: sync_step_args,
-            commitment,
-        };
-        let env = ExecutorEnv::builder()
-            .write_slice(&borsh::to_vec(&inputs).unwrap())
-            .build()
-            .unwrap();
-        let prover = default_prover();
-        let prove_info = prover.prove(env, RZ_STEP_ELF).unwrap();
-        let receipt = prove_info.receipt;
-        receipt.verify(RZ_STEP_ID).unwrap();
-        let duration = start_time.elapsed();
-        println!("Elapsed time: {:?}", duration);
     }
 
     #[test]
