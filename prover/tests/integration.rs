@@ -8,21 +8,9 @@ mod tests {
     };
     use sp1_sdk::HashableKey;
     use std::path::Path;
-    use std::process::Command;
 
-    #[tokio::test(flavor = "multi_thread")]
+    #[tokio::test]
     async fn test_committee_update_beacon_cli_e2e_groth16() {
-        let prune_out = Command::new("docker")
-            .arg("system")
-            .arg("prune")
-            .arg("-a")
-            .arg("-f")
-            .output()
-            .expect("Failed to prune");
-        println!(
-            "Docker prune out: {}",
-            &String::from_utf8(prune_out.stdout).unwrap()
-        );
         let path = Path::new("/Users/chef/.sp1/circuits/plonk/v3.0.0");
         if tokio::fs::metadata(path).await.is_ok() {
             tokio::fs::remove_dir_all(path)
@@ -66,17 +54,6 @@ mod tests {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn test_committee_update_beacon_cli_e2e_plonk() {
-        let prune_out = Command::new("docker")
-            .arg("system")
-            .arg("prune")
-            .arg("-a")
-            .arg("-f")
-            .output()
-            .expect("Failed to prune");
-        println!(
-            "Docker prune out: {}",
-            &String::from_utf8(prune_out.stdout).unwrap()
-        );
         let path = Path::new("/Users/chef/.sp1/circuits/plonk/v3.0.0");
         if tokio::fs::metadata(path).await.is_ok() {
             tokio::fs::remove_dir_all(path)
@@ -97,19 +74,6 @@ mod tests {
 
         let pubkeys_x_decoded = decode_pubkeys_x(oc.clone());
         let commitment = commit_to_keys_with_sign(&pubkeys_x_decoded.0, &pubkeys_x_decoded.1);
-
-        let prune_out = Command::new("docker")
-            .arg("system")
-            .arg("prune")
-            .arg("-a")
-            .arg("-f")
-            .output()
-            .expect("Failed to prune");
-        println!(
-            "Docker prune out: {}",
-            &String::from_utf8(prune_out.stdout).unwrap()
-        );
-
         let (step_proof, step_vk) = generate_step_proof_sp1(
             &prover::ProverOps::Default,
             commitment,
@@ -122,18 +86,6 @@ mod tests {
             public_values: step_public_values,
             vk: step_vk.hash_u32(),
         };
-
-        let prune_out = Command::new("docker")
-            .arg("system")
-            .arg("prune")
-            .arg("-a")
-            .arg("-f")
-            .output()
-            .expect("Failed to prune");
-        println!(
-            "Docker prune out: {}",
-            &String::from_utf8(prune_out.stdout).unwrap()
-        );
 
         let (_proof, _vk) = generate_aggregate_proof_sp1(
             &prover::ProverOps::Plonk,
