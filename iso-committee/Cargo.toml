@@ -15,10 +15,8 @@ ark-bn254 = "0.4.0"
 ark-ff = "0.4.0"
 ssz_rs = { git = "https://github.com/jonas089/ssz-patched-crates" }
 sha2 = { git = "https://github.com/RustCrypto/hashes/", rev = "9df20e865c3d141526074568984ba21a99429ea1" }
-sha2_risc0 = { package = "sha2", git = "https://github.com/risc0/RustCrypto-hashes", optional = true }
 sha2_sp1 = { package = "sha2", git = "https://github.com/sp1-patches/RustCrypto-hashes", branch = "patch-sha2-v0.10.8", optional = true }
 alloy-sol-types = "0.8.18"
 
 [features]
-risc0 = ["sha2_risc0"]
 sp1 = ["sha2_sp1"]

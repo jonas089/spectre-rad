@@ -5,9 +5,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-committee-circuit = { path = "../circuits/rz-committee/committee-circuit" }
-step-circuit = { path = "../circuits/rz-step/step-circuit" }
-risc0-zkvm = "1.2.0"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 serde = "1.0"
 serde_json = "1"
@@ -45,6 +42,5 @@ beacon-api-client = { git = "https://github.com/jonas089/ssz-patched-crates" }
 sp1-helper = { workspace = true }
 
 [features]
-metal = ["risc0-zkvm/metal"]
-cuda = ["risc0-zkvm/cuda", "sp1-sdk/cuda"]
+cuda = ["sp1-sdk/cuda"]
 wrapped = []
