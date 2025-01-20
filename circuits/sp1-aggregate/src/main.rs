@@ -15,12 +15,12 @@ pub fn main() {
     // verify committee proof
     sp1_zkvm::lib::verify::verify_sp1_proof(
         &committee_inputs.vk.clone(),
-        &(Sha256::digest(committee_inputs.public_values.clone())).into(),
+        &(Sha256::digest(&committee_inputs.public_values.clone())).into(),
     );
     // verify step proof
     sp1_zkvm::lib::verify::verify_sp1_proof(
         &step_inputs.vk.clone(),
-        &(Sha256::digest(step_inputs.public_values.clone())).into(),
+        &(Sha256::digest(&step_inputs.public_values.clone())).into(),
     );
     let committee_journal: CommitteeCircuitOutput =
         borsh::from_slice(&committee_inputs.public_values).unwrap();
