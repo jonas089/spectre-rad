@@ -32,12 +32,12 @@ pub fn generate_committee_update_proof_sp1(
             let (pk, vk) = client.setup(COMMITTEE_ELF);
             let proof = match compressed {
                 ProofCompressionBool::Compressed => client
-                    .prove(&pk, stdin)
+                    .prove(&pk, &stdin)
                     .compressed()
                     .run()
                     .expect("failed to generate proof"),
                 ProofCompressionBool::Uncompressed => client
-                    .prove(&pk, stdin)
+                    .prove(&pk, &stdin)
                     .run()
                     .expect("failed to generate proof"),
             };
@@ -47,7 +47,7 @@ pub fn generate_committee_update_proof_sp1(
             const COMMITTEE_ELF: &[u8] = include_elf!("sp1-committee");
             let (pk, vk) = client.setup(COMMITTEE_ELF);
             let proof = client
-                .prove(&pk, stdin)
+                .prove(&pk, &stdin)
                 .groth16()
                 .run()
                 .expect("failed to generate proof");
@@ -57,7 +57,7 @@ pub fn generate_committee_update_proof_sp1(
             const COMMITTEE_ELF: &[u8] = include_elf!("sp1-committee");
             let (pk, vk) = client.setup(COMMITTEE_ELF);
             let proof = client
-                .prove(&pk, stdin)
+                .prove(&pk, &stdin)
                 .plonk()
                 .run()
                 .expect("failed to generate proof");
@@ -93,12 +93,12 @@ pub fn generate_step_proof_sp1(
             let (pk, vk) = client.setup(STEP_ELF);
             let proof = match compressed {
                 ProofCompressionBool::Compressed => client
-                    .prove(&pk, stdin)
+                    .prove(&pk, &stdin)
                     .compressed()
                     .run()
                     .expect("failed to generate proof"),
                 ProofCompressionBool::Uncompressed => client
-                    .prove(&pk, stdin)
+                    .prove(&pk, &stdin)
                     .run()
                     .expect("failed to generate proof"),
             };
@@ -108,7 +108,7 @@ pub fn generate_step_proof_sp1(
             const STEP_ELF: &[u8] = include_elf!("sp1-step");
             let (pk, vk) = client.setup(STEP_ELF);
             let proof = client
-                .prove(&pk, stdin)
+                .prove(&pk, &stdin)
                 .groth16()
                 .run()
                 .expect("failed to generate proof");
@@ -118,7 +118,7 @@ pub fn generate_step_proof_sp1(
             const STEP_ELF: &[u8] = include_elf!("sp1-step");
             let (pk, vk) = client.setup(STEP_ELF);
             let proof = client
-                .prove(&pk, stdin)
+                .prove(&pk, &stdin)
                 .plonk()
                 .run()
                 .expect("failed to generate proof");
@@ -162,7 +162,7 @@ pub fn generate_aggregate_proof_sp1(
             const RECURSIVE_ELF: &[u8] = include_elf!("sp1-aggregate");
             let (pk, vk) = client.setup(RECURSIVE_ELF);
             let proof = client
-                .prove(&pk, stdin)
+                .prove(&pk, &stdin)
                 .groth16()
                 .run()
                 .expect("failed to generate proof");
@@ -172,7 +172,7 @@ pub fn generate_aggregate_proof_sp1(
             const RECURSIVE_ELF: &[u8] = include_elf!("sp1-aggregate");
             let (pk, vk) = client.setup(RECURSIVE_ELF);
             let proof = client
-                .prove(&pk, stdin)
+                .prove(&pk, &stdin)
                 .plonk()
                 .run()
                 .expect("failed to generate proof");
