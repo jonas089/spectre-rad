@@ -8,7 +8,7 @@ mod tests {
     use step_iso::types::SyncStepCircuitInput;
 
     #[tokio::test]
-    async fn test_committee_update_beacon_cli_e2e_groth16() {
+    async fn test_committee_rotation_beacon_cli_e2e_groth16() {
         let ((s, c), oc) = get_light_client_update().await;
         let (keys, signs) = decode_pubkeys_x(oc);
         let commitment = commit_to_keys_with_sign(&keys, &signs);
@@ -19,8 +19,11 @@ mod tests {
                 commitment: commitment,
             },
         };
-        let (rotation_proof, rotation_vk) =
-            generate_rotation_proof_sp1(&prover::ProverOps::Groth16, rotation_inputs);
+        let (rotation_proof, rotation_vk) = tokio::task::spawn_blocking(move || {
+            generate_rotation_proof_sp1(&prover::ProverOps::Groth16, rotation_inputs)
+        })
+        .await
+        .expect("Failed to join the spawned blocking task");
         #[allow(deprecated)]
         let client = ProverClient::new();
         client
@@ -29,7 +32,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_committee_update_beacon_cli_e2e_plonk() {
+    async fn test_committee_rotation_beacon_cli_e2e_plonk() {
         let ((s, c), oc) = get_light_client_update().await;
         let (keys, signs) = decode_pubkeys_x(oc);
         let commitment = commit_to_keys_with_sign(&keys, &signs);
@@ -40,9 +43,11 @@ mod tests {
                 commitment: commitment,
             },
         };
-        let (rotation_proof, rotation_vk) =
-            generate_rotation_proof_sp1(&prover::ProverOps::Plonk, rotation_inputs);
-
+        let (rotation_proof, rotation_vk) = tokio::task::spawn_blocking(move || {
+            generate_rotation_proof_sp1(&prover::ProverOps::Groth16, rotation_inputs)
+        })
+        .await
+        .expect("Failed to join the spawned blocking task");
         #[allow(deprecated)]
         let client = ProverClient::new();
         client
