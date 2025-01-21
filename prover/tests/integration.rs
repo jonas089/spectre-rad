@@ -44,7 +44,7 @@ mod tests {
             },
         };
         let (rotation_proof, rotation_vk) = tokio::task::spawn_blocking(move || {
-            generate_rotation_proof_sp1(&prover::ProverOps::Groth16, rotation_inputs)
+            generate_rotation_proof_sp1(&prover::ProverOps::Plonk, rotation_inputs)
         })
         .await
         .expect("Failed to join the spawned blocking task");
