@@ -3,16 +3,6 @@
 version = 4
 
 [[package]]
-name = "aggregate-iso"
-version = "0.1.0"
-dependencies = [
- "alloy-sol-types",
- "borsh",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "ahash"
 version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1405,6 +1395,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "rotation-iso"
+version = "0.1.0"
+dependencies = [
+ "alloy-sol-types",
+ "borsh",
+ "committee-iso",
+ "serde",
+ "serde_json",
+ "step-iso",
+]
+
+[[package]]
 name = "ruint"
 version = "1.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1627,25 +1629,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sp1-aggregate"
-version = "0.1.0"
-dependencies = [
- "aggregate-iso",
- "alloy-primitives 0.8.19",
- "alloy-sol-types",
- "bincode",
- "bls12_381",
- "borsh",
- "committee-iso",
- "itertools 0.13.0",
- "serde",
- "serde_json",
- "sha2 0.9.9",
- "sp1-zkvm",
- "step-iso",
-]
-
-[[package]]
 name = "sp1-committee"
 version = "0.1.0"
 dependencies = [
@@ -1698,6 +1681,25 @@ dependencies = [
  "p3-symmetric",
  "serde",
  "sha2 0.10.8",
+]
+
+[[package]]
+name = "sp1-rotation"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives 0.8.19",
+ "alloy-sol-types",
+ "bincode",
+ "bls12_381",
+ "borsh",
+ "committee-iso",
+ "itertools 0.13.0",
+ "rotation-iso",
+ "serde",
+ "serde_json",
+ "sha2 0.9.9",
+ "sp1-zkvm",
+ "step-iso",
 ]
 
 [[package]]

@@ -10,7 +10,7 @@ serde = "1.0"
 serde_json = "1"
 committee-iso = { path = "../iso-committee" }
 step-iso = { path = "../iso-step" }
-aggregate-iso = { path = "../iso-aggregate" }
+rotation-iso = { path = "../iso-rotation" }
 preprocessor = { path = "../preprocessor" }
 eth-types = { path = "../eth-types" }
 aligned-sdk = { git = "https://github.com/yetanotherco/aligned_layer", tag = "v0.9.2" }

@@ -50,16 +50,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "aggregate-iso"
-version = "0.1.0"
-dependencies = [
- "alloy-sol-types",
- "borsh",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "ahash"
 version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5262,7 +5252,6 @@ dependencies = [
 name = "prover"
 version = "0.1.0"
 dependencies = [
- "aggregate-iso",
  "aligned-sdk",
  "alloy-sol-types",
  "beacon-api-client",
@@ -5279,6 +5268,7 @@ dependencies = [
  "k256 0.13.4",
  "preprocessor",
  "reqwest 0.12.12",
+ "rotation-iso",
  "rpassword",
  "rusqlite",
  "serde",
@@ -5730,6 +5720,18 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "rotation-iso"
+version = "0.1.0"
+dependencies = [
+ "alloy-sol-types",
+ "borsh",
+ "committee-iso",
+ "serde",
+ "serde_json",
+ "step-iso",
 ]
 
 [[package]]
@@ -6482,25 +6484,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sp1-aggregate"
-version = "0.1.0"
-dependencies = [
- "aggregate-iso",
- "alloy-primitives 0.8.19",
- "alloy-sol-types",
- "bincode",
- "bls12_381 0.8.0 (git+https://github.com/sp1-patches/bls12_381?tag=patch-0.8.0-sp1-4.0.0)",
- "borsh",
- "committee-iso",
- "itertools 0.13.0",
- "serde",
- "serde_json",
- "sha2 0.9.9",
- "sp1-zkvm",
- "step-iso",
-]
-
-[[package]]
 name = "sp1-build"
 version = "4.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6888,6 +6871,25 @@ dependencies = [
  "sp1-recursion-compiler",
  "sp1-stark",
  "tempfile",
+]
+
+[[package]]
+name = "sp1-rotation"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives 0.8.19",
+ "alloy-sol-types",
+ "bincode",
+ "bls12_381 0.8.0 (git+https://github.com/sp1-patches/bls12_381?tag=patch-0.8.0-sp1-4.0.0)",
+ "borsh",
+ "committee-iso",
+ "itertools 0.13.0",
+ "rotation-iso",
+ "serde",
+ "serde_json",
+ "sha2 0.9.9",
+ "sp1-zkvm",
+ "step-iso",
 ]
 
 [[package]]

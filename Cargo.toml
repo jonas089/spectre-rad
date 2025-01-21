@@ -6,10 +6,10 @@ members = [
     "iso-step",
     "circuits/sp1-step",
     "circuits/sp1-committee",
-    "circuits/sp1-aggregate",
+    "circuits/sp1-rotation",
     "preprocessor",
     "eth-types",
-    "iso-aggregate",
+    "iso-rotation",
 ]
 
 default-members = ["prover"]
