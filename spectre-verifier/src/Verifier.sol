@@ -59,7 +59,7 @@ contract LightClientVerifier {
     function verifyRotationProof(
         bytes calldata _publicValues,
         bytes calldata _proofBytes
-    ) external returns (uint32, bytes32, bytes32, bytes32) {
+    ) external {
         ISP1Verifier(verifier).verifyProof(
             committeeProgramVKey,
             _publicValues,
@@ -74,13 +74,6 @@ contract LightClientVerifier {
         activeSlot = publicValues.slot;
         activeCommitteeCommitment = publicValues.next_commitment;
         finalizedHeaderRoot = publicValues.finalized_header_root;
-        // returns the proof journal for further processing of the outputs
-        return (
-            publicValues.slot,
-            publicValues.finalized_header_root,
-            publicValues.commitment,
-            publicValues.next_commitment
-        );
     }
 
     /// @notice Verify the step proof.
@@ -89,7 +82,7 @@ contract LightClientVerifier {
     function verifyStepProof(
         bytes calldata _publicValues,
         bytes calldata _proofBytes
-    ) external returns (uint32, bytes32, bytes32) {
+    ) external {
         ISP1Verifier(verifier).verifyProof(
             stepProgramVKey,
             _publicValues,
@@ -102,11 +95,5 @@ contract LightClientVerifier {
         assert(activeCommitteeCommitment == publicValues.commitment);
         assert(publicValues.slot > activeSlot);
         finalizedHeaderRoot = publicValues.finalized_header_root;
-        // returns the proof journal for further processing of the outputs
-        return (
-            publicValues.slot,
-            publicValues.commitment,
-            publicValues.finalized_header_root
-        );
     }
 }

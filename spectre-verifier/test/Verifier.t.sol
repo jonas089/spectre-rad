@@ -106,15 +106,10 @@ contract RotationTest is Test {
             abi.encodeWithSelector(SP1VerifierGateway.verifyProof.selector),
             abi.encode(true)
         );
-        (
-            uint32 slot,
-            bytes32 finalized_header_root,
-            bytes32 commitment,
-            bytes32 next_commitment
-        ) = lc_verifier.verifyRotationProof(
-                rotation_fixture.publicValues,
-                rotation_fixture.proof
-            );
+        lc_verifier.verifyRotationProof(
+            rotation_fixture.publicValues,
+            rotation_fixture.proof
+        );
     }
 
     function test_ValidStepProof() public {
@@ -124,14 +119,10 @@ contract RotationTest is Test {
             abi.encodeWithSelector(SP1VerifierGateway.verifyProof.selector),
             abi.encode(true)
         );
-        (
-            uint32 slot,
-            bytes32 finalized_header_root,
-            bytes32 commitment
-        ) = lc_verifier.verifyStepProof(
-                step_fixture.publicValues,
-                step_fixture.proof
-            );
+        lc_verifier.verifyStepProof(
+            step_fixture.publicValues,
+            step_fixture.proof
+        );
     }
 
     function testFail_InvalidRotationProof() external {
