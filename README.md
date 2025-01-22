@@ -1,23 +1,5 @@
 # Fast, Modular & Secure ZK Ethereum Light Client 🧪
 
-On an `A100` server from lambda labs, this zk light client can verify a committee update and step in `~97 seconds`.
-
-> [!WARNING]
-> The Risc0 circuits are currently on hold, please proceed with the SP1 circuits for safety & performance reasons!
-
-## Summary of current state - bottlenecks
-
-> [!NOTE]
-> I was able to solve a serious performance issue by using `from_uncompressed_unchecked` instead of `from_uncompressed`. 📈
-> This is still secure since the pubkeys are public inputs. ⛓
-> If you are a developer note that in cases where the pubkeys are private inputs this would be problematic! ⛓️‍💥
-
-`Risc0` does not have a precompile for `bls12_381` but to my surprise it generally seems to be `faster than SP1` with respect to both hashing and `ECC` arithmetic. I was reassured that `Risc0` will receive a precompile for `bls12_381` SOON ⏱.
-
-> [!NOTE]
-> The original Halo2 implementation of Spectre is located at `Chainsafe`.
-> This implementation of Spectre leverages ZKVMs like Risc0 for increased performance and groth16 support.
-
 # Spectre Use Cases
 Spectre is a trust minimized light-client for `Ethereum`. With Spectre it is possible to cryptographically verify the integrity of Ethereum `state root`.
 Lightclients are essentially cryptographic infrastructure that make all queries to a blockchain verifiable and therefore enhance security.
@@ -25,7 +7,11 @@ Without lightclients the development of secure decentralized applications would 
 relying a single source of truth. Additionally there would be no way to verify the integrity of the state transitions even when querying a large number
 of nodes.
 
-TLDR; Spectre makes blockchain queries secure by proving that the state is valid through cryptography(ZK). 
+
+> [!NOTE] TLDR;
+> Spectre makes blockchain queries secure 
+> by proving that the state is valid through cryptography(ZK). 
+
 
 ## Naming convention for crates
 
@@ -40,30 +26,38 @@ TLDR; Spectre makes blockchain queries secure by proving that the state is valid
 
 # Benchmarks
 Benchmarking the Step and Committee Circuits on different machines in SP1 and Risc0
+
 ## Proving Speed Benchmarks
-
-### Committee Circuit
-| Device | Risc0 (sha2 precompile) Elapsed | SP1 (sha2 precompile) Elapsed |
-| ------------- | ------------- | ------------- |
-| A100 (40GB) Lambda Labs, 30 core CPU | 29.50s | 40.51s |
-
-> [!WARNING]
-> This benchmark is out of date.
-
+Benchmarks were performed on SP1 v3.4.0, but we migrated to 4.x. 
+Therefore more recently performed benchmarks may differ from the results listed here.
 
 ### Step Circuit
-| Device | Risc0 (sha2 precompile) Elapsed | SP1 (sha2, bls12 precompile) Elapsed |
-| ------------- | ------------- | ------------- | 
-| A100 (40GB) Lambda Labs, 30 core CPU | 68.28s | 418.87s |
+| Hardware | 1x H100 lambdalabs 80 GB sxm5 |
+| --- | --- |
+| wrapped (groth16) | 91.6s |
+| wrapped (plonk) | 170.8s |
+| generic (SP1) | 43.2s |
+
+### Commitee Circuit
+| Hardware | 1x H100 lambdalabs 80 GB sxm5 |
+| --- | --- |
+| wrapped (groth16) | 56.9s |
+| wrapped (plonk) | 137.6s |
+| generic (SP1) | 22.1 |
+
+### Sync Committee Rotation
+| Hardware | 1x GH200 lambdalabs 96 GB pcie |
+| --- | --- |
+| wrapped (groth16) | 239.1s |
+| wrapped (plonk) | 289.5s |
 
 > [!WARNING]
-> This benchmark is out of date.
+> This benchmark was performed on less powerful hardware, using SP1 v4.0.1.
 
 # Circuit Inputs and Outputs
 In ZKVMs we refer to public outputs as information committed to the `journal`. Inputs can either be committed or kept a secret.
 
 ## The Beacon Header
-
 |  Input  | Type |
 | ------------- | ------------- |
 | slot  | int  |
@@ -72,7 +66,7 @@ In ZKVMs we refer to public outputs as information committed to the `journal`. I
 | state_root | Vec<u8> |
 | body_root | Vec<u8> |
 
-## 1. CommitteUpdate-Circuit
+## 1. Committee-Circuit
 
 ### 1.1. Inputs
 |  Input  | Type |
@@ -88,7 +82,6 @@ In ZKVMs we refer to public outputs as information committed to the `journal`. I
 | Finalized Block (Header) Root  | [u8;32] |
 
 ## 2. Step-Circuit
-
 ### 2.1. Inputs
 | Input | Type |
 | ------------- | ------------- |
@@ -97,9 +90,11 @@ In ZKVMs we refer to public outputs as information committed to the `journal`. I
 | Participation bits  | Vec<bool> |
 | Attested Header  | BeaconBlockHeader |
 | Finalized Header | BeaconBlockHeader |
+| Finality Branch | Vec<Vec<u8>> |
 | Execution Payload Root | Vec<u8> |
 | Execution Payload Branch | Vec<Vec<u8>> |
 | domain | [u8;32] |
+| Committee Commitment | [u8;32] |
 
 ### 2.2. Outputs
 | Output | Type |
@@ -109,37 +104,26 @@ In ZKVMs we refer to public outputs as information committed to the `journal`. I
 | Finalized Block (Header) Root | [u8;32] |
 
 
-## 3. Aggregation-Circuit
-
+## 3. Rotation Circuit
 ### 3.1. Inputs
-
+```rust
+pub struct RotationCircuitInputs {
+    pub committee: CommitteeUpdateArgs,
+    pub step: SyncStepCircuitInput,
+}
+```
 ### 3.2. Outputs
 | Output | Type  |
 | ------------- | ------------- |
 | Slot Number | u32 |
 | Commitment | bytes32 |
 | Finalized Header Root | bytes32 |
-| Step Circuit VK | bytes32 |
-| Commmittee Circuit VK | bytes32 |
 | Next Commitment | bytes32 |
 
 > [!NOTE]
 > These are wrapped (Ethereum/Sol) types.
 
-
-> [!NOTE] Summary
-> If the merkle proofs are `valid`,
-> and the data was `signed` by the committee,
-> and the root is `unique`,
-> then the step is `valid`.
-> If the merkle proofs are `valid`,
-> and the `roots match` in the aggregate proof
-> and the proofs are `valid`,
-> then the committee update is `valid`
-
-
 ## Generate (&Verify) a proof for the Committee Circuit in Risc0
-
 Prerequisites:
 
 - Rust installation
@@ -153,7 +137,8 @@ Prerequisites:
 Run this command:
 
 ```bash
-cargo test --bin prover test_committee_circuit_risc0 -- --nocapture
+cd prover
+cargo test --bin prover test_committee_circuit_default_sp1 -- --nocapture
 ```
 
 - `-F metal` for metal acceleration (M2, M3 Macbooks)
@@ -187,7 +172,8 @@ Verified Committee Root: [25, 122, 75, 125, 192, 12, 117, 238, 92, 109, 3, 192, 
 Run this command:
 
 ```bash
-cargo test test_step_circuit_risc0 -- --nocapture
+cd prover
+cargo test test_step_circuit_default_sp1 -- --nocapture
 ```
 
 Make sure to specify the path to `sync_step_512.json` as an environment variable when running any of the integration tests that are related to the step circuit.
@@ -201,7 +187,8 @@ Example:
 Use the `-F metal` flag to enable `metal` acceleration on MacOS, for example:
 
 ```bash
-cargo test test_step_circuit_risc0 --release -F metal
+cd prover
+cargo test test_step_circuit_default_sp1 --release -F metal
 ```
 
 to run the accelerated `step circuit`.
@@ -221,6 +208,10 @@ the `sync steps` and aim to expose the most recent trusted Ethereum root.
 > [!NOTE]
 > `Sync steps` are always verified against the most recent committee.
 
-# Integrations - third party proof verification infrastructure
+# Smart Contract
+The verification Smart Contract is located in `spectre-verifier/src/Verifier.sol`. 
+It is initialized with a `trusted committee commitment` and `finalized header`.
+Note that a `committee commitment` refers to a commitment over the public keys in the active committee.
 
+# Integrations - third party proof verification infrastructure
 Work in progress ⚙️⚙️
