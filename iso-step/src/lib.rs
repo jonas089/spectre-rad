@@ -1,10 +1,4 @@
-#[cfg(not(feature = "sp1"))]
 use bls12_381::{
-    hash_to_curve::{ExpandMsgXmd, HashToCurve},
-    pairing, G1Affine, G1Projective, G2Affine, G2Projective,
-};
-#[cfg(feature = "sp1")]
-use bls12_381_sp1::{
     hash_to_curve::{ExpandMsgXmd, HashToCurve},
     pairing, G1Affine, G1Projective, G2Affine, G2Projective,
 };
@@ -99,7 +93,7 @@ pub fn verify_aggregate_signature(args: SyncStepArgs, committee_commitment: [u8;
     let signing_root: Vec<u8> = add_left_right(attested_header_root, &args.domain.to_vec());
     let message_g2: G2Projective =
         <G2Projective as HashToCurve<ExpandMsgXmd<Sha256>>>::hash_to_curve(
-            [compute_digest(&signing_root)],
+            &compute_digest(&signing_root),
             DST,
         );
     let signature: G2Affine =

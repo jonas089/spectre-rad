@@ -1,9 +1,11 @@
 [package]
-name = "aggregate-iso"
+name = "rotation-iso"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+committee-iso = { path = "../iso-committee" }
+step-iso = { path = "../iso-step" }
 alloy-sol-types = "0.8.18"
 serde_json = { version = "1" }
 serde = { version = "1", features = ["derive"] }
