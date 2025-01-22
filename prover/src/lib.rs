@@ -1,3 +1,4 @@
+pub mod fixture;
 use committee_iso::types::CommitteeUpdateArgs;
 use rotation_iso::types::RotationCircuitInputs;
 use sp1_sdk::{include_elf, ProverClient, SP1ProofWithPublicValues, SP1Stdin, SP1VerifyingKey};

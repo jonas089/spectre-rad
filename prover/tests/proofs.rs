@@ -1,14 +1,13 @@
 #[cfg(test)]
 mod test_circuits {
-    use alloy_sol_types::SolType;
     use committee_iso::{
-        types::{CommitteeCircuitOutput, CommitteeUpdateArgs, WrappedOutput},
+        types::{CommitteeCircuitOutput, CommitteeUpdateArgs},
         utils::load_circuit_args_env as load_committee_args_env,
     };
-    use prover::{generate_committee_update_proof_sp1, generate_step_proof_sp1, ProverOps};
-    use serde::{Deserialize, Serialize};
-    use sp1_sdk::{HashableKey, SP1ProofWithPublicValues, SP1VerifyingKey};
-    use std::path::PathBuf;
+    use prover::{
+        fixture::{create_committee_proof_fixture, create_step_proof_fixture},
+        generate_committee_update_proof_sp1, generate_step_proof_sp1, ProverOps,
+    };
     use step_iso::{types::SyncStepArgs, utils::load_circuit_args_env as load_step_args_env};
 
     #[test]
@@ -34,7 +33,7 @@ mod test_circuits {
             committee_update,
             &prover::ProofCompressionBool::Uncompressed,
         );
-        create_proof_fixture(&proof, &vk, &ops);
+        create_committee_proof_fixture(&proof, &vk, &ops);
     }
 
     #[test]
@@ -46,7 +45,7 @@ mod test_circuits {
             committee_update,
             &prover::ProofCompressionBool::Uncompressed,
         );
-        create_proof_fixture(&proof, &vk, &ops);
+        create_committee_proof_fixture(&proof, &vk, &ops);
     }
 
     #[test]
@@ -78,7 +77,7 @@ mod test_circuits {
             sync_step_args,
             &prover::ProofCompressionBool::Uncompressed,
         );
-        create_proof_fixture(&proof, &vk, &ops);
+        create_step_proof_fixture(&proof, &vk, &ops);
     }
 
     #[test]
@@ -95,46 +94,6 @@ mod test_circuits {
             sync_step_args,
             &prover::ProofCompressionBool::Uncompressed,
         );
-        create_proof_fixture(&proof, &vk, &ops);
-    }
-
-    #[derive(Debug, Clone, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    struct ProofFixture {
-        root: String,
-        commitment: String,
-        vkey: String,
-        public_values: String,
-        proof: String,
-    }
-    fn create_proof_fixture(
-        proof: &SP1ProofWithPublicValues,
-        vk: &SP1VerifyingKey,
-        ops: &ProverOps,
-    ) {
-        let bytes = proof.public_values.as_slice();
-        let WrappedOutput {
-            finalized_header_root,
-            commitment,
-        } = WrappedOutput::abi_decode(bytes, false).unwrap();
-        let fixture = ProofFixture {
-            root: format!("0x{}", hex::encode(finalized_header_root)),
-            commitment: format!("0x{}", hex::encode(commitment)),
-            vkey: vk.bytes32().to_string(),
-            public_values: format!("0x{}", hex::encode(bytes)),
-            proof: format!("0x{}", hex::encode(proof.bytes())),
-        };
-        let prefix = match ops {
-            ProverOps::Default => panic!("No point in generating a fixture for a default proof!"),
-            ProverOps::Groth16 => "groth16-fixture.json",
-            ProverOps::Plonk => "plonk-fixture.json",
-        };
-        let fixture_path = PathBuf::from("./");
-        std::fs::create_dir_all(&fixture_path).expect("failed to create fixture path");
-        std::fs::write(
-            fixture_path.join(prefix),
-            serde_json::to_string_pretty(&fixture).unwrap(),
-        )
-        .expect("failed to write fixture");
+        create_step_proof_fixture(&proof, &vk, &ops);
     }
 }
