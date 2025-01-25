@@ -4,3 +4,4 @@ aligned/keystore0
 **.db
 **/.env
 **/cache
+spectre-verifier/out

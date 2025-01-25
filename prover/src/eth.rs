@@ -1,9 +1,7 @@
-use std::str::FromStr;
-
 use abi::{Abi, ParamType};
 use ethers::prelude::*;
 use k256::ecdsa::SigningKey;
-// query spectre contract and send proof payloads to it
+use std::str::FromStr;
 
 pub struct SpectreContractClient {
     pub contract: String,
@@ -67,7 +65,6 @@ impl SpectreContractClient {
         match contract.method::<_, ()>(method_name, args)?.send().await {
             Ok(_) => Ok(()),
             Err(error) => {
-                // Print or deserialize the Ethereum error
                 if let ContractError::Revert(revert_data) = &error {
                     match abi::decode(&[ParamType::String], &revert_data.0) {
                         Ok(decoded) => {

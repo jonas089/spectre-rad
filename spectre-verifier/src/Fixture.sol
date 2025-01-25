@@ -23,7 +23,6 @@ struct StepProofFixture {
 
 library FixtureLoader {
     using stdJson for string;
-
     function parseRotationFixture(
         string memory json
     ) internal pure returns (RotationProofFixture memory) {
