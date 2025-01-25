@@ -25,7 +25,7 @@ async fn main() {
     // epoch currently 256
     let target_slot = loop {
         let mut x = 32 * 256;
-        while x < starting_slot {
+        while x <= starting_slot {
             x += 32 * 256;
         }
         break x;
@@ -69,6 +69,7 @@ async fn main() {
                 println!("Error: {}", e);
             }
         }
+        println!("Update Success, waiting 5 seconds...");
         tokio::time::sleep(Duration::from_secs(5)).await;
     }
 }
