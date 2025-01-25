@@ -213,5 +213,18 @@ The verification Smart Contract is located in `spectre-verifier/src/Verifier.sol
 It is initialized with a `trusted committee commitment` and `finalized header`.
 Note that a `committee commitment` refers to a commitment over the public keys in the active committee.
 
+Experimental deployment (developer notes):
+
+```rust
+✅  [Success] Hash: 0xf3d1d7505ea334542cc1e0954974e42e320e0ec73f0b5de3968340205ea0acdb
+Contract Address: 0xE45E2ae4C38B951e6ad0aDEd86C108Bb4b9ad16f
+Block: 7549914
+Paid: 0.000526296619253219 ETH (453433 gas * 1.160693243 gwei)
+```
+
 # Integrations - third party proof verification infrastructure
 Work in progress ⚙️⚙️
+
+
+
+

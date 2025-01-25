@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
-
 import {ISP1Verifier} from "sp1-contracts/contracts/src/ISP1Verifier.sol";
 
 struct RotationOutputStruct {
@@ -69,8 +68,9 @@ contract LightClientVerifier {
             _publicValues,
             (RotationOutputStruct)
         );
-        assert(activeCommitteeCommitment == publicValues.commitment);
-        assert(publicValues.slot > activeSlot);
+        require(activeCommitteeCommitment == publicValues.commitment);
+        require(publicValues.slot > activeSlot);
+        // this is the attested slot
         activeSlot = publicValues.slot;
         activeCommitteeCommitment = publicValues.next_commitment;
         finalizedHeaderRoot = publicValues.finalized_header_root;
@@ -92,8 +92,9 @@ contract LightClientVerifier {
             _publicValues,
             (StepOutputStruct)
         );
-        assert(activeCommitteeCommitment == publicValues.commitment);
-        assert(publicValues.slot > activeSlot);
+        require(activeCommitteeCommitment == publicValues.commitment);
+        // this is the attested slot
+        require(publicValues.slot > activeSlot);
         finalizedHeaderRoot = publicValues.finalized_header_root;
     }
 }

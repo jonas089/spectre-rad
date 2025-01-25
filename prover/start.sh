@@ -1,0 +1,1 @@
+cargo run --release -F wrapped -- --nocapture

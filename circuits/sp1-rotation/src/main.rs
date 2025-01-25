@@ -83,7 +83,7 @@ pub fn main() {
     );
     verify_aggregate_signature(step_inputs.args.clone(), step_inputs.commitment);
     let output = WrappedOutput::abi_encode(&WrappedOutput {
-        slot: u32::from_str_radix(&committee_inputs.finalized_header.slot, 10)
+        slot: u32::from_str_radix(&step_inputs.args.finalized_header.slot, 10)
             .expect("Failed to parse slot as u32"),
         // this should be the current sync committee commitment stored under the contract
         commitment: FixedBytes::<32>::from_slice(&step_inputs.commitment),

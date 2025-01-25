@@ -36,6 +36,7 @@ bls12_381 = { git = "https://github.com/zkcrypto/bls12_381", rev = "9ea427c0eb1a
 itertools = "0.13.0"
 ethereum-consensus-types = { git = "https://github.com/jonas089/ssz-patched-crates" }
 beacon-api-client = { git = "https://github.com/jonas089/ssz-patched-crates" }
+dotenv = "0.15"
 
 
 [build-dependencies]

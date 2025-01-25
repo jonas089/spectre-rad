@@ -1,3 +1,4 @@
+pub mod eth;
 pub mod fixture;
 use committee_iso::types::CommitteeUpdateArgs;
 use rotation_iso::types::RotationCircuitInputs;

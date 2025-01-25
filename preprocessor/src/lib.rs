@@ -8,7 +8,7 @@
 mod rotation;
 mod step;
 
-use beacon_api_client::{BlockId, Client, ClientTypes, Value, VersionedValue};
+use beacon_api_client::{BeaconHeaderSummary, BlockId, Client, ClientTypes, Value, VersionedValue};
 use eth_types::Spec;
 use ethereum_consensus_types::bls::BlsSignature;
 use ethereum_consensus_types::{
@@ -133,6 +133,47 @@ pub async fn get_block_header<C: ClientTypes>(
     Ok(block.header.message)
 }
 
+pub async fn get_finalized_header<C: ClientTypes>(
+    client: &Client<C>,
+    slot: u64,
+) -> eyre::Result<BeaconBlockHeader> {
+    let block_id = BlockId::Slot(slot);
+    let header = get_block_header(client, block_id).await?;
+    Ok(header)
+}
+
+/*pub async fn finalized_header_to_args<S: Spec>(
+    finalized_header: &BeaconBlockHeader,
+    pubkeys_compressed: Vector<BlsPublicKey, { S::SYNC_COMMITTEE_SIZE }>,
+    domain: [u8; 32],
+) -> eyre::Result<SyncStepArgs>
+where
+    [(); S::SYNC_COMMITTEE_SIZE]:,
+    [(); S::BYTES_PER_LOGS_BLOOM]:,
+    [(); S::MAX_EXTRA_DATA_BYTES]:,
+{
+    // Use the finalized header to build SyncStepArgs
+    let finalized_args = SyncStepArgs {
+        finalized_header: finalized_header.clone(),
+        attested_header: finalized_header.clone(), // Replace with attested header if available
+        finality_branch: vec![],                   // Generate Merkle proof here if necessary
+        execution_payload_root: finalized_header.body_root.to_vec(),
+        execution_payload_branch: vec![], // Generate Merkle proof here if necessary
+    };
+    Ok(finalized_args)
+}*/
+
+pub async fn get_block_summary<C: ClientTypes>(
+    client: &Client<C>,
+    id: BlockId,
+) -> eyre::Result<BeaconHeaderSummary> {
+    // TODO: Once the ethereum beacon_api_client is updated, we can avoid this struct definition
+
+    let route = format!("eth/v1/beacon/headers/{id}");
+    let block: BeaconHeaderSummary = client.get::<Value<_>>(&route).await?.data;
+    Ok(block)
+}
+
 pub async fn light_client_update_to_args<S: Spec>(
     update: &LightClientUpdateCapella<
         { S::SYNC_COMMITTEE_SIZE },
@@ -177,11 +218,12 @@ where
     Ok((sync_args, rotation_args))
 }
 
-pub async fn get_light_client_update() -> ((SyncStepArgs, CommitteeUpdateArgs), Vec<Vec<u8>>) {
+/// Gets the latest light client update
+pub async fn get_light_client_update_at_slot(
+    slot: u64,
+) -> ((SyncStepArgs, CommitteeUpdateArgs), Vec<Vec<u8>>) {
     // hardcoded for now - todo: take client or url as arg
     let client = MainnetClient::new(Url::parse("https://lodestar-sepolia.chainsafe.io").unwrap());
-    let block = get_block_header(&client, BlockId::Finalized).await.unwrap();
-    let slot = block.slot;
     let period = slot / (32 * 256);
     println!(
         "Fetching light client update at current Slot: {} at Period: {}",
@@ -225,6 +267,7 @@ pub async fn get_light_client_update() -> ((SyncStepArgs, CommitteeUpdateArgs), 
             oc,
         )
     };
+
     let mut finalized_sync_committee_branch = {
         let block_root = client
             .get_beacon_block_root(BlockId::Slot(
@@ -252,13 +295,4 @@ pub async fn get_light_client_update() -> ((SyncStepArgs, CommitteeUpdateArgs), 
         body_root: s.finalized_header.clone().body_root,
     };
     ((s, c), oc)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[tokio::test]
-    async fn test_generate_inputs() {
-        let _inputs = get_light_client_update().await;
-    }
 }

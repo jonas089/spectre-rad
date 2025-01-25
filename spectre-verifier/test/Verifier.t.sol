@@ -1,29 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
-
 import {Test, console} from "forge-std/Test.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {LightClientVerifier} from "../src/Verifier.sol";
-import {SP1VerifierGateway} from "sp1-contracts/contracts/src/SP1VerifierGateway.sol";
-
-struct RotationProofFixture {
-    uint32 slot;
-    bytes32 root;
-    bytes32 commitment;
-    bytes32 next_commitment;
-    bytes32 vkey;
-    bytes publicValues;
-    bytes proof;
-}
-
-struct StepProofFixture {
-    uint32 slot;
-    bytes32 root;
-    bytes32 commitment;
-    bytes32 vkey;
-    bytes publicValues;
-    bytes proof;
-}
+import {SP1Verifier} from "sp1-contracts/contracts/src/v4.0.0-rc.3/SP1VerifierGroth16.sol";
+import {FixtureLoader, RotationProofFixture, StepProofFixture} from "../src/Fixture.sol";
 
 contract RotationTest is Test {
     using stdJson for string;
@@ -31,81 +12,44 @@ contract RotationTest is Test {
     address verifier;
     LightClientVerifier public lc_verifier;
 
-    function loadRotationFixture()
-        public
-        view
-        returns (RotationProofFixture memory)
-    {
+    function setUp() public {
         string memory root = vm.projectRoot();
         string memory path = string.concat(
             root,
             "/test/fixtures/rotation-groth16.json"
         );
         string memory json = vm.readFile(path);
-        RotationProofFixture memory rotation_fixture;
-        rotation_fixture.slot = abi.decode(json.parseRaw(".slot"), (uint32));
-        rotation_fixture.root = abi.decode(json.parseRaw(".root"), (bytes32));
-        rotation_fixture.commitment = abi.decode(
-            json.parseRaw(".commitment"),
-            (bytes32)
+        RotationProofFixture memory rotation_fixture = FixtureLoader
+            .parseRotationFixture(json);
+        path = string.concat(root, "/test/fixtures/step-groth16.json");
+        json = vm.readFile(path);
+        StepProofFixture memory step_fixture = FixtureLoader.parseStepFixture(
+            json
         );
-        rotation_fixture.next_commitment = abi.decode(
-            json.parseRaw(".nextCommitment"),
-            (bytes32)
-        );
-        rotation_fixture.vkey = abi.decode(json.parseRaw(".vkey"), (bytes32));
-        rotation_fixture.publicValues = abi.decode(
-            json.parseRaw(".publicValues"),
-            (bytes)
-        );
-        rotation_fixture.proof = abi.decode(json.parseRaw(".proof"), (bytes));
-        return rotation_fixture;
-    }
-
-    function loadStepFixture() public view returns (StepProofFixture memory) {
-        string memory root = vm.projectRoot();
-        string memory path = string.concat(
-            root,
-            "/test/fixtures/step-groth16.json"
-        );
-        string memory json = vm.readFile(path);
-        StepProofFixture memory step_fixture;
-        step_fixture.slot = abi.decode(json.parseRaw(".slot"), (uint32));
-        step_fixture.root = abi.decode(json.parseRaw(".root"), (bytes32));
-        step_fixture.commitment = abi.decode(
-            json.parseRaw(".commitment"),
-            (bytes32)
-        );
-        step_fixture.vkey = abi.decode(json.parseRaw(".vkey"), (bytes32));
-        step_fixture.publicValues = abi.decode(
-            json.parseRaw(".publicValues"),
-            (bytes)
-        );
-        step_fixture.proof = abi.decode(json.parseRaw(".proof"), (bytes));
-        return step_fixture;
-    }
-
-    function setUp() public {
-        RotationProofFixture memory rotation_fixture = loadRotationFixture();
-        StepProofFixture memory step_fixture = loadStepFixture();
-        verifier = address(new SP1VerifierGateway(address(1)));
+        // Deploy the actual SP1Verifier contract
+        verifier = address(new SP1Verifier());
+        // Deploy the LightClientVerifier using the deployed SP1Verifier
         lc_verifier = new LightClientVerifier(
             verifier,
             rotation_fixture.vkey, // either a deterministic build (nix, docker), or derived from ELF
             step_fixture.vkey,
             0x00,
-            0xf670c64f8ed2c43554ef01e0a1b702b443e8709cd58c9c5330f1421dc9fcfef6, // see fixture payload
-            6815743 // rotation fixture payload - 1,
+            0x0fbe43bcd87569860753ec08e275400ec8d307259e618ca8319b03e714f06523, // see fixture payload
+            6823935 // attested slot - 1 for testing!
         );
     }
 
     function test_ValidRotationProof() public {
-        RotationProofFixture memory rotation_fixture = loadRotationFixture();
-        vm.mockCall(
-            verifier,
-            abi.encodeWithSelector(SP1VerifierGateway.verifyProof.selector),
-            abi.encode(true)
+        string memory root = vm.projectRoot();
+        string memory path = string.concat(
+            root,
+            "/test/fixtures/rotation-groth16.json"
         );
+        string memory json = vm.readFile(path);
+        RotationProofFixture memory rotation_fixture = FixtureLoader
+            .parseRotationFixture(json);
+
+        // Actual call to SP1Verifier
         lc_verifier.verifyRotationProof(
             rotation_fixture.publicValues,
             rotation_fixture.proof
@@ -113,11 +57,14 @@ contract RotationTest is Test {
     }
 
     function test_ValidStepProof() public {
-        StepProofFixture memory step_fixture = loadStepFixture();
-        vm.mockCall(
-            verifier,
-            abi.encodeWithSelector(SP1VerifierGateway.verifyProof.selector),
-            abi.encode(true)
+        string memory root = vm.projectRoot();
+        string memory path = string.concat(
+            root,
+            "/test/fixtures/step-groth16.json"
+        );
+        string memory json = vm.readFile(path);
+        StepProofFixture memory step_fixture = FixtureLoader.parseStepFixture(
+            json
         );
         lc_verifier.verifyStepProof(
             step_fixture.publicValues,
@@ -126,7 +73,16 @@ contract RotationTest is Test {
     }
 
     function testFail_InvalidRotationProof() external {
-        RotationProofFixture memory rotation_fixture = loadRotationFixture();
+        string memory root = vm.projectRoot();
+        string memory path = string.concat(
+            root,
+            "/test/fixtures/rotation-groth16.json"
+        );
+        string memory json = vm.readFile(path);
+        RotationProofFixture memory rotation_fixture = FixtureLoader
+            .parseRotationFixture(json);
+
+        // Generate a fake proof to simulate invalid proof behavior
         bytes memory fakeProof = new bytes(rotation_fixture.proof.length);
         lc_verifier.verifyRotationProof(
             rotation_fixture.publicValues,
