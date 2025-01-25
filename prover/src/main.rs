@@ -21,7 +21,7 @@ async fn main() {
         rpc_url,
         chain_id,
     };
-    let starting_slot = client.read_slot_value().await + 1;
+    let starting_slot = client.read_slot_value().await;
     // epoch currently 256
     let target_slot = loop {
         let mut x = 32 * 256;
