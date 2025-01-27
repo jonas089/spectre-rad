@@ -182,17 +182,6 @@ Example:
 
 `see above`
 
-## Metal Acceleration
-
-Use the `-F metal` flag to enable `metal` acceleration on MacOS, for example:
-
-```bash
-cd prover
-cargo test test_step_circuit_default_sp1 --release -F metal
-```
-
-to run the accelerated `step circuit`.
-
 ## Test Data
 
 Test data for the circuit can be found in `data/*.json`. 
