@@ -191,7 +191,7 @@ where
 }
 
 /// Get the most recent sync step
-pub async fn get_sync_step_at_slot(slot: u64, domain: [u8; 32]) -> (SyncStepArgs, [u8; 32]) {
+pub async fn get_sync_step_at_slot(slot: u64) -> (SyncStepArgs, [u8; 32]) {
     let client = MainnetClient::new(Url::parse("https://lodestar-sepolia.chainsafe.io").unwrap());
     let finality_update = get_light_client_finality_update::<Testnet, _>(&client)
         .await
@@ -230,6 +230,23 @@ pub async fn get_sync_step_at_slot(slot: u64, domain: [u8; 32]) -> (SyncStepArgs
     let finalized_header = finality_update.finalized_header;
     let attested_header = finality_update.attested_header;
     let signature = finality_update.sync_aggregate.sync_committee_signature;
+
+    let fork_version = client
+        .get_fork(StateId::Head)
+        .await
+        .unwrap()
+        .current_version;
+    let genesis_validators_root = client
+        .get_genesis_details()
+        .await
+        .unwrap()
+        .genesis_validators_root;
+    let fork_data = ForkData {
+        genesis_validators_root,
+        fork_version,
+    };
+    let domain = compute_domain(DomainType::SyncCommittee, &fork_data).unwrap();
+
     let args = SyncStepArgs {
         signature_compressed: signature.to_bytes().to_vec(),
         pubkeys_uncompressed: active_committee,
@@ -254,19 +271,10 @@ pub async fn get_sync_step_at_slot(slot: u64, domain: [u8; 32]) -> (SyncStepArgs
             .collect(),
         execution_payload_branch: execution_branch.iter().map(|b| b.0.to_vec()).collect(),
         execution_payload_root: execution_root.collect::<Result<Vec<u8>, _>>().unwrap(),
-        // hardcoded for testing, should probably be fetched & derived at runtime?
-        domain, /*[
-                    7, 0, 0, 0, 48, 83, 175, 74, 95, 250, 246, 166, 104, 40, 151, 228, 42, 212, 194, 8, 48,
-                    56, 232, 147, 61, 9, 41, 204, 88, 234, 56, 134,
-                ],*/
+        domain,
     };
     println!("Debug Sync Step Args: {:?}", &args);
     (args, commitment)
-    // finalized header root / beacon block root
-    // attested header
-    // finalized header
-    // signature
-    // participation bits
 }
 
 /// Gets the latest light client update
