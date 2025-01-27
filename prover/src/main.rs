@@ -8,10 +8,9 @@ use alloy_sol_types::SolType;
 use committee_iso::utils::{commit_to_keys_with_sign, decode_pubkeys_x};
 use ethers::types::Bytes;
 use hex::FromHex;
-use preprocessor::get_light_client_update_at_slot;
-use prover::{eth::SpectreContractClient, generate_rotation_proof_sp1};
+use preprocessor::{get_current_sync_step, get_light_client_update_at_slot};
+use prover::{eth::SpectreContractClient, generate_rotation_proof_sp1, generate_step_proof_sp1};
 use rotation_iso::types::{RotationCircuitInputs, WrappedOutput};
-use shiplift::{ContainerListOptions, Docker, RmContainerOptions};
 use sp1_sdk::HashableKey;
 use std::{process::Command, time::Duration};
 use step_iso::types::SyncStepCircuitInput;
@@ -29,71 +28,104 @@ async fn main() {
         rpc_url,
         chain_id,
     };
-    let starting_slot = 6823936; //client.read_slot_value().await;
-                                 // epoch currently 256
-    let target_slot = loop {
-        let mut x = 32 * 256;
-        while x <= starting_slot {
-            x += 32 * 256;
-        }
-        break x;
-    };
     let semaphore = std::sync::Arc::new(Semaphore::new(1));
     loop {
-        stop_containers().await;
-        let ((s, c), oc) = get_light_client_update_at_slot((target_slot) as u64).await;
-        let (keys, signs) = decode_pubkeys_x(oc);
-        let commitment = commit_to_keys_with_sign(&keys, &signs);
-        println!(
-            "Active Committee: {:?}",
-            format!("0x{}", hex::encode(commitment))
-        );
-        println!("Generating Rotation proof at: {}", &target_slot);
-        let permit = semaphore.clone().acquire_owned().await.unwrap();
-        let proof = tokio::task::spawn_blocking(move || {
-            let proof = generate_rotation_proof_sp1(
-                &prover::ProverOps::Groth16,
-                RotationCircuitInputs {
-                    committee: c,
-                    step: SyncStepCircuitInput {
-                        args: s,
-                        commitment,
-                    },
-                },
+        let last_known_slot = client.read_slot_value().await;
+        prune_environment().await;
+        let sync_step = get_current_sync_step().await;
+        let target_slot = u64::from_str_radix(&sync_step.0.attested_header.slot, 10).unwrap();
+        if target_slot <= last_known_slot.into() {
+            println!("Contract is on top of chain!");
+            tokio::time::sleep(Duration::from_secs(10)).await;
+            continue;
+        }
+        if target_slot % (32 * 256) == 0 {
+            let ((s, c), oc) = get_light_client_update_at_slot((target_slot) as u64).await;
+            let (keys, signs) = decode_pubkeys_x(oc);
+            let commitment = commit_to_keys_with_sign(&keys, &signs);
+            println!(
+                "Active Committee: {:?}",
+                format!("0x{}", hex::encode(commitment))
             );
-            drop(permit);
-            proof
-        })
-        .await
-        .expect("Prover Task failed!");
-        let payload: (Bytes, Bytes) = (
-            Bytes::from_hex(&format!(
-                "0x{}",
-                hex::encode(proof.0.public_values.as_slice())
-            ))
-            .unwrap(),
-            Bytes::from_hex(&format!("0x{}", hex::encode(proof.0.bytes()))).unwrap(),
-        );
-        println!("Verifying Key: {}", hex::encode(&proof.1.bytes32()));
-        let circuit_out =
-            WrappedOutput::abi_decode(&proof.0.public_values.as_slice(), false).unwrap();
-        println!("Commitment: {:?}", &circuit_out.commitment);
-        println!("Slot: {:?}", &circuit_out.slot);
-        // verify proof on-chain
-        /*match client.call_with_args("verifyRotationProof", payload).await {
-            Ok(_) => {}
-            Err(e) => {
-                println!("Error: {}", e);
+            println!("Generating Rotation proof at: {}", &target_slot);
+            let permit = semaphore.clone().acquire_owned().await.unwrap();
+            let proof = tokio::task::spawn_blocking(move || {
+                let proof = generate_rotation_proof_sp1(
+                    &prover::ProverOps::Groth16,
+                    RotationCircuitInputs {
+                        committee: c,
+                        step: SyncStepCircuitInput {
+                            args: s,
+                            commitment,
+                        },
+                    },
+                );
+                drop(permit);
+                proof
+            })
+            .await
+            .expect("Prover Task failed!");
+            let payload: (Bytes, Bytes) = (
+                Bytes::from_hex(&format!(
+                    "0x{}",
+                    hex::encode(proof.0.public_values.as_slice())
+                ))
+                .unwrap(),
+                Bytes::from_hex(&format!("0x{}", hex::encode(proof.0.bytes()))).unwrap(),
+            );
+            println!("Verifying Key: {}", hex::encode(&proof.1.bytes32()));
+            let circuit_out =
+                WrappedOutput::abi_decode(&proof.0.public_values.as_slice(), false).unwrap();
+            println!("Commitment: {:?}", &circuit_out.commitment);
+            println!("Slot: {:?}", &circuit_out.slot);
+            match client.call_with_args("verifyRotationProof", payload).await {
+                Ok(_) => {}
+                Err(e) => {
+                    println!("Error: {}", e);
+                }
             }
-        }*/
-        drop(payload);
-        drop(proof);
+        } else {
+            println!("Generating Step proof at: {}", &target_slot);
+            let permit = semaphore.clone().acquire_owned().await.unwrap();
+            let proof = tokio::task::spawn_blocking(move || {
+                let proof = generate_step_proof_sp1(
+                    &prover::ProverOps::Groth16,
+                    sync_step.1,
+                    sync_step.0,
+                    &prover::ProofCompressionBool::Uncompressed,
+                );
+                drop(permit);
+                proof
+            })
+            .await
+            .expect("Prover Task failed!");
+            let payload: (Bytes, Bytes) = (
+                Bytes::from_hex(&format!(
+                    "0x{}",
+                    hex::encode(proof.0.public_values.as_slice())
+                ))
+                .unwrap(),
+                Bytes::from_hex(&format!("0x{}", hex::encode(proof.0.bytes()))).unwrap(),
+            );
+            println!("Verifying Key: {}", hex::encode(&proof.1.bytes32()));
+            let circuit_out =
+                WrappedOutput::abi_decode(&proof.0.public_values.as_slice(), false).unwrap();
+            println!("Commitment: {:?}", &circuit_out.commitment);
+            println!("Slot: {:?}", &circuit_out.slot);
+            match client.call_with_args("verifyStepProof", payload).await {
+                Ok(_) => {}
+                Err(e) => {
+                    println!("Error: {}", e);
+                }
+            }
+        }
+
         println!("Update Success, waiting 10 seconds...");
         tokio::time::sleep(Duration::from_secs(10)).await;
     }
 }
 
-async fn stop_containers() {
+async fn prune_environment() {
     let _ = Command::new("rm")
         .arg("-rf")
         .arg("/Users/chef/.sp1/circuits/groth16/v4.0.0-rc.3")
@@ -115,13 +147,3 @@ async fn stop_containers() {
         eprintln!("{}", String::from_utf8_lossy(&output.stderr));
     }
 }
-
-/*
-
-untagged: ghcr.io/succinctlabs/sp1-gnark:v4.0.0-rc.3
-untagged: ghcr.io/succinctlabs/sp1-gnark@sha256:b9cc16808ad0b7dabb5743cb7f4ac343f40b3485a1c94a38360f40630aab82ab
-deleted: sha256:c08c397077eac01ee705d69688ea76c7fe2126005291e76974723b254fd83b82
-deleted: sha256:73a03b712244bae7e2d8755339ad986880e453d2d6b0f84a42a3bef9623bd947
-deleted: sha256:b3a77f38fae5c013571852095b4fef259650b3dc5b021eb27f01196558e21b92
-deleted: sha256:ff80ec55a37609daeaf3d3843aa8105f6c6b18984cf42badda290363444bdef3
-*/
