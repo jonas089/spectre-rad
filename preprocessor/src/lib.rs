@@ -191,13 +191,13 @@ where
 }
 
 /// Get the most recent sync step
-pub async fn get_sync_step_at_slot(slot: u64) -> (SyncStepArgs, [u8; 32]) {
+pub async fn get_current_sync_step() -> (SyncStepArgs, [u8; 32]) {
     let client = MainnetClient::new(Url::parse("https://lodestar-sepolia.chainsafe.io").unwrap());
     let finality_update = get_light_client_finality_update::<Testnet, _>(&client)
         .await
         .unwrap();
     let block_root = client
-        .get_beacon_block_root(BlockId::Slot(slot))
+        .get_beacon_block_root(BlockId::Slot(finality_update.finalized_header.beacon.slot))
         .await
         .unwrap();
     let bootstrap = get_light_client_bootstrap::<Testnet, _>(&client, block_root)
@@ -355,3 +355,6 @@ pub async fn get_light_client_update_at_slot(
     };
     ((s, c), oc)
 }
+
+#[tokio::test]
+async fn test_query_sync_step() {}
