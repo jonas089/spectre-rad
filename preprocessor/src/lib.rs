@@ -7,7 +7,6 @@
 
 mod rotation;
 mod step;
-use std::io::Read;
 
 use beacon_api_client::{BeaconHeaderSummary, BlockId, Client, ClientTypes, Value, VersionedValue};
 use committee_iso::utils::{commit_to_keys_with_sign, decode_pubkeys_x};
@@ -212,24 +211,15 @@ pub async fn get_current_sync_step() -> (SyncStepArgs, [u8; 32]) {
         .collect();
     let (keys, signs) = decode_pubkeys_x(active_committee.clone());
     let commitment = commit_to_keys_with_sign(&keys, &signs);
-    let finality_branch = bootstrap.current_sync_committee_branch;
-    let execution_branch = bootstrap.header.execution_branch;
-    let execution_root = bootstrap.header.execution.state_root.bytes();
     let bits = finality_update
         .sync_aggregate
         .sync_committee_bits
         .to_bitvec();
     let mut participation: Vec<bool> = vec![];
     for bit in bits {
-        if bit {
-            participation.push(true);
-        } else {
-            participation.push(false);
-        }
+        participation.push(bit);
     }
-    let finalized_header = finality_update.finalized_header;
-    let attested_header = finality_update.attested_header;
-    let signature = finality_update.sync_aggregate.sync_committee_signature;
+    assert_eq!(participation.len(), 512);
 
     let fork_version = client
         .get_fork(StateId::Head)
@@ -247,34 +237,14 @@ pub async fn get_current_sync_step() -> (SyncStepArgs, [u8; 32]) {
     };
     let domain = compute_domain(DomainType::SyncCommittee, &fork_data).unwrap();
 
-    let args = SyncStepArgs {
-        signature_compressed: signature.to_bytes().to_vec(),
-        pubkeys_uncompressed: active_committee,
-        pariticipation_bits: participation,
-        attested_header: step_iso::types::BeaconBlockHeader {
-            slot: attested_header.beacon.slot.to_string(),
-            proposer_index: attested_header.beacon.proposer_index.to_string(),
-            parent_root: attested_header.beacon.parent_root,
-            state_root: attested_header.beacon.state_root,
-            body_root: attested_header.beacon.body_root,
-        },
-        finalized_header: step_iso::types::BeaconBlockHeader {
-            slot: finalized_header.beacon.slot.to_string(),
-            proposer_index: finalized_header.beacon.proposer_index.to_string(),
-            parent_root: finalized_header.beacon.parent_root,
-            state_root: finalized_header.beacon.state_root,
-            body_root: finalized_header.beacon.body_root,
-        },
-        finality_branch: finality_branch
-            .iter()
-            .map(|n| n.bytes().collect::<Result<Vec<u8>, _>>().unwrap())
-            .collect(),
-        execution_payload_branch: execution_branch.iter().map(|b| b.0.to_vec()).collect(),
-        execution_payload_root: execution_root.collect::<Result<Vec<u8>, _>>().unwrap(),
+    let sync_args = step::step_args_from_finality_update(
+        finality_update,
+        bootstrap.current_sync_committee.pubkeys,
         domain,
-    };
-    println!("Debug Sync Step Args: {:?}", &args);
-    (args, commitment)
+    )
+    .await
+    .unwrap();
+    (sync_args, commitment)
 }
 
 /// Gets the latest light client update
