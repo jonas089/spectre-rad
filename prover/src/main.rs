@@ -10,10 +10,11 @@ use ethers::types::Bytes;
 use hex::FromHex;
 use preprocessor::{get_current_sync_step, get_light_client_update_at_slot};
 use prover::{eth::SpectreContractClient, generate_rotation_proof_sp1, generate_step_proof_sp1};
-use rotation_iso::types::{RotationCircuitInputs, WrappedOutput};
+use rotation_iso::types::{RotationCircuitInputs, WrappedOutput as WrappedRotationOutput};
 use sp1_sdk::HashableKey;
 use std::{process::Command, time::Duration};
 use step_iso::types::SyncStepCircuitInput;
+use step_iso::types::WrappedOutput as WrappedStepOutput;
 use tokio::sync::Semaphore;
 
 #[tokio::main]
@@ -75,7 +76,8 @@ async fn main() {
             );
             println!("Verifying Key: {}", hex::encode(&proof.1.bytes32()));
             let circuit_out =
-                WrappedOutput::abi_decode(&proof.0.public_values.as_slice(), false).unwrap();
+                WrappedRotationOutput::abi_decode(&proof.0.public_values.as_slice(), false)
+                    .unwrap();
             println!("Commitment: {:?}", &circuit_out.commitment);
             println!("Slot: {:?}", &circuit_out.slot);
             match client.call_with_args("verifyRotationProof", payload).await {
@@ -109,7 +111,7 @@ async fn main() {
             );
             println!("Verifying Key: {}", hex::encode(&proof.1.bytes32()));
             let circuit_out =
-                WrappedOutput::abi_decode(&proof.0.public_values.as_slice(), false).unwrap();
+                WrappedStepOutput::abi_decode(&proof.0.public_values.as_slice(), false).unwrap();
             println!("Commitment: {:?}", &circuit_out.commitment);
             println!("Slot: {:?}", &circuit_out.slot);
             match client.call_with_args("verifyStepProof", payload).await {
