@@ -7,8 +7,10 @@
 
 mod rotation;
 mod step;
+use std::io::Read;
 
 use beacon_api_client::{BeaconHeaderSummary, BlockId, Client, ClientTypes, Value, VersionedValue};
+use committee_iso::utils::{commit_to_keys_with_sign, decode_pubkeys_x};
 use eth_types::Spec;
 use ethereum_consensus_types::bls::BlsSignature;
 use ethereum_consensus_types::{
@@ -186,6 +188,85 @@ where
         step::step_args_from_finality_update(finality_update, pubkeys_compressed, domain).await?;
 
     Ok((sync_args, rotation_args))
+}
+
+/// Get the most recent sync step
+pub async fn get_sync_step_at_slot(slot: u64, domain: [u8; 32]) -> (SyncStepArgs, [u8; 32]) {
+    let client = MainnetClient::new(Url::parse("https://lodestar-sepolia.chainsafe.io").unwrap());
+    let finality_update = get_light_client_finality_update::<Testnet, _>(&client)
+        .await
+        .unwrap();
+    let block_root = client
+        .get_beacon_block_root(BlockId::Slot(slot))
+        .await
+        .unwrap();
+    let bootstrap = get_light_client_bootstrap::<Testnet, _>(&client, block_root)
+        .await
+        .unwrap();
+
+    let active_committee: Vec<Vec<u8>> = bootstrap
+        .current_sync_committee
+        .pubkeys
+        .iter()
+        .map(|k| k.to_bytes().to_vec())
+        .collect();
+    let (keys, signs) = decode_pubkeys_x(active_committee.clone());
+    let commitment = commit_to_keys_with_sign(&keys, &signs);
+    let finality_branch = bootstrap.current_sync_committee_branch;
+    let execution_branch = bootstrap.header.execution_branch;
+    let execution_root = bootstrap.header.execution.state_root.bytes();
+    let bits = finality_update
+        .sync_aggregate
+        .sync_committee_bits
+        .to_bitvec();
+    let mut participation: Vec<bool> = vec![];
+    for bit in bits {
+        if bit {
+            participation.push(true);
+        } else {
+            participation.push(false);
+        }
+    }
+    let finalized_header = finality_update.finalized_header;
+    let attested_header = finality_update.attested_header;
+    let signature = finality_update.sync_aggregate.sync_committee_signature;
+    let args = SyncStepArgs {
+        signature_compressed: signature.to_bytes().to_vec(),
+        pubkeys_uncompressed: active_committee,
+        pariticipation_bits: participation,
+        attested_header: step_iso::types::BeaconBlockHeader {
+            slot: attested_header.beacon.slot.to_string(),
+            proposer_index: attested_header.beacon.proposer_index.to_string(),
+            parent_root: attested_header.beacon.parent_root,
+            state_root: attested_header.beacon.state_root,
+            body_root: attested_header.beacon.body_root,
+        },
+        finalized_header: step_iso::types::BeaconBlockHeader {
+            slot: finalized_header.beacon.slot.to_string(),
+            proposer_index: finalized_header.beacon.proposer_index.to_string(),
+            parent_root: finalized_header.beacon.parent_root,
+            state_root: finalized_header.beacon.state_root,
+            body_root: finalized_header.beacon.body_root,
+        },
+        finality_branch: finality_branch
+            .iter()
+            .map(|n| n.bytes().collect::<Result<Vec<u8>, _>>().unwrap())
+            .collect(),
+        execution_payload_branch: execution_branch.iter().map(|b| b.0.to_vec()).collect(),
+        execution_payload_root: execution_root.collect::<Result<Vec<u8>, _>>().unwrap(),
+        // hardcoded for testing, should probably be fetched & derived at runtime?
+        domain, /*[
+                    7, 0, 0, 0, 48, 83, 175, 74, 95, 250, 246, 166, 104, 40, 151, 228, 42, 212, 194, 8, 48,
+                    56, 232, 147, 61, 9, 41, 204, 88, 234, 56, 134,
+                ],*/
+    };
+    println!("Debug Sync Step Args: {:?}", &args);
+    (args, commitment)
+    // finalized header root / beacon block root
+    // attested header
+    // finalized header
+    // signature
+    // participation bits
 }
 
 /// Gets the latest light client update

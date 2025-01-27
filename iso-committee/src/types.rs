@@ -1,5 +1,4 @@
 use crate::utils::compute_digest;
-use alloy_sol_types::sol;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 

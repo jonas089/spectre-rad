@@ -1,3 +1,9 @@
+/*
+    This main file contains an example execution loop that updates a smart contract on sepolia.
+    In production a loop that manages contracts on multiple networks can be used.
+    This program serves as a test entry for a production environment.
+*/
+
 use alloy_sol_types::SolType;
 use committee_iso::utils::{commit_to_keys_with_sign, decode_pubkeys_x};
 use ethers::types::Bytes;
@@ -82,8 +88,8 @@ async fn main() {
         }*/
         drop(payload);
         drop(proof);
-        println!("Update Success, waiting 5 seconds...");
-        tokio::time::sleep(Duration::from_secs(120)).await;
+        println!("Update Success, waiting 10 seconds...");
+        tokio::time::sleep(Duration::from_secs(10)).await;
     }
 }
 
