@@ -8,6 +8,5 @@ fn main() {
         args.features = vec!["wrapped".to_string()];
     }
     build_program_with_args("../circuits/sp1-step", args.clone());
-    build_program_with_args("../circuits/sp1-committee", args.clone());
     build_program_with_args("../circuits/sp1-rotation", Default::default());
 }

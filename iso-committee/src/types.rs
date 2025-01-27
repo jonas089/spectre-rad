@@ -34,21 +34,6 @@ pub struct CommitteeUpdateArgs {
     pub sync_committee_branch: Branch,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
-pub struct CommitteeCircuitOutput {
-    pub commitment: [u8; 32],
-    pub finalized_header_root: [u8; 32],
-}
-
-impl CommitteeCircuitOutput {
-    pub fn new(commitment: [u8; 32], finalized_header_root: [u8; 32]) -> Self {
-        Self {
-            commitment,
-            finalized_header_root,
-        }
-    }
-}
-
 lazy_static! {
     pub static ref ZERO_HASHES: [[u8; 32]; 2] = {
         std::iter::successors(Some([0; 32]), |&prev| {
@@ -59,11 +44,4 @@ lazy_static! {
         .try_into()
         .unwrap()
     };
-}
-
-sol! {
-    struct WrappedOutput{
-        bytes32 commitment;
-        bytes32 finalized_header_root;
-    }
 }

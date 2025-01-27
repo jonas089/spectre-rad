@@ -1,5 +1,5 @@
 [workspace]
-members = ["sp1-committee", "sp1-step", "sp1-rotation"]
+members = ["sp1-step", "sp1-rotation"]
 
 [workspace.dependencies]
 sp1-zkvm = "4.0.1"
