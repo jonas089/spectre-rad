@@ -133,36 +133,6 @@ pub async fn get_block_header<C: ClientTypes>(
     Ok(block.header.message)
 }
 
-pub async fn get_finalized_header<C: ClientTypes>(
-    client: &Client<C>,
-    slot: u64,
-) -> eyre::Result<BeaconBlockHeader> {
-    let block_id = BlockId::Slot(slot);
-    let header = get_block_header(client, block_id).await?;
-    Ok(header)
-}
-
-/*pub async fn finalized_header_to_args<S: Spec>(
-    finalized_header: &BeaconBlockHeader,
-    pubkeys_compressed: Vector<BlsPublicKey, { S::SYNC_COMMITTEE_SIZE }>,
-    domain: [u8; 32],
-) -> eyre::Result<SyncStepArgs>
-where
-    [(); S::SYNC_COMMITTEE_SIZE]:,
-    [(); S::BYTES_PER_LOGS_BLOOM]:,
-    [(); S::MAX_EXTRA_DATA_BYTES]:,
-{
-    // Use the finalized header to build SyncStepArgs
-    let finalized_args = SyncStepArgs {
-        finalized_header: finalized_header.clone(),
-        attested_header: finalized_header.clone(), // Replace with attested header if available
-        finality_branch: vec![],                   // Generate Merkle proof here if necessary
-        execution_payload_root: finalized_header.body_root.to_vec(),
-        execution_payload_branch: vec![], // Generate Merkle proof here if necessary
-    };
-    Ok(finalized_args)
-}*/
-
 pub async fn get_block_summary<C: ClientTypes>(
     client: &Client<C>,
     id: BlockId,
@@ -232,7 +202,7 @@ pub async fn get_light_client_update_at_slot(
     let ((s, mut c), oc) = {
         let update = get_light_client_update_at_period(&client, period)
             .await
-            .unwrap();
+            .expect("Failed to get light client update!");
         let block_root = client
             .get_beacon_block_root(BlockId::Slot(slot))
             .await

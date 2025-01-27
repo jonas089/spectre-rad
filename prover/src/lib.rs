@@ -138,7 +138,7 @@ pub fn generate_rotation_proof_sp1(
     inputs: RotationCircuitInputs,
 ) -> (SP1ProofWithPublicValues, SP1VerifyingKey) {
     use std::time::Instant;
-    sp1_sdk::utils::setup_logger();
+    //sp1_sdk::utils::setup_logger();
     let start_time = Instant::now();
     #[allow(deprecated)]
     let client = ProverClient::new();
