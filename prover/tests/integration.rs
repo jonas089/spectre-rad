@@ -12,8 +12,10 @@ mod tests {
 
     #[tokio::test]
     async fn generate_rotation_proof_payload() {
-        let ((s, c), oc) = get_light_client_update_at_slot(6823936).await;
-        let (keys, signs) = decode_pubkeys_x(oc);
+        let (sc, oc) = get_light_client_update_at_slot(6823936).await;
+        let s = sc.clone().unwrap().0;
+        let c = sc.unwrap().1;
+        let (keys, signs) = decode_pubkeys_x(oc.unwrap());
         let commitment = commit_to_keys_with_sign(&keys, &signs);
         let rotation_inputs = RotationCircuitInputs {
             committee: c,
@@ -37,8 +39,10 @@ mod tests {
 
     #[tokio::test]
     async fn generate_step_proof_payload() {
-        let ((s, _), oc) = get_light_client_update_at_slot(6823936).await;
-        let (keys, signs) = decode_pubkeys_x(oc);
+        let (sc, oc) = get_light_client_update_at_slot(6823936).await;
+        let s = sc.clone().unwrap().0;
+        let c = sc.unwrap().1;
+        let (keys, signs) = decode_pubkeys_x(oc.unwrap());
         let commitment = commit_to_keys_with_sign(&keys, &signs);
         let (step_proof, step_vk) = tokio::task::spawn_blocking(move || {
             generate_step_proof_sp1(
@@ -60,8 +64,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_committee_rotation_beacon_cli_e2e_plonk() {
-        let ((s, c), oc) = get_light_client_update_at_slot(6832128).await;
-        let (keys, signs) = decode_pubkeys_x(oc);
+        let (sc, oc) = get_light_client_update_at_slot(6823936).await;
+        let s = sc.clone().unwrap().0;
+        let c = sc.unwrap().1;
+        let (keys, signs) = decode_pubkeys_x(oc.unwrap());
         let commitment = commit_to_keys_with_sign(&keys, &signs);
         let rotation_inputs = RotationCircuitInputs {
             committee: c,

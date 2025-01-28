@@ -202,7 +202,6 @@ pub async fn get_current_sync_step() -> (SyncStepArgs, [u8; 32]) {
     let bootstrap = get_light_client_bootstrap::<Testnet, _>(&client, block_root)
         .await
         .unwrap();
-
     let active_committee: Vec<Vec<u8>> = bootstrap
         .current_sync_committee
         .pubkeys
@@ -250,7 +249,10 @@ pub async fn get_current_sync_step() -> (SyncStepArgs, [u8; 32]) {
 /// Gets the latest light client update
 pub async fn get_light_client_update_at_slot(
     slot: u64,
-) -> ((SyncStepArgs, CommitteeUpdateArgs), Vec<Vec<u8>>) {
+) -> (
+    Option<(SyncStepArgs, CommitteeUpdateArgs)>,
+    Option<Vec<Vec<u8>>>,
+) {
     // hardcoded for now - todo: take client or url as arg
     let client = MainnetClient::new(Url::parse("https://lodestar-sepolia.chainsafe.io").unwrap());
     let period = slot / (32 * 256);
@@ -258,10 +260,14 @@ pub async fn get_light_client_update_at_slot(
         "Fetching light client update at current Slot: {} at Period: {}",
         slot, period
     );
-    let ((s, mut c), oc) = {
-        let update = get_light_client_update_at_period(&client, period)
-            .await
-            .expect("Failed to get light client update!");
+    let (sc, oc): (
+        Option<(SyncStepArgs, CommitteeUpdateArgs)>,
+        Option<Vec<Vec<u8>>>,
+    ) = {
+        let update = match get_light_client_update_at_period(&client, period).await {
+            Ok(update) => Some(update),
+            Err(_) => return (None, None),
+        };
         let block_root = client
             .get_beacon_block_root(BlockId::Slot(slot))
             .await
@@ -288,19 +294,32 @@ pub async fn get_light_client_update_at_slot(
             genesis_validators_root,
             fork_version,
         };
+        match update {
+            Some(_) => {}
+            None => return (None, None),
+        }
         let domain = compute_domain(DomainType::SyncCommittee, &fork_data).unwrap();
         (
-            light_client_update_to_args::<Testnet>(&update, pubkeys_compressed, domain)
+            Some(
+                light_client_update_to_args::<Testnet>(
+                    &update.unwrap(),
+                    pubkeys_compressed,
+                    domain,
+                )
                 .await
                 .unwrap(),
-            oc,
+            ),
+            Some(oc),
         )
     };
+
+    let s_unwrapped = sc.clone().unwrap().0;
+    let mut c_unwrapped = sc.unwrap().1;
 
     let mut finalized_sync_committee_branch = {
         let block_root = client
             .get_beacon_block_root(BlockId::Slot(
-                u64::from_str_radix(&s.finalized_header.slot, 10).unwrap(),
+                u64::from_str_radix(&s_unwrapped.finalized_header.slot, 10).unwrap(),
             ))
             .await
             .unwrap();
@@ -313,17 +332,17 @@ pub async fn get_light_client_update_at_slot(
             .map(|n| n.to_vec())
             .collect_vec()
     };
-    finalized_sync_committee_branch.insert(0, c.sync_committee_branch[0].clone());
-    finalized_sync_committee_branch[1] = c.sync_committee_branch[1].clone();
-    c.sync_committee_branch = finalized_sync_committee_branch;
-    c.finalized_header = CommitteeBeaconBlockHeader {
-        slot: s.finalized_header.clone().slot,
-        proposer_index: s.finalized_header.clone().proposer_index,
-        parent_root: s.finalized_header.clone().parent_root,
-        state_root: s.finalized_header.clone().state_root,
-        body_root: s.finalized_header.clone().body_root,
+    finalized_sync_committee_branch.insert(0, c_unwrapped.sync_committee_branch[0].clone());
+    finalized_sync_committee_branch[1] = c_unwrapped.sync_committee_branch[1].clone();
+    c_unwrapped.sync_committee_branch = finalized_sync_committee_branch;
+    c_unwrapped.finalized_header = CommitteeBeaconBlockHeader {
+        slot: s_unwrapped.finalized_header.clone().slot,
+        proposer_index: s_unwrapped.finalized_header.clone().proposer_index,
+        parent_root: s_unwrapped.finalized_header.clone().parent_root,
+        state_root: s_unwrapped.finalized_header.clone().state_root,
+        body_root: s_unwrapped.finalized_header.clone().body_root,
     };
-    ((s, c), oc)
+    (Some((s_unwrapped, c_unwrapped)), oc)
 }
 
 #[tokio::test]
