@@ -72,10 +72,7 @@ contract LightClientVerifier {
             _publicValues,
             (RotationOutputStruct)
         );
-        require(
-            activeCommitteeCommitment == publicValues.commitment ||
-                nextCommitteeCommitment == publicValues.commitment
-        );
+        require(nextCommitteeCommitment == publicValues.commitment);
         require(publicValues.slot > activeSlot);
         // this is the attested slot
         activeSlot = publicValues.slot;
