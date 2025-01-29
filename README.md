@@ -9,7 +9,7 @@ relying a single source of truth. Additionally there would be no way to verify t
 of nodes.
 
 
-[!NOTE] TLDR;
+> [!NOTE]
 > Spectre makes blockchain queries secure 
 > by proving that the state is valid through cryptography(ZK). 
 
@@ -195,7 +195,7 @@ In order to deploy this prover in production, one would have to query one or mor
 Whenever a new `committee update` occurs, it must be applied before new `sync steps` can be proven. A solidity contract should handle the `committee updates` seperately to 
 the `sync steps` and aim to expose the most recent trusted Ethereum root.
 
-[!NOTE]
+> [!NOTE]
 > `Sync steps` are always verified against the most recent committee.
 
 # Smart Contract
