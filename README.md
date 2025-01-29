@@ -1,4 +1,5 @@
 # Fast, Modular & Secure ZK Ethereum Light Client 🧪
+![cover](https://github.com/jonas089/spectre-rad/blob/master/resources/banner.png)
 
 # Spectre Use Cases
 Spectre is a trust minimized light-client for `Ethereum`. With Spectre it is possible to cryptographically verify the integrity of Ethereum `state root`.
