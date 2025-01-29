@@ -35,6 +35,7 @@ contract RotationTest is Test {
             step_fixture.vkey,
             0x00,
             0x0fbe43bcd87569860753ec08e275400ec8d307259e618ca8319b03e714f06523, // see fixture payload
+            0x403a49cd58a653a01aa3e2031a5ec52cd8199d555b5ed67643aab6a42e40bcef,
             6823935 // attested slot - 1 for testing!
         );
     }

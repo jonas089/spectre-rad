@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity =0.8.20;
 import {ISP1Verifier} from "sp1-contracts/contracts/src/ISP1Verifier.sol";
 
 struct RotationOutputStruct {
@@ -33,6 +33,8 @@ contract LightClientVerifier {
     bytes32 public finalizedHeaderRoot;
     // the current active committee
     bytes32 public activeCommitteeCommitment;
+    // the next active committee
+    bytes32 public nextCommitteeCommitment;
     // the current active slot
     uint32 public activeSlot;
 
@@ -42,6 +44,7 @@ contract LightClientVerifier {
         bytes32 _stepProgramVKey,
         bytes32 _finalizedHeaderRoot,
         bytes32 _activeCommitteeCommitment,
+        bytes32 _nextCommitteeCommitment,
         uint32 _activeSlot
     ) {
         verifier = _verifier;
@@ -49,6 +52,7 @@ contract LightClientVerifier {
         stepProgramVKey = _stepProgramVKey;
         finalizedHeaderRoot = _finalizedHeaderRoot;
         activeCommitteeCommitment = _activeCommitteeCommitment;
+        nextCommitteeCommitment = _nextCommitteeCommitment;
         activeSlot = _activeSlot;
     }
 
@@ -68,7 +72,10 @@ contract LightClientVerifier {
             _publicValues,
             (RotationOutputStruct)
         );
-        require(activeCommitteeCommitment == publicValues.commitment);
+        require(
+            activeCommitteeCommitment == publicValues.commitment ||
+                nextCommitteeCommitment == publicValues.commitment
+        );
         require(publicValues.slot > activeSlot);
         // this is the attested slot
         activeSlot = publicValues.slot;
@@ -93,7 +100,7 @@ contract LightClientVerifier {
             (StepOutputStruct)
         );
         require(activeCommitteeCommitment == publicValues.commitment);
-        // this is the attested slot
+        // this is the finalized slot
         require(publicValues.slot > activeSlot);
         finalizedHeaderRoot = publicValues.finalized_header_root;
     }
