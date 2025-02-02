@@ -76,7 +76,8 @@ contract LightClientVerifier {
         require(publicValues.slot > activeSlot);
         // this is the attested slot
         activeSlot = publicValues.slot;
-        activeCommitteeCommitment = publicValues.next_commitment;
+        activeCommitteeCommitment = nextCommitteeCommitment;
+        nextCommitteeCommitment = publicValues.next_commitment;
         finalizedHeaderRoot = publicValues.finalized_header_root;
     }
 
@@ -96,7 +97,7 @@ contract LightClientVerifier {
             _publicValues,
             (StepOutputStruct)
         );
-        require(activeCommitteeCommitment == publicValues.commitment);
+        require(nextCommitteeCommitment == publicValues.commitment);
         // this is the finalized slot
         require(publicValues.slot > activeSlot);
         finalizedHeaderRoot = publicValues.finalized_header_root;

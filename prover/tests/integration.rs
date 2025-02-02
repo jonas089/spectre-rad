@@ -12,7 +12,7 @@ mod tests {
 
     #[tokio::test]
     async fn generate_rotation_proof_payload() {
-        let (sc, oc) = get_light_client_update_at_slot(6823936).await;
+        let (sc, oc) = get_light_client_update_at_slot(6897664 - (256 * 32)).await;
         let s = sc.clone().unwrap().0;
         let c = sc.unwrap().1;
         let (keys, signs) = decode_pubkeys_x(oc.unwrap());
@@ -38,8 +38,25 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn find_last_committee() {
+        let mut current_height = 6823936;
+        loop {
+            current_height += 32 * 256;
+            let (sc, _) = get_light_client_update_at_slot(current_height).await;
+            match sc {
+                Some(_) => {
+                    println!("Slot: {}", current_height)
+                }
+                None => {
+                    break;
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
     async fn generate_step_proof_payload() {
-        let (sc, oc) = get_light_client_update_at_slot(6823936).await;
+        let (sc, oc) = get_light_client_update_at_slot(6897664 - (256 * 32)).await;
         let s = sc.clone().unwrap().0;
         let c = sc.unwrap().1;
         let (keys, signs) = decode_pubkeys_x(oc.unwrap());
