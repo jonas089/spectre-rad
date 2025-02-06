@@ -127,7 +127,7 @@ mod tests {
     use crate::{types::CommitteeUpdateArgs, utils::commit_to_keys_with_sign};
 
     #[test]
-    fn test_poseidon_commit() {
+    fn test_sha2_commit() {
         let args: CommitteeUpdateArgs = load_circuit_args_env();
         let compressed: (Vec<num_bigint::BigUint>, Vec<u8>) =
             decode_pubkeys_x(args.pubkeys_compressed.clone());
